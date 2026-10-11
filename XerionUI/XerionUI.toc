@@ -59,13 +59,6 @@ Modules\Class\DeathKnight\Blightfall.lua
 Modules\Class\Druid\WellHoned.lua
 Modules\Class\Druid\BearForm.lua
 Modules\Class\Druid\Ironfur.lua
-Modules\Class\Warrior\SpellReflect.lua
-Modules\Class\Paladin\PaladinAura.lua
-Modules\Class\Paladin\ShiningLight.lua
-Modules\Class\Monk\Brewmaster.lua
-Modules\Class\Shaman\ElementalBlast.lua
-Modules\Class\Mage\AlterTime.lua
-Modules\Class\DemonHunter\FieryBrand.lua
 Modules\Class\DeathKnight\ReapersMark.lua
 Modules\Class\DeathKnight\ForbiddenSacrifice.lua
 Modules\Class\DeathKnight\RuneforgeAlert.lua

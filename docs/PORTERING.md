@@ -76,15 +76,8 @@ Alle porteret og markeret `untested` i optionspanelet, indtil de er set i spille
 | Putrefy / Forbidden Sacrifice | K | Death Knight (Unholy) | ForbiddenSacrifice | ✅ |
 | Control Undead | K | Death Knight | ControlUndead | ✅ |
 | Runeforge Alert | I | Death Knight | RuneforgeAlert | ✅ |
-| Fiery Brand | K | Demon Hunter (Vengeance) | FieryBrand | ✅ |
-| Brewmaster (orbs, dodge, elixir) | K | Monk | ExpelHarmOrbs, BrewDodge, ElixirProc | ✅ |
-| Shining Light | K | Paladin (Protection) | ShiningLight | ✅ |
-| Paladin Aura | K | Paladin | PaladinAura | ✅ |
-| Alter Time-helbred | K | Mage | AlterTime | ✅ |
-| Elemental Blast-bogstaver | K | Shaman | ElementalBlast | ✅ |
 | Well-Honed Instincts-lyd | K | Druid | WellHoned | ✅ |
 | Bear Form-påmindelse | K | Druid (Guardian) | BearForm | ✅ |
-| Spell Reflect-skade | K | Warrior | SpellReflect | ✅ |
 | Defensive Indicator, Self Dispel Alert, Movement Alert | I | alle | – | ✖ porteret, men fjernet igen efter ønske (oktober 2026) |
 | Dispel Alert (tekst + ikon ved eget dispel/purge) | N | alle | DispelAlert | ✖ bygget og fjernet igen (oktober 2026): i Midnight kan aura-lister og -ID'er ikke læses, så navn og ikon på det fjernede er ikke til at få |
 | Auto-Cast shine som overskrivning af EllesmereUI's dispel-glow på nameplates | N | alle | EUINameplates | ✖ bygget og fjernet igen (oktober 2026): EllesmereUI's aura-knapper er låst for addon-kode efter oprettelsen; shine'n blev kun svagt synlig |

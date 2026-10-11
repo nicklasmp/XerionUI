@@ -147,73 +147,6 @@ O:RegisterModuleOptions("BearForm", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("SpellReflect", function(ctx, m, G)
-	return {
-		Card("Text", Join(G.Font("font"), {
-			{ type = "color", label = "Label color", path = "labelColor" },
-			{ type = "color", label = "Value color", path = "valueColor" },
-		})),
-		Card("Learned spells", {
-			{ type = "description", width = "full", text = "Which damage lines are yours is learned after fights without a reflect, per character." },
-			{ type = "button", text = "Forget learned spells", onClick = function() m:Forget() end },
-		}),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("PaladinAura", function(ctx, m, G)
-	return {
-		Card("When", {
-			{ type = "toggle", label = "Only in Mythic+", path = "mplusOnly", width = "full" },
-		}),
-		Card("Icon", G.Icon("icon", { square = true })),
-		Card("Border", G.Border("border")),
-		Card("Text", Join(G.Font("text", { color = true }), {
-			{ type = "dropdown", label = "Placed", path = "textSide", values = m.SIDES },
-			{ type = "slider", label = "Offset X", path = "textX", min = -60, max = 60, step = 1 },
-			{ type = "slider", label = "Offset Y", path = "textY", min = -60, max = 60, step = 1 },
-		})),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("ElementalBlast", function(ctx, m, G)
-	return {
-		Card("Letters", Join({
-			{ type = "color", label = "Critical Strike (C)", path = "critColor" },
-			{ type = "color", label = "Haste (H)", path = "hasteColor" },
-			{ type = "color", label = "Mastery (M)", path = "masteryColor" },
-			{ type = "slider", label = "Height above the icon", path = "offsetY", min = -20, max = 30, step = 1 },
-		}, G.Font("font"))),
-		Card("Preview position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("AlterTime", function(ctx, m, G)
-	return {
-		Card("Text", G.Font("font", { color = true })),
-		Card("Placement", {
-			{ type = "toggle", label = "Hang it on the Cooldown Manager's Alter Time icon", path = "anchorCDM", width = "full" },
-			{ type = "slider", label = "Offset X", path = "anchorX", min = -60, max = 60, step = 1 },
-			{ type = "slider", label = "Offset Y", path = "anchorY", min = -60, max = 60, step = 1 },
-		}),
-		Card("Position (when not on the icon)", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("FieryBrand", function(ctx, m, G)
-	return {
-		Card("Icon", Join(G.Icon("icon", { square = true }), {
-			{ type = "toggle", label = "Cooldown swipe", path = "showSwipe" },
-			{ type = "toggle", label = "Grey out the target debuff", path = "desatDebuff" },
-		})),
-		Card("Border on you (buff)", G.Border("buffBorder")),
-		Card("Border on the target (debuff)", G.Border("debuffBorder")),
-		Card("Timer text", G.Font("timerText", { toggle = "Show timer", anchor = true })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
 O:RegisterModuleOptions("ReapersMark", function(ctx, m, G)
 	return {
 		Card("Icon", Join(G.Icon("icon", { square = true }), {
@@ -237,53 +170,6 @@ O:RegisterModuleOptions("ForbiddenSacrifice", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
 		Card("Stack text", G.Font("stackText", { toggle = "Show stacks" })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("ShiningLight", function(ctx, m, G)
-	return {
-		Card("Bar", Join(G.Bar("bar"), {
-			{ type = "toggle", label = "Show the bar when it is empty", path = "alwaysShow" },
-			{ type = "color", label = "Free Shining Light", path = "freeColor" },
-			{ type = "color", label = "Shield of the Righteous charges", path = "chargeColor" },
-		})),
-		Card("Border", G.Border("border")),
-		Card("Timer text", Join({ { type = "toggle", label = "Show timer", path = "showTimers", width = "full" } }, G.Font("timerText")), { previewState = "full" }),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("ExpelHarmOrbs", function(ctx, m, G)
-	return {
-		Card("Orbs", {
-			{ type = "slider", label = "Orb size", path = "orbSize", min = 6, max = 40, step = 1 },
-			{ type = "slider", label = "Arc radius", path = "orbRadius", min = 10, max = 120, step = 1 },
-			{ type = "slider", label = "Arc spread (degrees)", path = "orbSpread", min = 20, max = 240, step = 5 },
-			{ type = "color", label = "Color", path = "orbColor" },
-		}),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("BrewDodge", function(ctx, m, G)
-	return {
-		Card("When", { { type = "toggle", label = "Only in combat", path = "combatOnly", width = "full" } }),
-		Card("Text", G.Font("font", { color = true })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("ElixirProc", function(ctx, m, G)
-	return {
-		Card("When", {
-			{ type = "toggle", label = "Show the bright icon while a proc is possible", path = "showReady", width = "full" },
-		}),
-		Card("Icon", Join(G.Icon("icon", { square = true }), {
-			{ type = "toggle", label = "Cooldown swipe", path = "showSwipe" },
-		})),
-		Card("Border", G.Border("border")),
-		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
 		Card("Position", G.Position("position")),
 	}
 end)

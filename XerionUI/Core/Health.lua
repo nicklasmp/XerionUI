@@ -95,18 +95,14 @@ Health.CHECKS = {
 		end
 	end,
 	Shroud = NeedAuraContainers,
-	FieryBrand = NeedAuraContainers,
 	ReapersMark = NeedAuraContainers,
 	ForbiddenSacrifice = NeedAuraContainers,
 	Stoneform = NeedAuraContainers,
 	WellHoned = NeedAuraSounds,
 	BoneShield = NeedCooldownManager,
 	DRWSound = NeedCooldownManager,
-	ShiningLight = NeedCooldownManager,
-	ElementalBlast = NeedCooldownManager,
 	Ironfur = function() end, -- works without the Cooldown Manager (own icon)
 	BloodBeast = NeedDamageMeter,
-	SpellReflect = NeedDamageMeter,
 }
 
 local cache = {}
