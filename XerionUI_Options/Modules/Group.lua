@@ -11,36 +11,6 @@ local Card, Join = O.Card, O.Join
 local function IS121() return XUI.IS_121 end
 
 --------------------------------------------------------------------------------
-O:RegisterModuleOptions("DeathAlert", function(ctx, m, G)
-	local function roleRow(role, label)
-		return {
-			{ type = "toggle", label = label .. ": show", path = "roles." .. role .. ".show" },
-			{ type = "toggle", label = label .. ": alert", path = "roles." .. role .. ".alert" },
-		}
-	end
-	return {
-		Card("Message", {
-			{ type = "input", label = "Text after the name", path = "suffix" },
-			{ type = "color", label = "Color", path = "suffixColor" },
-			{ type = "slider", label = "Show for (seconds)", path = "hold", min = 0.5, max = 8, step = 0.5 },
-			{ type = "slider", label = "Fade out (seconds)", path = "fade", min = 0, max = 3, step = 0.1 },
-		}),
-		Card("Text", G.Font("text")),
-		Card("Alert", G.Alert("alert", { fallbackHint = "Leave empty to speak \"<name> died\"." })),
-		Card("Names", {
-			{ type = "description", width = "full", text = "Comma separated. With a whitelist only those names alert; otherwise the blacklist names are skipped. Names hidden in combat always alert." },
-			{ type = "input", label = "Whitelist", path = "whitelist" },
-			{ type = "input", label = "Blacklist", path = "blacklist" },
-		}),
-		Card("Raid roles", Join(
-			{ { type = "description", width = "full", text = "In a raid, what each role's deaths do." } },
-			roleRow("TANK", "Tanks"), roleRow("HEALER", "Healers"), roleRow("DAMAGER", "Damage")
-		)),
-		Card("Position", G.Position("position")),
-	}
-end)
-
---------------------------------------------------------------------------------
 O:RegisterModuleOptions("Externals", function(ctx, m, G)
 	return {
 		Card("Layout", {
@@ -168,47 +138,6 @@ O:RegisterModuleOptions("Shroud", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Name text", G.Font("nameText", { toggle = "Show name" })),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
---------------------------------------------------------------------------------
-O:RegisterModuleOptions("CCTracker", function(ctx, m, G)
-	return {
-		Card("Bars", {
-			{ type = "dropdown", label = "Stacking", path = "mode", values = m.MODES },
-			{ type = "toggle", label = "Only spells your group can cast", path = "classRows",
-				hidden = function() return m.db.mode == "each" end },
-			{ type = "dropdown", label = "Grow", path = "grow", values = m.GROW },
-			{ type = "slider", label = "Spacing", path = "spacing", min = 0, max = 20, step = 1 },
-			{ type = "dropdown", label = "Icon", path = "iconSide", values = m.ICON_SIDES },
-			{ type = "slider", label = "Gap between icon and bar", path = "iconGap", min = 0, max = 10, step = 1 },
-			{ type = "slider", label = "Enemies tracked at most", path = "maxUnits", min = 1, max = 40, step = 1 },
-		}),
-		Card("Bar", G.Bar("bar")),
-		Card("Border", G.Border("border")),
-		Card("Name text", Join(G.Font("nameText", { toggle = "Show name" }), {
-			{ type = "dropdown", label = "Align", path = "nameAlign", values = m.NAME_ALIGNS },
-		})),
-		Card("Timer text", Join(G.Font("timerText", { toggle = "Show timer" }), {
-			{ type = "dropdown", label = "Timer side", path = "timerSide", values = m.TIMER_SIDES },
-			{ type = "toggle", label = "Tenths of a second", path = "tenths" },
-		})),
-		Card("Sound", {
-			{ type = "description", width = "full", text = "Played by the game when a listed debuff lands - once per enemy, so the Effects channel is the default." },
-			{ type = "dropdown", label = "Sound", path = "sound", media = "sound", filesOnly = true },
-			{ type = "dropdown", label = "Channel", path = "soundChannel", values = XUI.Audio.CHANNELS },
-			{ type = "dropdown", label = "For", path = "soundFrom", values = m.SOUND_FROM },
-			{ type = "button", text = "Test", onClick = function() m:PlayTest() end },
-		}),
-		Card("Spells", {
-			{ type = "description", width = "full", text = "The DEBUFF's spell ID, which is not always the cast's (Binding Shot's stun is 117526). Order is the bars' order." },
-			{
-				type = "spellList", path = "spells", colors = "colors", labels = "labels", reorder = true, width = "full",
-				defaultColor = function(id) return m:SpellColor(id) end,
-				defaultLabel = function(id) local b = m.BUILTIN[id] return b and b[1] or nil end,
-			},
-		}),
 		Card("Position", G.Position("position")),
 	}
 end)

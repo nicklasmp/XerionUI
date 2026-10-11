@@ -94,7 +94,6 @@ Health.CHECKS = {
 			if not (rf and type(rf.GetFFD) == "function") then problem("icon mode places icons on EllesmereUI's party frames, which are not available") end
 		end
 	end,
-	CCTracker = function(problem) NeedAuraContainers(problem) NeedAuraSounds(problem) end,
 	Shroud = NeedAuraContainers,
 	FieryBrand = NeedAuraContainers,
 	ReapersMark = NeedAuraContainers,

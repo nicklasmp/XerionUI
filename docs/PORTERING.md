@@ -15,7 +15,7 @@ Hvert legacy-feature flyttes ind i den nye kerne som ét modul: én fil i `Xerio
 
 ## Fase 1b — gruppe, kamp og EllesmereUI (færdig, oktober 2026)
 
-Melee Indicator, Death Alert, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, CC Tracker, Aggro Check, Bloodlust Ready og de fem EllesmereUI-tweaks er porteret (se tabellerne). CC Cast Notices udgik.
+Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro Check, Bloodlust Ready og de fem EllesmereUI-tweaks er porteret (se tabellerne). CC Cast Notices udgik.
 
 ## Fase 2 — generelle QoL-indikatorer (simple, mest tekst)
 
@@ -29,7 +29,7 @@ Melee Indicator, Death Alert, Externals, Party Interrupts, Co-Tank, Shroud/Mass 
 | Melee Indicator | I | ✅ | |
 | Character Indicator | I | ⏳ | |
 | Potion Alert | I | ⏳ | |
-| Death Alert | I | ✅ | |
+| Death Alert | I | ✖ | Fjernet oktober 2026 — ikke værdifuld |
 | Prevent Release | I | ⏳ | |
 | Cursor Circle | I | ❓ | EllesmereUI har selv cursor-features |
 | Misc (AH-filtre m.m.) | I | ⏳ | AH-filteret skriver Blizzards globale `AUCTION_HOUSE_DEFAULT_FILTERS` — tjek for taint |
@@ -43,7 +43,7 @@ Melee Indicator, Death Alert, Externals, Party Interrupts, Co-Tank, Shroud/Mass 
 | Party Interrupts | K | ✅ | Stor (1.600 linjer); bar- og ikon-layout |
 | Co-Tank | K | ✅ | Bar + debuff-ikoner |
 | Shroud / Mass Invis bar | K | ✅ | Bar-modul: første rigtige bruger af `CreateBar` |
-| CC Tracker (bars) | K | ✅ | Midnight AuraContainer-baseret |
+| CC Tracker (bars) | K | ✖ | Fjernet oktober 2026 — ikke værdifuld |
 | CC Cast Notices | K | ✖ | Virker ikke i Midnight (cast-ID'er er redigerede) — jf. legacy README |
 | Aggro Check | K | ✅ | |
 | Bloodlust ready (lyd/TTS) | K | ✅ | Kan bruge `G.Alert` direkte |
