@@ -235,8 +235,21 @@ function O:RefreshSidebar()
 		end
 		end
 		if #list > 0 then
-			AddHead(cat.name)
-			for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
+			if cat.key == "group" or cat.key == "tweaks" then
+				-- these fold from their heading too (a search unfolds them)
+				local flag = cat.key .. "Folded"
+				local folded = XUI.DB.global.panel[flag] and S.searchText == ""
+				AddHead(cat.name, { folded = folded, toggle = function()
+					XUI.DB.global.panel[flag] = not XUI.DB.global.panel[flag]
+					O:RefreshSidebar()
+				end })
+				if not folded then
+					for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
+				end
+			else
+				AddHead(cat.name)
+				for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
+			end
 		end
 	end
 	for i = ni + 1, #itemPool do itemPool[i]:Hide() end

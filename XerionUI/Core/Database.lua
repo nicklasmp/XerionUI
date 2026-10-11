@@ -41,6 +41,8 @@ DB.GLOBAL_DEFAULTS = {
 		dock = true,
 		density = "normal",
 		classFolded = false,
+		groupFolded = false,
+		tweaksFolded = false,
 	},
 	-- named looks of the global style, shared by every profile
 	themes = {},
