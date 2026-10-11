@@ -57,10 +57,6 @@ function XUI.IsSecret(v)
 	return issecretvalue ~= nil and issecretvalue(v) or false
 end
 
-function XUI.IsSecretTable(t)
-	return issecrettable ~= nil and issecrettable(t) or false
-end
-
 -- `v` when it is a readable value, otherwise `fallback`.
 function XUI.Readable(v, fallback)
 	if v == nil or (issecretvalue and issecretvalue(v)) then return fallback end

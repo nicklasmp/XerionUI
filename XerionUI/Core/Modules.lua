@@ -2,12 +2,12 @@
 -- XerionUI - Core/Modules.lua
 -- Feature modules and their lifecycle.
 --
---   local M = XUI:NewModule("DeathAlert", {
---       name = "Death Alert", desc = "...", category = "group",
+--   local M = XUI:NewModule("Stoneform", {
+--       name = "Stoneform Alert", desc = "...", category = "group",
 --       icon = 132147,              -- texture/fileID shown in the options sidebar
 --       iconSpell = 20594,          -- optional: use this spell's icon instead (icon is the fallback)
---       classes = { "WARRIOR" },    -- optional: only load for these classes
---       specs = { 73 },             -- optional: only run in these specializations
+--       classes = { "DEATHKNIGHT" }, -- optional: only load for these classes
+--       specs = { 250 },           -- optional: only run in these specializations
 --       requires = "EllesmereUI",   -- optional: only run when this addon is loaded
 --       defaults = { ... },         -- the module's saved settings
 --       untested = true,            -- optional: flagged as untested in the options
@@ -329,11 +329,6 @@ function Module:RequireRunning()
 	if self.running then return true end
 	self:Print("switch the module on first - a test runs through its real code.")
 	return false
-end
-
--- True while previewing in this state (or in no particular state).
-function Module:PreviewIs(value)
-	return self:IsPreview() and (self.previewState == nil or self.previewState == value)
 end
 
 -- Restores defaults but keeps the module's enabled state.

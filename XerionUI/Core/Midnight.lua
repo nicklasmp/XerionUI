@@ -126,22 +126,6 @@ function XUI.ClassColor(class)
 	return 0.6, 0.6, 0.6
 end
 
--- Whether the client restricts addons right now (a fight, a key, a boss, a
--- match). Engine buttons refuse changes then; work waits for it to lift,
--- which ends with PLAYER_REGEN_ENABLED or ADDON_RESTRICTION_STATE_CHANGED.
-local HOLD_TYPES = { "Combat", "Encounter", "ChallengeMode", "PvPMatch" }
-function XUI.Restricted(types)
-	if InCombatLockdown() then return true end
-	local R = C_RestrictedActions
-	local T = Enum and Enum.AddOnRestrictionType
-	if not (R and R.IsAddOnRestrictionActive and T) then return false end
-	for _, name in ipairs(types or HOLD_TYPES) do
-		local t = T[name]
-		if t ~= nil and XUI.Ask(R.IsAddOnRestrictionActive, t) then return true end
-	end
-	return false
-end
-
 -- Sound registrations (C_UnitAuras.AddAuraSound) are refused during a boss
 -- encounter and in combat inside a key.
 function XUI.AuraSoundsBlocked()
