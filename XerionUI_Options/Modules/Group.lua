@@ -66,6 +66,10 @@ O:RegisterModuleOptions("Interrupts", function(ctx, m, G)
 			{ type = "description", width = "full", text = "Placed beside each member's EllesmereUI party frame; without EllesmereUI they stack at the position below." },
 		}), { hidden = iconMode }),
 		Card("Border", G.Border("border")),
+		Card("Cooldown flash", Join(G.Glow("flash", { toggle = "Flash when a member's interrupt goes on cooldown" }), {
+			{ type = "slider", label = "Flash for (seconds)", path = "flashSecs", min = 0.5, max = 6, step = 0.5 },
+			{ type = "toggle", label = "Also for your own interrupt", path = "flashSelf" },
+		})),
 		Card("Name text", G.Font("nameText"), { hidden = barMode }),
 		Card("Timer text", G.Font("timerText")),
 		Card("Detection", {

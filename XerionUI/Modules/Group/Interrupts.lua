@@ -63,6 +63,9 @@ local M = XUI:NewModule("Interrupts", {
 		nameText = T.Font(12),
 		timerText = T.Font(12),
 		icon = T.Icon(24),
+		flash = T.Glow(true, { useGlobal = false, type = "PULSE", color = { 1, 0.82, 0, 1 } }),
+		flashSecs = 2,
+		flashSelf = false,
 		position = T.Position(-420, 0),
 	},
 })
@@ -220,12 +223,35 @@ local function AcquireRow()
 	return row
 end
 
+-- A member's interrupt going on cooldown flashes its row for a moment, so a
+-- kick is noticed without watching the bars. Both boxes are cleared because
+-- the display mode may have changed since the flash started.
+local function StopFlash(row)
+	row.flashId = (row.flashId or 0) + 1
+	Style:HideGlow(row.barBox)
+	Style:HideGlow(row.iconBox)
+end
+
+local function Flash(row)
+	local db = M.db
+	if row.unit == "player" and not db.flashSelf then return end
+	if Style:Resolve("glow", db.flash).enabled == false or (db.flashSecs or 0) <= 0 then return end
+	StopFlash(row)
+	local id = row.flashId
+	local box = db.displayMode == "icon" and row.iconBox or row.barBox
+	Style:ShowGlow(box, db.flash)
+	M:After(db.flashSecs, function()
+		if row.flashId == id then StopFlash(row) end
+	end)
+end
+
 local function ReleaseRow(row)
 	row:Hide()
 	row.cdStart, row.cdDur, row.previewRestart, row.guid = nil, nil, nil, nil
 	row.kickedTex, row.markIdx, row.previewKicked = nil, nil, nil
 	-- cleared, not just hidden: a pooled row must not carry a marker over
 	row.hasMark = nil
+	StopFlash(row)
 	row.mark:Hide()
 	pool[#pool + 1] = row
 end
@@ -453,12 +479,14 @@ local function SetReady(row)
 	row.swipe:Hide()
 	SetMark(row, nil)
 	SetKicked(row, nil)
+	StopFlash(row)
 	if not M.db.showReady and not M:IsPreview() then row:Hide() end
 	ShowRowsSoon()
 end
 
 local function StartCooldown(row, start, dur)
 	if not dur or dur <= 0 then return end
+	local fresh = (not row.cdStart or abs(start - row.cdStart) > 1) and GetTime() - start < 1.5
 	row.cdStart, row.cdDur = start, dur
 	if M.db.displayMode == "icon" then
 		row.swipe:SetCooldown(start, dur)
@@ -467,6 +495,7 @@ local function StartCooldown(row, start, dur)
 	row.bar:SetMinMaxValues(0, dur)
 	row.bar:SetValue(dur - (GetTime() - start))
 	row:Show()
+	if fresh then Flash(row) end
 	ShowRowsSoon()
 	StartTicker()
 end
