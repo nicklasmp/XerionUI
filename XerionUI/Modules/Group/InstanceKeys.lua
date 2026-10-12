@@ -27,7 +27,6 @@ local M = XUI:NewModule("InstanceKeys", {
 	category = "group",
 	icon = [[Interface\Icons\INV_Relics_Hourglass]],
 	order = 80,
-	untested = true,
 	defaults = {
 		showTitle = true,
 		showAll = false,
