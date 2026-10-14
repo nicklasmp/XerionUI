@@ -42,6 +42,7 @@ DB.GLOBAL_DEFAULTS = {
 		density = "normal",
 		classFolded = false,
 		groupFolded = false,
+		dungeonFolded = false,
 		tweaksFolded = false,
 	},
 	-- named looks of the global style, shared by every profile

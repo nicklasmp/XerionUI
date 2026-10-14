@@ -6,6 +6,7 @@
 --       name = "Stoneform Alert", desc = "...", category = "group",
 --       icon = 132147,              -- texture/fileID shown in the options sidebar
 --       iconSpell = 20594,          -- optional: use this spell's icon instead (icon is the fallback)
+--       dungeon = "Murder Row",    -- category "dungeon" only: the dungeon it is listed under
 --       classes = { "DEATHKNIGHT" }, -- optional: only load for these classes
 --       specs = { 250 },           -- optional: only run in these specializations
 --       requires = "EllesmereUI",   -- optional: only run when this addon is loaded
@@ -36,6 +37,7 @@ XUI.CATEGORIES = {
 	{ key = "general", name = "General" },
 	{ key = "combat", name = "Combat" },
 	{ key = "group", name = "Group" },
+	{ key = "dungeon", name = "Dungeon" },
 	{ key = "tweaks", name = "EllesmereUI Tweaks" },
 	{ key = "class", name = "Class" }, -- last: it is the long one
 }
@@ -58,6 +60,8 @@ function XUI:NewModule(key, info)
 	m.desc = info.desc
 	m.category = info.category or "general"
 	m.icon = info.icon
+	-- the dungeon a "dungeon" module belongs to; the options list them per dungeon
+	m.dungeon = info.dungeon
 	-- a spell whose icon the options show (the game's own art, whatever the build)
 	m.iconSpell = info.iconSpell
 	m.order = info.order or 100

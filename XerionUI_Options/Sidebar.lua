@@ -229,13 +229,13 @@ function O:RefreshSidebar()
 			list = {}
 		else
 		for _, m in ipairs(XUI:SortedModules(cat.key)) do
-			if m:IsAvailable() and ModuleMatches(m, cat.name:lower()) then
+			if m:IsAvailable() and ModuleMatches(m, cat.name:lower() .. " " .. (m.dungeon or ""):lower()) then
 				list[#list + 1] = m
 			end
 		end
 		end
 		if #list > 0 then
-			if cat.key == "group" or cat.key == "tweaks" then
+			if cat.key == "group" or cat.key == "dungeon" or cat.key == "tweaks" then
 				-- these fold from their heading too (a search unfolds them)
 				local flag = cat.key .. "Folded"
 				local folded = XUI.DB.global.panel[flag] and S.searchText == ""
@@ -244,7 +244,22 @@ function O:RefreshSidebar()
 					O:RefreshSidebar()
 				end })
 				if not folded then
-					for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
+					if cat.key == "dungeon" then
+						-- one sub-heading per dungeon (alphabetical), its modules indented below
+						local byDungeon, names = {}, {}
+						for _, m in ipairs(list) do
+							local d = m.dungeon or "Other"
+							if not byDungeon[d] then byDungeon[d] = {} names[#names + 1] = d end
+							byDungeon[d][#byDungeon[d] + 1] = m
+						end
+						table.sort(names)
+						for _, d in ipairs(names) do
+							AddHead(d)
+							for _, m in ipairs(byDungeon[d]) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m, false, 14) end
+						end
+					else
+						for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
+					end
 				end
 			else
 				AddHead(cat.name)
