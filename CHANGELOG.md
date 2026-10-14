@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.1.0 - 2026-10-14
+- Add Bonus Roll Confirm module (ported from the BonusRollConfirm addon): confirmation before using or passing a bonus roll, with loot spec shown
+
 ## 2.0.2 - 2026-10-14
 - Rename Auto Gossip module to Auto NPC Dialog
 - Remove the CC Tracker module (not the wanted feature)

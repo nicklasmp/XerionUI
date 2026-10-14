@@ -358,6 +358,20 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+O:RegisterModuleOptions("BonusRollConfirm", function(ctx, m, G)
+	return {
+		Card("Confirm", {
+			{ type = "toggle", label = "Ask before using a bonus roll", path = "confirmRoll" },
+			{ type = "toggle", label = "Ask before passing", path = "confirmPass" },
+			{ type = "toggle", label = "Show the loot specialization", path = "showSpec",
+				tip = "Names the spec the roll will award for, so a wrong loot spec is noticed before the roll is gone." },
+			{ type = "toggle", label = "Say what happened", path = "announce" },
+			{ type = "button", text = "Test", onClick = function() m:Test() end },
+		}),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
 	return {
 		Card("Bar", {
