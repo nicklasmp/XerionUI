@@ -372,6 +372,21 @@ O:RegisterModuleOptions("BonusRollConfirm", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+O:RegisterModuleOptions("MeterReset", function(ctx, m, G)
+	return {
+		Card("Ask when leaving", {
+			{ type = "toggle", label = "Dungeons", path = "dungeons" },
+			{ type = "toggle", label = "Raids", path = "raids" },
+			{ type = "toggle", label = "Scenarios", path = "scenarios" },
+			{ type = "slider", label = "Delay after loading (s)", path = "delay", min = 0, max = 10, step = 1,
+				tip = "Waits a moment after the loading screen so the question does not appear on top of it." },
+			{ type = "toggle", label = "Say what happened", path = "announce" },
+			{ type = "button", text = "Test", onClick = function() m:Test() end },
+		}),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
 	return {
 		Card("Bar", {

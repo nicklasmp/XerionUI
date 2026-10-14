@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.2.0 - 2026-10-14
+- Add Meter Reset module: asks whether to reset the damage meter when you leave a dungeon (optionally raids and scenarios)
+
 ## 2.1.2 - 2026-10-14
 - Make the interrupt flash blink fewer times (1.5 s, about two pulses)
 
