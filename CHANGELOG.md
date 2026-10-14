@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.2.1 - 2026-10-14
+- Auto NPC Dialog lists the name next to each option ID (learned when the NPC is talked to)
+
 ## 2.2.0 - 2026-10-14
 - Add Meter Reset module: asks whether to reset the damage meter when you leave a dungeon (optionally raids and scenarios)
 

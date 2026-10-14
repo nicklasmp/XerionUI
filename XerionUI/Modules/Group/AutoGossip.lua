@@ -28,6 +28,31 @@ local M = XUI:NewModule("AutoGossip", {
 
 local lastPick = {}
 
+-- Option IDs say nothing on their own, so the names the game has shown for
+-- them are kept (db.names) and listed next to the IDs in the options.
+function M:Remember(id, name)
+	if type(id) ~= "number" or IsSecret(id) or type(name) ~= "string" or IsSecret(name) or name == "" then return end
+	self.db.names = self.db.names or {}
+	self.db.names[id] = name:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|T.-|t", ""):gsub("^%s+", "")
+end
+
+-- "id - name" for every listed ID, for the options page
+function M:ListLabels()
+	local lines, seen = {}, {}
+	for _, list in ipairs({ self.db.options or {}, self.db.confirm or {} }) do
+		for _, id in ipairs(list) do
+			if not seen[id] then
+				seen[id] = true
+				local name = self.db.names and self.db.names[id]
+				lines[#lines + 1] = name and ("%d  -  %s"):format(id, name)
+					or ("%d  -  |cff888888name not seen yet (talk to the NPC once)|r"):format(id)
+			end
+		end
+	end
+	return #lines > 0 and table.concat(lines, "
+") or "|cff888888No options listed.|r"
+end
+
 local function IDSet(list)
 	local set = {}
 	if type(list) ~= "table" then return set end
@@ -75,6 +100,7 @@ function M:TrySelect()
 			-- once per few seconds: a refreshed gossip window must not loop
 			if lastPick[id] and (now - lastPick[id]) < COOLDOWN then return end
 			lastPick[id] = now
+			self:Remember(id, o.name)
 			Select(id, o.name, confirm[id])
 			return
 		end
