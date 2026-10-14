@@ -20,7 +20,6 @@ local M = XUI:NewModule("BloodBeast", {
 	order = 50,
 	classes = { "DEATHKNIGHT" },
 	specs = { 250, 252 },
-	untested = true,
 	defaults = {
 		font = T.Font(22),
 		labelColor = { 0.9, 0.12, 0.12, 1 },

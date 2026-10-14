@@ -29,7 +29,6 @@ local M = XUI:NewModule("Blightfall", {
 	order = 70,
 	classes = { "DEATHKNIGHT" },
 	specs = { 252 },
-	untested = true,
 	defaults = {
 		delaySR = 7,
 		delayBF = 7,

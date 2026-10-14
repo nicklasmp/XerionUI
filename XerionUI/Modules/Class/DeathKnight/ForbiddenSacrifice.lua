@@ -42,7 +42,6 @@ local M = XUI:NewModule("ForbiddenSacrifice", {
 	order = 90,
 	classes = { "DEATHKNIGHT" },
 	specs = { 252 },
-	untested = true,
 	defaults = {
 		bar = T.Bar(200, 20, { color = { 0.44, 0.76, 0.22, 1 } }),
 		border = T.Border(),

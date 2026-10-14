@@ -18,7 +18,6 @@ local M = XUI:NewModule("AutoGossip", {
 	category = "group",
 	icon = [[Interface\Icons\INV_Misc_Note_01]],
 	order = 62,
-	untested = true,
 	defaults = {
 		options = { 131567, 131502, SETHRALISS },
 		confirm = { SETHRALISS },

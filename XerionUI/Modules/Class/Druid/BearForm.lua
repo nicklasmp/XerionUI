@@ -22,7 +22,6 @@ local M = XUI:NewModule("BearForm", {
 	order = 40,
 	classes = { "DRUID" },
 	specs = { 104 },
-	untested = true,
 	defaults = {
 		text = "BEAR FORM",
 		color = { 1, 0.49, 0.04, 1 },

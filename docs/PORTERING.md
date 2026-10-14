@@ -66,7 +66,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 
 ## Fase 4 — klasser og specs (færdig, oktober 2026)
 
-Alle porteret og markeret `untested` i optionspanelet, indtil de er set i spillet. De delte byggeklodser (timer-ikon, damage-meter-tekst) ligger i `Modules/Class/Kit.lua`.
+Alle porteret (untested-markeringen er fjernet igen 14. okt 2026). De delte byggeklodser (timer-ikon, damage-meter-tekst) ligger i `Modules/Class/Kit.lua`.
 
 | Feature | Kilde | Klasse | Modul | Status |
 |---|---|---|---|---|

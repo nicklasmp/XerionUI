@@ -67,7 +67,6 @@ local M = XUI:NewModule("RuneforgeAlert", {
 	icon = [[Interface\Icons\Spell_Deathknight_RuneTap]],
 	order = 100,
 	classes = { "DEATHKNIGHT" },
-	untested = true,
 	defaults = {
 		text = "Check Runeforge",
 		color = { 1, 1, 1, 1 },

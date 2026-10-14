@@ -18,7 +18,6 @@ local M = XUI:NewModule("BloodIsLife", {
 	order = 40,
 	classes = { "DEATHKNIGHT" },
 	specs = { 250, 252 },
-	untested = true,
 	defaults = {
 		icon = T.Icon(44),
 		border = T.Border({ useGlobal = false, style = "SOLID", size = 1, color = { 0.77, 0.12, 0.23, 1 } }),

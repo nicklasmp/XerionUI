@@ -16,7 +16,6 @@ local M = XUI:NewModule("ControlUndead", {
 	icon = FALLBACK,
 	order = 60,
 	classes = { "DEATHKNIGHT" },
-	untested = true,
 	defaults = {
 		icon = T.Icon(44),
 		border = T.Border(),

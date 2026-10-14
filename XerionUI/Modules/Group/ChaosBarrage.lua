@@ -26,7 +26,6 @@ local M = XUI:NewModule("ChaosBarrage", {
 	category = "group",
 	icon = [[Interface\Icons\Spell_Shadow_ShadowBolt]],
 	order = 81,
-	untested = true,
 	defaults = {
 		roles = { TANK = true, HEALER = false, DAMAGER = false },
 		color = { 0.1, 0.85, 0.85, 1 },

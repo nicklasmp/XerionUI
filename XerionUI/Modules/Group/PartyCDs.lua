@@ -40,7 +40,6 @@ local M = XUI:NewModule("PartyCDs", {
 	category = "group",
 	icon = [[Interface\Icons\Spell_Holy_AvengingWrath]],
 	order = 31,
-	untested = true,
 	defaults = {
 		showSelf = false,
 		groupOnly = true,

@@ -26,7 +26,6 @@ local M = XUI:NewModule("Ironfur", {
 	order = 50,
 	classes = { "DRUID" },
 	specs = { 104 },
-	untested = true,
 	defaults = {
 		duration = 7,
 		glow = T.Glow(true, { useGlobal = false, type = "PULSE", color = { 1, 0.49, 0.04, 1 } }),

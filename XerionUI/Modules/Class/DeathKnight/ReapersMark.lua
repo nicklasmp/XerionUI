@@ -47,7 +47,6 @@ local M = XUI:NewModule("ReapersMark", {
 	icon = [[Interface\Icons\Ability_Warlock_ImprovedSoulFire]],
 	order = 80,
 	classes = { "DEATHKNIGHT" },
-	untested = true,
 	defaults = {
 		icon = T.Icon(44),
 		border = T.Border(),

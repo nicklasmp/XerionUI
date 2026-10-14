@@ -23,7 +23,6 @@ local M = XUI:NewModule("DamageAmp", {
 	category = "group",
 	icon = [[Interface\Icons\Ability_Warrior_Rampage]],
 	order = 80,
-	untested = true,
 	defaults = {
 		text = "Damage Amp",
 		showPercent = true,
