@@ -43,7 +43,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Party Interrupts | K | ✅ | Stor (1.600 linjer); bar- og ikon-layout |
 | Co-Tank | K | ✅ | Bar + debuff-ikoner |
 | Shroud / Mass Invis bar | K | ✅ | Bar-modul: første rigtige bruger af `CreateBar` |
-| CC Tracker (bars) | K | ✅ | Fjernet 11. okt, gendannet 14. okt 2026 efter ønske |
+| CC Tracker (bars) | K | ✖ | Fjernet 14. okt 2026 — var ikke den ønskede funktion. Ønsket er tracking af party CC-cooldowns (ikke bygget endnu) |
 | CC Cast Notices | K | ✖ | Virker ikke i Midnight (cast-ID'er er redigerede) — jf. legacy README |
 | Aggro Check | K | ✅ | |
 | Bloodlust ready (lyd/TTS) | K | ✅ | Kan bruge `G.Alert` direkte |
@@ -57,7 +57,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Raid Frame Manager | I | ❓ | Erstatter Blizzards manager — stor |
 | Dungeon Teleports | I | ❓ | Du har allerede TeleportMenu installeret |
 | Party Cooldowns (Party CDs) | K | ✅ | Port 14. okt 2026: ikoner pr. party-medlem med nedtælling, læst via sensor-containere i keys. Droppet: radial swipe, HealerExternal-ikon, generisk party-frame-søgning (kun EllesmereUI + fri blok). Utestet i spillet |
-| Auto Gossip | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. Utestet i spillet |
+| Auto NPC Dialog (Auto Gossip) | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. Utestet i spillet |
 | Kira Reminders: Damage Amp + Chaos Barrage (Murder Row, Kystia Manaheart) | K | ✅ | Port 14. okt 2026 som to moduler (DamageAmp, ChaosBarrage). Droppet: nameplate-fastgørelse på EllesmereUI (brug position.attach), chat-debug/log, manuel target-bar. Utestet i spillet |
 | Kira Reminders: resten (BigWigs-lister pr. dungeon, boss-HP-kald, wrong target, trash aura-lyde) | K | ❌ | Fravalgt af Nicklas 14. okt 2026; kan tages op senere (5.400 linjer, kun to dungeons har indbyggede regler) |
 | MDT Compact / MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |

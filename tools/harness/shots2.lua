@@ -14,7 +14,7 @@ local function ScrollPages(fraction)
 		end
 	end
 end
-for _, key in ipairs({ "CCTracker", "Externals", "CoTank", "EUIPartyFrames" }) do
+for _, key in ipairs({ "Externals", "CoTank", "EUIPartyFrames" }) do
 	XUI.Options:Open(key)
 	MOCK.Advance(0.2)
 	MOCK.Shot("page-" .. key)

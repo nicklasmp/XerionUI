@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.0.2 - 2026-10-14
+- Rename Auto Gossip module to Auto NPC Dialog
+- Remove the CC Tracker module (not the wanted feature)
+
 ## 2.0.1 - 2026-10-14
 - Add addon icon and custom Party Cooldowns icon
 - Add version history (CHANGELOG.md) and tools/bump.js

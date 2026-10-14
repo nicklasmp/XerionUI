@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Auto Gossip
+-- Auto NPC Dialog
 -- Picks chosen gossip options for you inside instances (skip a dungeon's
 -- talk-to-the-NPC step) and answers the "are you sure?" box for the ones you
 -- list. Talk to the NPC, press "Print the open options" and add the IDs.
@@ -13,7 +13,7 @@ local SETHRALISS = 48126
 local COOLDOWN = 5
 
 local M = XUI:NewModule("AutoGossip", {
-	name = "Auto Gossip",
+	name = "Auto NPC Dialog",
 	desc = "Picks chosen gossip options for you inside dungeons.",
 	category = "group",
 	icon = [[Interface\Icons\INV_Misc_Note_01]],

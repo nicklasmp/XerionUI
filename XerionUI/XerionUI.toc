@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.0.1
+## Version: 2.0.2
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -51,7 +51,6 @@ Modules\Group\DamageAmp.lua
 Modules\Group\ChaosBarrage.lua
 Modules\Group\CoTank.lua
 Modules\Group\Shroud.lua
-Modules\Group\CCTracker.lua
 Modules\Group\AggroCheck.lua
 Modules\Group\Bloodlust.lua
 Modules\Group\InstanceKeys.lua
