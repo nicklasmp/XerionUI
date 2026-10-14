@@ -63,8 +63,10 @@ local M = XUI:NewModule("Interrupts", {
 		nameText = T.Font(12),
 		timerText = T.Font(12),
 		icon = T.Icon(24),
-		flash = T.Glow(true, { useGlobal = false, type = "PULSE", color = { 1, 0.82, 0, 1 } }),
-		flashSecs = 2,
+		flash = T.Glow(true, { useGlobal = false, type = "PIXEL", color = { 1, 0.82, 0, 1 }, thickness = 3, lines = 12 }),
+		flashFill = true,
+		flashFillColor = { 1, 0.82, 0, 0.55 },
+		flashSecs = 3,
 		flashSelf = false,
 		position = T.Position(-420, 0),
 	},
@@ -201,7 +203,27 @@ local function NewRow()
 	row.bar:SetMinMaxValues(0, 1)
 	row.bar:SetValue(1)
 	row.barBorder = Style:Border(row.barBox)
+	-- bright fill that blinks while the row flashes (above the bar, below the texts)
+	row.flashFill = CreateFrame("Frame", nil, row)
+	row.flashFill:SetFrameLevel(row.barBox:GetFrameLevel() + 3)
+	row.flashFill.tex = row.flashFill:CreateTexture(nil, "OVERLAY")
+	row.flashFill.tex:SetAllPoints()
+	row.flashFill.tex:SetColorTexture(1, 1, 1, 1)
+	row.flashFill:Hide()
+	row.flashAnim = row.flashFill:CreateAnimationGroup()
+	row.flashAnim:SetLooping("REPEAT")
+	local out = row.flashAnim:CreateAnimation("Alpha")
+	out:SetFromAlpha(1)
+	out:SetToAlpha(0.1)
+	out:SetDuration(0.25)
+	out:SetOrder(1)
+	local back = row.flashAnim:CreateAnimation("Alpha")
+	back:SetFromAlpha(0.1)
+	back:SetToAlpha(1)
+	back:SetDuration(0.25)
+	back:SetOrder(2)
 	row.texts = CreateFrame("Frame", nil, row)
+	row.texts:SetFrameLevel(row.flashFill:GetFrameLevel() + 1)
 	row.texts:SetAllPoints(row.barBox)
 	row.name = row.texts:CreateFontString(nil, "OVERLAY")
 	row.name:SetWordWrap(false)
@@ -230,6 +252,8 @@ local function StopFlash(row)
 	row.flashId = (row.flashId or 0) + 1
 	Style:HideGlow(row.barBox)
 	Style:HideGlow(row.iconBox)
+	row.flashAnim:Stop()
+	row.flashFill:Hide()
 end
 
 local function Flash(row)
@@ -240,6 +264,14 @@ local function Flash(row)
 	local id = row.flashId
 	local box = db.displayMode == "icon" and row.iconBox or row.barBox
 	Style:ShowGlow(box, db.flash)
+	if db.flashFill ~= false then
+		local c = db.flashFillColor or { 1, 0.82, 0, 0.55 }
+		row.flashFill:ClearAllPoints()
+		row.flashFill:SetAllPoints(box)
+		row.flashFill.tex:SetColorTexture(c[1], c[2], c[3], c[4] or 0.55)
+		row.flashFill:Show()
+		row.flashAnim:Play()
+	end
 	M:After(db.flashSecs, function()
 		if row.flashId == id then StopFlash(row) end
 	end)

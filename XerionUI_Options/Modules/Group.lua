@@ -67,6 +67,8 @@ O:RegisterModuleOptions("Interrupts", function(ctx, m, G)
 		}), { hidden = iconMode }),
 		Card("Border", G.Border("border")),
 		Card("Cooldown flash", Join(G.Glow("flash", { toggle = "Flash when a member's interrupt goes on cooldown" }), {
+			{ type = "toggle", label = "Blinking fill over the row", path = "flashFill" },
+			{ type = "color", label = "Fill color", path = "flashFillColor", hasAlpha = true },
 			{ type = "slider", label = "Flash for (seconds)", path = "flashSecs", min = 0.5, max = 6, step = 0.5 },
 			{ type = "toggle", label = "Also for your own interrupt", path = "flashSelf" },
 		})),
