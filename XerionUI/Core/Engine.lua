@@ -7,6 +7,9 @@
 --   Engine.Silence(button)              no clicks or tooltips on an engine button
 --   Engine.WhenFree(module, pending, fn)  run a refused restyle when the fight
 --                                        or restriction that refused it ends
+--   Engine.NewSensor(host, unit, key, include)  a hidden container that answers
+--                                        "is one of these auras on `unit`?"
+--   Engine.SensorLit(sensor)             that answer (a secret boolean in keys)
 --
 -- Why the last one: once an engine button's initializer returns, the client
 -- locks it against addon code for as long as auras are secret (combat, keys,
@@ -49,3 +52,35 @@ function Engine.WhenFree(module, pending, fn)
 		if pending() then self:After(0, fn) end
 	end)
 end
+
+--------------------------------------------------------------------------------
+-- Sensors. A one-slot container filtered to some spell IDs, parked far off
+-- screen. The aura button it holds sits 50000 px to the right, so the
+-- container only stretches that far while a matching aura exists, and
+-- IsMouseOver on it answers "is the aura there?" even when the aura list
+-- itself is secret (the answer is a secret boolean, good for
+-- C_CurveUtil.EvaluateColorValueFromBoolean).
+--------------------------------------------------------------------------------
+local function InitSensorButton(b)
+	pcall(b.SetSize, b, 1, 1)
+	Engine.Silence(b)
+end
+
+function Engine.NewSensor(host, unit, key, include)
+	local c, why = Engine.NewContainer(host)
+	if not c then return nil, why end
+	c:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -11, 0)
+	pcall(c.EnableMouse, c, false)
+	local ok, err = pcall(c.AddAuraGroup, c, key, "HELPFUL", {
+		maxFrameCount = 1,
+		candidateFilters = { includeSpellIDs = include },
+		initializeFrame = InitSensorButton,
+		layout = { elementWidth = 50000, elementHeight = 1, elementSpacing = 0, lineSpacing = 0 },
+	})
+	if not ok then return nil, tostring(err) end
+	pcall(c.SetUnit, c, unit)
+	pcall(c.SetEnabled, c, false)
+	return c
+end
+
+function Engine.SensorLit(c) return c:IsMouseOver(1e5, -1e5, 0, 0) end

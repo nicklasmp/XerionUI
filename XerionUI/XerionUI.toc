@@ -43,6 +43,8 @@ Modules\Combat\MeleeIndicator.lua
 Modules\Combat\Stoneform.lua
 Modules\Group\Externals.lua
 Modules\Group\Interrupts.lua
+Modules\Group\PartyCDsData.lua
+Modules\Group\PartyCDs.lua
 Modules\Group\CoTank.lua
 Modules\Group\Shroud.lua
 Modules\Group\CCTracker.lua

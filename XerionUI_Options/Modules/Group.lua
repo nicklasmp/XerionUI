@@ -87,6 +87,179 @@ O:RegisterModuleOptions("Interrupts", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+-- Party Cooldowns: the spell list is one row per spell of the chosen spec
+--------------------------------------------------------------------------------
+local PCD_ROW_H = 28
+
+local function PartyCDRows(parent, ctx, m, state)
+	local f = CreateFrame("Frame", nil, parent)
+	f.rows = {}
+	f.height = PCD_ROW_H
+	f:SetHeight(PCD_ROW_H)
+
+	local function Row(i)
+		local r = f.rows[i]
+		if r then return r end
+		r = CreateFrame("Frame", nil, f)
+		r:SetHeight(PCD_ROW_H - 2)
+		r.bg = O:Rect(r, "control", "BACKGROUND")
+		r.bg:SetAllPoints()
+		r.bg:SetAlpha(i % 2 == 0 and 0.35 or 0.6)
+		r.toggle = CreateFrame("Button", nil, r)
+		r.toggle:SetSize(30, 16)
+		r.toggle:SetPoint("LEFT", 6, 0)
+		r.switch = O.Switch(r.toggle)
+		r.switch:SetAllPoints()
+		r.toggle:SetScript("OnClick", function()
+			m:SetSpellShown(state.spec, r.spell, r.def.off)
+			ctx:Changed()
+		end)
+		r.icon = r:CreateTexture(nil, "ARTWORK")
+		r.icon:SetSize(18, 18)
+		r.icon:SetPoint("LEFT", r.toggle, "RIGHT", 8, 0)
+		r.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+		r.name = O:Text(r, O.SIZE.text, "text")
+		r.name:SetPoint("LEFT", r.icon, "RIGHT", 8, 0)
+		r.down = O:IconButton(r, "chevron", 22, "Move down", function()
+			if m:MoveSpell(state.spec, r.spell, 1) then ctx:Changed() end
+		end)
+		r.down:SetPoint("RIGHT", -2, 0)
+		r.up = O:IconButton(r, "chevron", 22, "Move up", function()
+			if m:MoveSpell(state.spec, r.spell, -1) then ctx:Changed() end
+		end)
+		r.up.icon:SetTexCoord(0, 1, 1, 0)
+		r.up:SetPoint("RIGHT", r.down, "LEFT", -2, 0)
+		r.secs = O:Text(r, O.SIZE.small, "muted")
+		r.secs:SetText("s")
+		r.secs:SetPoint("RIGHT", r.up, "LEFT", -8, 0)
+		r.cd = CreateFrame("EditBox", nil, r)
+		r.cd:SetSize(50, 20)
+		r.cd:SetPoint("RIGHT", r.secs, "LEFT", -4, 0)
+		r.cd:SetAutoFocus(false)
+		r.cd:SetNumeric(true)
+		r.cd:SetFont(O:FontPath(), O.SIZE.small, "")
+		r.cd:SetTextColor(O:Color("text"))
+		r.cd:SetJustifyH("CENTER")
+		O:Skin(r.cd, "control", "controlLine")
+		local function commit()
+			local n = tonumber(r.cd:GetText() or "")
+			r.cd:ClearFocus()
+			if n and n > 0 then m:SetCd(state.spec, r.spell, n) end
+			ctx:Changed()
+		end
+		r.cd:SetScript("OnEnterPressed", commit)
+		r.cd:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+		r.name:SetPoint("RIGHT", r.cd, "LEFT", -8, 0)
+		f.rows[i] = r
+		return r
+	end
+
+	function f:Measure()
+		local n = #m:SpecSpells(state.spec)
+		self.height = math.max(1, n) * PCD_ROW_H
+		self:SetHeight(self.height)
+		return self.height
+	end
+
+	function f:Refresh()
+		local list = m:SpecSpells(state.spec)
+		for i, def in ipairs(list) do
+			local r = Row(i)
+			r.def, r.spell = def, def.id
+			r:ClearAllPoints()
+			r:SetPoint("TOPLEFT", 0, -(i - 1) * PCD_ROW_H)
+			r:SetPoint("TOPRIGHT", 0, -(i - 1) * PCD_ROW_H)
+			r.icon:SetTexture(XUI.GetSpellIcon(def.show or def.id))
+			r.name:SetText(XUI.GetSpellName(def.id))
+			r.switch:SetState(not def.off, false)
+			r.icon:SetDesaturated(def.off)
+			if not r.cd:HasFocus() then r.cd:SetText(tostring(def.cd)) end
+			r.up:SetEnabled(i > 1)
+			r.down:SetEnabled(i < #list)
+			r:Show()
+		end
+		for i = #list + 1, #self.rows do self.rows[i]:Hide() end
+		self:Measure()
+	end
+	return f
+end
+
+O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
+	local state = { class = XUI.playerClass, spec = nil }
+	local function ClassEntry(token)
+		for _, c in ipairs(m.CLASSES) do
+			if c.token == token then return c end
+		end
+	end
+	if not ClassEntry(state.class) then state.class = m.CLASSES[1].token end
+	state.spec = ClassEntry(state.class).specs[1]
+
+	local function classValues()
+		local out = {}
+		for _, c in ipairs(m.CLASSES) do
+			out[#out + 1] = { value = c.token, text = (LOCALIZED_CLASS_NAMES_MALE and LOCALIZED_CLASS_NAMES_MALE[c.token]) or c.token }
+		end
+		out[#out + 1] = { value = "RACE", text = "Racials (every class)" }
+		return out
+	end
+	local function specValues()
+		local out = {}
+		if state.class == "RACE" then return { { value = "race", text = "Racials" } } end
+		for _, id in ipairs(ClassEntry(state.class).specs) do
+			local ok, _, name = pcall(GetSpecializationInfoByID, id)
+			out[#out + 1] = { value = id, text = ok and name or ("Spec " .. id) }
+		end
+		return out
+	end
+	local function noEui() return not (XUI.EUI and XUI.EUI.Module("EllesmereUIRaidFrames")) end
+	local function loose() return noEui() or not m.db.attach end
+
+	return {
+		Card("Who", {
+			{ type = "toggle", label = "Show your own row", path = "showSelf" },
+			{ type = "toggle", label = "Only while in a group", path = "groupOnly" },
+			{ type = "description", width = "full",
+				text = "Five-player groups only: in a raid the rows are hidden. Your own row follows your casts; the others follow their buffs, which the game still lets this read inside a key." },
+		}),
+		Card("Placement", {
+			{ type = "toggle", label = "Beside EllesmereUI's party frames", path = "attach", disabled = noEui, width = "full",
+				tip = "Off, or without EllesmereUI's party frames, the rows form one block you place yourself." },
+			{ type = "dropdown", label = "Side", path = "side", values = m.SIDES, disabled = loose },
+			{ type = "slider", label = "Distance", path = "offX", min = -40, max = 40, step = 1, disabled = loose },
+			{ type = "slider", label = "Shift along", path = "offY", min = -40, max = 40, step = 1, disabled = loose },
+			{ type = "dropdown", label = "Block grows", path = "growth", values = m.GROWTH },
+			{ type = "slider", label = "Space between rows", path = "rowSpacing", min = 0, max = 30, step = 1 },
+		}),
+		Card("Icons", Join({
+			{ type = "slider", label = "Space between icons", path = "spacing", min = 0, max = 20, step = 1 },
+		}, G.Icon("icon", { square = true }))),
+		Card("Border", G.Border("border")),
+		Card("Glow while the effect is up", G.Glow("glow", { toggle = "Glow while the buff is up" })),
+		Card("Timer text", Join({
+			{ type = "toggle", label = "Show the countdown", path = "showTimer", width = "full" },
+		}, G.Font("timerText", { color = true }))),
+		Card("Name text", Join({
+			{ type = "toggle", label = "Show names (block mode)", path = "showName", width = "full" },
+		}, G.Font("nameText"))),
+		Card("Spells", {
+			{ type = "description", width = "full",
+				text = "What each class and spec shows, in this order. Switch a spell off, change its cooldown length (seconds), or move it." },
+			{ type = "dropdown", label = "Class", values = classValues,
+				get = function() return state.class end,
+				set = function(_, v)
+					state.class = v
+					state.spec = v == "RACE" and "race" or ClassEntry(v).specs[1]
+				end },
+			{ type = "tabs", width = "full", values = specValues,
+				get = function() return state.spec end,
+				set = function(_, v) state.spec = v end },
+			{ type = "custom", width = "full", build = function(parent, c) return PartyCDRows(parent, c, m, state) end },
+		}),
+		Card("Position", G.Position("position")),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("CoTank", function(ctx, m, G)
 	local function noDebuffs() return not m.db.debuffs.enabled end
 	return {

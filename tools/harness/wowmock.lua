@@ -104,7 +104,7 @@ function UnitClass() return "Warrior", "WARRIOR", 1 end
 function UnitName() return "Xerion" end
 function UnitRace() return "Dwarf", "Dwarf" end
 function GetRealmName() return "Ravencrest" end
-function UnitGUID() return "Player-1-0001" end
+function UnitGUID(u) return "Player-1-" .. tostring(u or "player") end
 function IsShiftKeyDown() return false end
 function IsControlKeyDown() return false end
 function IsAltKeyDown() return false end
@@ -503,7 +503,7 @@ function UnitExists(u) return u == "player" or (MOCK.inGroup and u:match("^party
 function UnitIsUnit(a, b) return a == b end
 function UnitClassBase() return "WARRIOR" end
 function UnitCanAttack() return false end
-function UnitGroupRolesAssigned() return "DAMAGER" end
+function UnitGroupRolesAssigned() return MOCK.role or "DAMAGER" end
 function UnitHealth() return 50 end
 function UnitHealthMax() return 100 end
 function UnitGetTotalAbsorbs() return 0 end
@@ -587,3 +587,6 @@ if MOCK_BUILD and MOCK_BUILD >= 120100 then
 	C_UnitAuras.GetAuraDataBySlot = function() return nil end
 	C_UnitAuras.GetAuraDuration = function() return nil end
 end
+
+-- the value check of Party Cooldowns: hands back the number it was given
+C_CurveUtil = { EvaluateColorValueFromBoolean = function(b, a, c) if b then return a end return c end }

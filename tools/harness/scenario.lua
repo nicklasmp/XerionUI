@@ -116,6 +116,21 @@ Step("combat start / end", function()
 	MOCK.Advance(5)
 end)
 
+Step("party cooldowns: group, buffs and casts", function()
+	MOCK.inGroup, MOCK.role = true, "TANK"
+	MOCK.Fire("GROUP_ROSTER_UPDATE")
+	MOCK.Advance(1)
+	for _, unit in ipairs({ "party1", "party2", "party3", "party4" }) do MOCK.Fire("UNIT_AURA", unit) end
+	MOCK.Advance(2)
+	MOCK.Fire("UNIT_SPELLCAST_SUCCEEDED", "player", "cast", 31884)
+	MOCK.Advance(3)
+	MOCK.Fire("CHALLENGE_MODE_START")
+	MOCK.Advance(3)
+	MOCK.inGroup, MOCK.role = false, nil
+	MOCK.Fire("GROUP_ROSTER_UPDATE")
+	MOCK.Advance(1)
+end)
+
 Step("stoneform bleed", function()
 	MOCK.bleed = true
 	MOCK.Fire("UNIT_AURA", "player")

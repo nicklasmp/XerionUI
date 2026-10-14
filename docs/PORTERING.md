@@ -56,6 +56,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | LFG Improvements | I | ⏳ | |
 | Raid Frame Manager | I | ❓ | Erstatter Blizzards manager — stor |
 | Dungeon Teleports | I | ❓ | Du har allerede TeleportMenu installeret |
+| Party Cooldowns (Party CDs) | K | ✅ | Port 14. okt 2026: ikoner pr. party-medlem med nedtælling, læst via sensor-containere i keys. Droppet: radial swipe, HealerExternal-ikon, generisk party-frame-søgning (kun EllesmereUI + fri blok). Utestet i spillet |
 | Key Vendor | K | ⏳ | |
 | Macro Factory | I | ❓ | |
 
