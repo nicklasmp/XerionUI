@@ -1,0 +1,31 @@
+name: Release
+
+# Push a tag like v2.0.1 to publish a GitHub release that WowUp can install from.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^## Version: .*/## Version: ${VERSION}/" XerionUI/XerionUI.toc XerionUI_Options/XerionUI_Options.toc || true
+          grep -n "^## Version" XerionUI/XerionUI.toc
+
+      - name: Package
+        run: zip -r "XerionUI-${GITHUB_REF_NAME}.zip" XerionUI XerionUI_Options -x "*.git*"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "XerionUI-${GITHUB_REF_NAME}.zip" \
+            --title "XerionUI ${GITHUB_REF_NAME}" --generate-notes

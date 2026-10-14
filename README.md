@@ -4,7 +4,9 @@ Personal quality-of-life and tweak suite for World of Warcraft: Midnight — one
 
 ## Install
 
-Copy both folders into `World of Warcraft/_retail_/Interface/AddOns/`:
+**WowUp:** Add Addons > Install from URL > `https://github.com/nicklasmp/xerionui`. WowUp then updates from the latest GitHub release.
+
+**Manual:** Copy both folders into `World of Warcraft/_retail_/Interface/AddOns/`:
 
 - `XerionUI` — the addon
 - `XerionUI_Options` — the settings window (loads the first time you open it)
