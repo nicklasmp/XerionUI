@@ -1,4 +1,4 @@
-## Interface: 120000, 120001, 120005, 120007, 120100
+## Interface: 120000, 120001, 120005, 120007, 120100, 120105
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
