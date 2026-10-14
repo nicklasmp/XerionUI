@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.2.2 - 2026-10-14
+- Fix a syntax error in Auto NPC Dialog from 2.2.1
+
 ## 2.2.1 - 2026-10-14
 - Auto NPC Dialog lists the name next to each option ID (learned when the NPC is talked to)
 

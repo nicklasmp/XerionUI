@@ -353,8 +353,7 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 				get = function() return m.ListText(m.db.confirm) end,
 				set = function(_, v) m.db.confirm = m.ParseList(v) end },
 			{ type = "button", text = "Print the open options", onClick = function() m:PrintOptions() end },
-			{ type = "description", width = "full", text = function() return "Listed now:
-" .. m:ListLabels() end },
+			{ type = "description", width = "full", text = function() return "Listed now:\n" .. m:ListLabels() end },
 		}),
 	}
 end)

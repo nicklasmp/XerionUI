@@ -49,8 +49,7 @@ function M:ListLabels()
 			end
 		end
 	end
-	return #lines > 0 and table.concat(lines, "
-") or "|cff888888No options listed.|r"
+	return #lines > 0 and table.concat(lines, "\n") or "|cff888888No options listed.|r"
 end
 
 local function IDSet(list)
