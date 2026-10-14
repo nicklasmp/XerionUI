@@ -378,6 +378,27 @@ O:RegisterModuleOptions("AggroCheck", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
+	return {
+		Card("When", {
+			{ type = "toggle", label = "Only inside instances", path = "instanceOnly" },
+			{ type = "toggle", label = "Say what it picked", path = "announce" },
+		}),
+		Card("Options", {
+			{ type = "description", width = "full",
+				text = "Gossip option IDs, comma separated. Talk to the NPC and press the button to see the IDs on offer." },
+			{ type = "input", label = "Pick automatically", width = "full",
+				get = function() return m.ListText(m.db.options) end,
+				set = function(_, v) m.db.options = m.ParseList(v) end },
+			{ type = "input", label = "Also answer \"are you sure?\" for", width = "full",
+				get = function() return m.ListText(m.db.confirm) end,
+				set = function(_, v) m.db.confirm = m.ParseList(v) end },
+			{ type = "button", text = "Print the open options", onClick = function() m:PrintOptions() end },
+		}),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("InstanceKeys", function(ctx, m, G)
 	return {
 		Card("Show", {

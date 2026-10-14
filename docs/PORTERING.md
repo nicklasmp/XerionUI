@@ -57,6 +57,9 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Raid Frame Manager | I | ❓ | Erstatter Blizzards manager — stor |
 | Dungeon Teleports | I | ❓ | Du har allerede TeleportMenu installeret |
 | Party Cooldowns (Party CDs) | K | ✅ | Port 14. okt 2026: ikoner pr. party-medlem med nedtælling, læst via sensor-containere i keys. Droppet: radial swipe, HealerExternal-ikon, generisk party-frame-søgning (kun EllesmereUI + fri blok). Utestet i spillet |
+| Auto Gossip | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. Utestet i spillet |
+| Kira Reminders (DungeonAlerts) | K | ⏳ | Boss-timer-alarmer pr. dungeon via BigWigs, cast-bars, announce-pile, boss-HP-kald, wrong target, damage amp, trash-lyde. 5.400 linjer; kun to dungeons har indbyggede regler (Murder Row, Temple of Sethraliss) |
+| MDT Compact / MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |
 | Key Vendor | K | ⏳ | |
 | Macro Factory | I | ❓ | |
 
