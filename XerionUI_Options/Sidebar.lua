@@ -254,8 +254,17 @@ function O:RefreshSidebar()
 						end
 						table.sort(names)
 						for _, d in ipairs(names) do
-							AddHead(d)
-							for _, m in ipairs(byDungeon[d]) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m, false, 14) end
+							-- each dungeon folds on its own (a search unfolds them)
+							local panel = XUI.DB.global.panel
+							panel.dungeonsFolded = panel.dungeonsFolded or {}
+							local dFolded = panel.dungeonsFolded[d] and S.searchText == ""
+							AddHead(d, { folded = dFolded, toggle = function()
+								panel.dungeonsFolded[d] = not panel.dungeonsFolded[d] or nil
+								O:RefreshSidebar()
+							end })
+							if not dFolded then
+								for _, m in ipairs(byDungeon[d]) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m, false, 14) end
+							end
 						end
 					else
 						for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end

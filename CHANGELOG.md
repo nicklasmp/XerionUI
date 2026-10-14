@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.1.1 - 2026-10-14
+- Fix the module header texts running under the buttons
+- Add folding for each dungeon in the sidebar
+
 ## 2.1.0 - 2026-10-14
 - Add Bonus Roll Confirm module (ported from the BonusRollConfirm addon): confirmation before using or passing a bonus roll, with loot spec shown
 

@@ -33,7 +33,7 @@ function O.CreatePageHead(parent)
 
 	-- module controls, right to left
 	f.enable = CreateFrame("Button", nil, f)
-	f.enable:SetSize(64, 28)
+	f.enable:SetSize(108, 28) -- wide enough for the switch plus "Disabled"
 	f.enable:SetPoint("RIGHT", -20, 0)
 	f.enable.switch = O.Switch(f.enable)
 	f.enable.switch:SetPoint("RIGHT")
@@ -115,6 +115,19 @@ function O.CreatePageHead(parent)
 		if m then O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end
 	end)
 
+	-- the texts end left of the leftmost control so they never run under it
+	function f.FitTexts()
+		local textLeft = f.title:GetLeft()
+		local edge = f.stop and f.stop:GetLeft() or f:GetRight()
+		local w = (textLeft and edge) and (edge - textLeft - 16) or 400
+		w = math.max(w, 120)
+		for _, fs in ipairs({ f.title, f.desc, f.status }) do
+			fs:SetWordWrap(false)
+			fs:SetWidth(w)
+		end
+	end
+	f:SetScript("OnSizeChanged", function() f.FitTexts() end)
+
 	f.line = O:Rect(f, "line", "ARTWORK")
 	f.line:SetHeight(1)
 	f.line:SetPoint("BOTTOMLEFT")
@@ -144,6 +157,10 @@ function O:RefreshPageHead()
 	f.diag:SetShown(showModule)
 	f.diag:ClearAllPoints()
 	f.diag:SetPoint("RIGHT", last, "LEFT", -8, 0)
+	-- keep the texts clear of the controls: stop them left of the leftmost one
+	f.stop = showModule and f.diag or nil
+	f.FitTexts()
+	C_Timer.After(0, f.FitTexts) -- anchors above resolve a frame later
 	f.status:SetText("")
 	if m then
 		f.icon:SetTexture(XUI.ModuleIcon(m))
