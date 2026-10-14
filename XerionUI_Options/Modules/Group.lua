@@ -340,12 +340,14 @@ end)
 O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 	return {
 		Card("When", {
+			{ type = "toggle", label = "Use the built-in dungeon list", path = "useBuiltin",
+				tip = "Dialogs shipped with XerionUI, picked automatically. On by default. Your own IDs below are used either way." },
 			{ type = "toggle", label = "Only inside instances", path = "instanceOnly" },
 			{ type = "toggle", label = "Say what it picked", path = "announce" },
 		}),
 		Card("Options", {
 			{ type = "description", width = "full",
-				text = "Gossip option IDs, comma separated. Talk to the NPC and press the button to see the IDs on offer." },
+				text = "Your own gossip option IDs on top of the built-in list, comma separated. Talk to the NPC and press the button to see the IDs on offer." },
 			{ type = "input", label = "Pick automatically", width = "full",
 				get = function() return m.ListText(m.db.options) end,
 				set = function(_, v) m.db.options = m.ParseList(v) end },

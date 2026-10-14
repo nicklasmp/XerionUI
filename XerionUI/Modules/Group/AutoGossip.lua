@@ -9,8 +9,16 @@
 local XUI = select(2, ...).XUI
 
 local IsSecret = XUI.IsSecret
-local SETHRALISS = 48126
 local COOLDOWN = 5
+
+-- Dialogs shipped with the addon: dungeon steps worth skipping every time.
+-- Used while "Use the built-in dungeon list" is on (the default); the lists
+-- you type in the options come on top. confirm = also answer "are you sure?".
+local BUILTIN = {
+	{ id = 131567 },
+	{ id = 131502 },
+	{ id = 48126, confirm = true }, -- Sethraliss
+}
 
 local M = XUI:NewModule("AutoGossip", {
 	name = "Auto NPC Dialog",
@@ -19,14 +27,50 @@ local M = XUI:NewModule("AutoGossip", {
 	icon = [[Interface\Icons\INV_Misc_Note_01]],
 	order = 62,
 	defaults = {
-		options = { 131567, 131502, SETHRALISS },
-		confirm = { SETHRALISS },
+		useBuiltin = true,
+		options = {},
+		confirm = {},
 		instanceOnly = true,
 		announce = true,
 	},
 })
 
 local lastPick = {}
+
+-- The shipped IDs sat in the saved lists before the built-in list existed;
+-- take them out once so the toggle really switches them off.
+local function MigrateBuiltin(db)
+	if db.builtinMigrated then return end
+	db.builtinMigrated = true
+	local builtin, builtinConfirm = {}, {}
+	for _, d in ipairs(BUILTIN) do
+		builtin[d.id] = true
+		if d.confirm then builtinConfirm[d.id] = true end
+	end
+	local function strip(list, drop)
+		local out = {}
+		for _, id in ipairs(list or {}) do
+			if not drop[tonumber(id)] then out[#out + 1] = id end
+		end
+		return out
+	end
+	db.options = strip(db.options, builtin)
+	db.confirm = strip(db.confirm, builtinConfirm)
+end
+
+-- built-in and typed IDs together, as the lists the rest of the module reads
+function M:Wanted()
+	local options, confirm = {}, {}
+	for _, id in ipairs(self.db.options or {}) do options[#options + 1] = id end
+	for _, id in ipairs(self.db.confirm or {}) do confirm[#confirm + 1] = id end
+	if self.db.useBuiltin then
+		for _, d in ipairs(BUILTIN) do
+			options[#options + 1] = d.id
+			if d.confirm then confirm[#confirm + 1] = d.id end
+		end
+	end
+	return options, confirm
+end
 
 -- Option IDs say nothing on their own, so the names the game has shown for
 -- them are kept (db.names) and listed next to the IDs in the options.
@@ -39,7 +83,8 @@ end
 -- "id - name" for every listed ID, for the options page
 function M:ListLabels()
 	local lines, seen = {}, {}
-	for _, list in ipairs({ self.db.options or {}, self.db.confirm or {} }) do
+	local options, confirm = self:Wanted()
+	for _, list in ipairs({ options, confirm }) do
 		for _, id in ipairs(list) do
 			if not seen[id] then
 				seen[id] = true
@@ -85,13 +130,14 @@ end
 
 function M:TrySelect()
 	if not Inside() then return end
-	local wanted = IDSet(self.db.options)
+	local options, confirmList = self:Wanted()
+	local wanted = IDSet(options)
 	if not next(wanted) then return end
 	local CG = C_GossipInfo
 	if not (CG and CG.GetOptions and CG.SelectOption) then return end
 	local ok, opts = pcall(CG.GetOptions)
 	if not ok or type(opts) ~= "table" then return end
-	local confirm = IDSet(self.db.confirm)
+	local confirm = IDSet(confirmList)
 	local now = GetTime()
 	for _, o in ipairs(opts) do
 		local id = o.gossipOptionID
@@ -110,7 +156,7 @@ end
 function M:OnConfirmShown(optionID)
 	if not Inside() or IsSecret(optionID) then return end
 	local id = tonumber(optionID)
-	if not id or not IDSet(self.db.confirm)[id] then return end
+	if not id or not IDSet(select(2, self:Wanted()))[id] then return end
 	local CG = C_GossipInfo
 	if not (CG and CG.SelectOption) then return end
 	local ok = pcall(CG.SelectOption, id, "", true)
@@ -119,6 +165,7 @@ function M:OnConfirmShown(optionID)
 end
 
 function M:OnEnable()
+	MigrateBuiltin(self.db)
 	self:RegisterEvent("GOSSIP_SHOW", function(m) m:After(0, m.TrySelect) end)
 	if type(GossipConfirmDialog_Show) == "function" then
 		self:SecureHook("GossipConfirmDialog_Show", function(m, optionID) m:After(0, function() m:OnConfirmShown(optionID) end) end)

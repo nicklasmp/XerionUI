@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.3.0 - 2026-10-14
+- Auto NPC Dialog: built-in dungeon list, on by default, with a toggle
+
 ## 2.2.3 - 2026-10-14
 - Merge FocusKick Sound into Focus Cast Bar (own section; old settings carried over)
 
