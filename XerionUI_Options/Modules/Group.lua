@@ -399,6 +399,52 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
+	return {
+		Card("Bar", {
+			{ type = "description", width = "full",
+				text = "Murder Row, Kystia Manaheart: when one boss finishes its timed cast the other takes extra damage for 20 seconds. The bar counts the window down and shows that boss's health. Use the Test button to play it." },
+			{ type = "input", label = "Label", path = "text" },
+			{ type = "toggle", label = "Show health percent", path = "showPercent" },
+			{ type = "color", label = "Bar color", path = "color" },
+		}),
+		Card("Bar size", G.Bar("bar")),
+		Card("Border", G.Border("border")),
+		Card("Label", G.Font("label", { color = true })),
+		Card("Timer", G.Font("timer", { color = true })),
+		Card("Percent", G.Font("percent", { color = true })),
+		Card("Alert", G.Alert("alert")),
+		Card("Position", G.Position("position")),
+	}
+end)
+
+--------------------------------------------------------------------------------
+O:RegisterModuleOptions("ChaosBarrage", function(ctx, m, G)
+	return {
+		Card("Counter", {
+			{ type = "description", width = "full",
+				text = "Murder Row, Kystia Manaheart: boxes count the bolts left in a group and a bar times the current bolt. Use the Test button to play it." },
+			{ type = "toggle", label = "Show for tanks", path = "roles.TANK" },
+			{ type = "toggle", label = "Show for healers", path = "roles.HEALER" },
+			{ type = "toggle", label = "Show for damage dealers", path = "roles.DAMAGER" },
+			{ type = "color", label = "Bolt color", path = "color", hasAlpha = true },
+			{ type = "color", label = "Empty color", path = "emptyColor", hasAlpha = true },
+			{ type = "slider", label = "Width", path = "width", min = 40, max = 400, step = 1 },
+			{ type = "slider", label = "Box height", path = "height", min = 4, max = 40, step = 1 },
+			{ type = "slider", label = "Gap", path = "gap", min = 0, max = 10, step = 1 },
+		}),
+		Card("Cast bar", {
+			{ type = "toggle", label = "Show the bolt cast bar", path = "showCast" },
+			{ type = "slider", label = "Height", path = "cast.height", min = 4, max = 40, step = 1 },
+			{ type = "color", label = "Bar color", path = "cast.color" },
+		}),
+		Card("Border", G.Border("border")),
+		Card("Timer", G.Font("castTimer", { color = true })),
+		Card("Position", G.Position("position")),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("InstanceKeys", function(ctx, m, G)
 	return {
 		Card("Show", {

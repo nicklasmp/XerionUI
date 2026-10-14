@@ -58,7 +58,8 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Dungeon Teleports | I | ❓ | Du har allerede TeleportMenu installeret |
 | Party Cooldowns (Party CDs) | K | ✅ | Port 14. okt 2026: ikoner pr. party-medlem med nedtælling, læst via sensor-containere i keys. Droppet: radial swipe, HealerExternal-ikon, generisk party-frame-søgning (kun EllesmereUI + fri blok). Utestet i spillet |
 | Auto Gossip | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. Utestet i spillet |
-| Kira Reminders (DungeonAlerts) | K | ⏳ | Boss-timer-alarmer pr. dungeon via BigWigs, cast-bars, announce-pile, boss-HP-kald, wrong target, damage amp, trash-lyde. 5.400 linjer; kun to dungeons har indbyggede regler (Murder Row, Temple of Sethraliss) |
+| Kira Reminders: Damage Amp + Chaos Barrage (Murder Row, Kystia Manaheart) | K | ✅ | Port 14. okt 2026 som to moduler (DamageAmp, ChaosBarrage). Droppet: nameplate-fastgørelse på EllesmereUI (brug position.attach), chat-debug/log, manuel target-bar. Utestet i spillet |
+| Kira Reminders: resten (BigWigs-lister pr. dungeon, boss-HP-kald, wrong target, trash aura-lyde) | K | ❌ | Fravalgt af Nicklas 14. okt 2026; kan tages op senere (5.400 linjer, kun to dungeons har indbyggede regler) |
 | MDT Compact / MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |
 | Key Vendor | K | ⏳ | |
 | Macro Factory | I | ❓ | |

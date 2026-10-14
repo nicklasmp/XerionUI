@@ -46,6 +46,8 @@ Modules\Group\Interrupts.lua
 Modules\Group\PartyCDsData.lua
 Modules\Group\PartyCDs.lua
 Modules\Group\AutoGossip.lua
+Modules\Group\DamageAmp.lua
+Modules\Group\ChaosBarrage.lua
 Modules\Group\CoTank.lua
 Modules\Group\Shroud.lua
 Modules\Group\CCTracker.lua
