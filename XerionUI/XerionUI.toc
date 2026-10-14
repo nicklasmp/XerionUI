@@ -2,13 +2,14 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.0.0
+## Version: 2.0.1
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
 ## OptionalDeps: SharedMedia, SharedMedia_MyMedia, EllesmereUI, EllesmereUINameplates, EllesmereUICooldownManager, EllesmereUIMythicTimer, EllesmereUIRaidFrames, EllesmereUIUnitFrames
 ## AddonCompartmentFunc: XerionUI_OnAddonCompartmentClick
 ## Category: Interface Enhancements
+## IconTexture: Interface\AddOns\XerionUI\Media\addon-icon
 
 # Libraries
 Libs\LibStub\LibStub.lua

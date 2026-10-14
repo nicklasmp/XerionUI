@@ -1,5 +1,6 @@
 // Generates the addon-list icon: a 128x128 full-colour TGA.
-// A woven X (orange blade over a pale blade) on a dark rounded tile with a soft glow.
+// A thin white X in the style of the X (Twitter) mark: one bold stroke with
+// flat horizontal cuts, one hairline stroke running behind it with a gap.
 //   node tools/gen-addon-icon.js [preview.png]
 const fs = require('fs');
 const path = require('path');
@@ -8,47 +9,25 @@ const zlib = require('zlib');
 const N = 128, S = 4;
 const OUT = path.join(__dirname, '..', 'XerionUI', 'Media', 'addon-icon.tga');
 
-const ORANGE = [255, 125, 10], AMBER = [255, 190, 60], PALE = [236, 238, 244], PALE_LO = [150, 156, 172];
-const BG_TOP = [34, 34, 38], BG_BOT = [14, 14, 16];
-
-const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-const clamp01 = (t) => Math.min(Math.max(t, 0), 1);
-
-// distance from (x,y) to the segment a-b
-function segDist(x, y, ax, ay, bx, by) {
-  const dx = bx - ax, dy = by - ay;
-  const t = clamp01(((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy));
-  return Math.hypot(x - (ax + t * dx), y - (ay + t * dy));
-}
-
-const LO = 31, HI = 97, HALF = 9.5;          // blade extents and half thickness
-function bladeA(x, y) { return segDist(x, y, LO, LO, HI, HI); }   // "\"
-function bladeB(x, y) { return segDist(x, y, HI, LO, LO, HI); }   // "/"
+const WHITE = [255, 255, 255], BLACK = [12, 12, 12];
+const TOP = 26, BOT = 102;                  // vertical extent of the mark
+const LEFT = 28, RIGHT = 100;               // horizontal extent
+const BOLD = 8, HAIR = 2.6, GAP = 3.5;      // half widths (horizontal) and gap around the bold stroke
+const BOLD_SHIFT = 12;                      // the bold stroke is skewed steeper than 45 degrees
 
 // Colour at a point, or null for transparent.
 function sample(x, y) {
   const r = 22, cx = Math.min(Math.max(x, r), N - r), cy = Math.min(Math.max(y, r), N - r);
   if (Math.hypot(x - cx, y - cy) > r) return null;
-
-  const edge = Math.min(x, y, N - x, N - y);
-  const dB = bladeB(x, y), dA = bladeA(x, y);
-
-  // pale blade "/" on top, with a dark keyline where it crosses the orange one
-  if (dB <= HALF) return mix(PALE, PALE_LO, clamp01((x + y - 60) / 110));
-  if (dB <= HALF + 3.5 && dA <= HALF) return BG_BOT;
-
-  // orange blade "\" with a bright-to-deep gradient along its length
-  if (dA <= HALF) return mix(AMBER, ORANGE, clamp01((x + y - 62) / 80));
-
-  // rim light
-  if (edge < 3) return mix(ORANGE, [150, 60, 0], clamp01((y) / N));
-
-  // background: vertical gradient plus a warm glow around the X
-  let c = mix(BG_TOP, BG_BOT, y / N);
-  const glow = Math.exp(-Math.min(dA, dB) / 15) * 0.5;
-  return mix(c, ORANGE, glow * 0.55);
+  if (y < TOP || y > BOT) return BLACK;
+  const t = (y - TOP) / (BOT - TOP);
+  const bold = (LEFT + BOLD_SHIFT) + t * (RIGHT - LEFT - 2 * BOLD_SHIFT);   // "\" centre line
+  const hair = RIGHT - t * (RIGHT - LEFT);                  // "/" centre line
+  if (Math.abs(x - bold) <= BOLD) return WHITE;
+  if (Math.abs(x - bold) <= BOLD + GAP) return BLACK;
+  if (Math.abs(x - hair) <= HAIR) return WHITE;
+  return BLACK;
 }
-
 const px = new Uint8Array(N * N * 4);   // RGBA
 for (let y = 0; y < N; y++) {
   for (let x = 0; x < N; x++) {
