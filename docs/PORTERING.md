@@ -96,7 +96,7 @@ Alle får `requires = "EllesmereUI…"`, så de kun kører med det relevante Ell
 | Feature | Kilde | Status | Note |
 |---|---|---|---|
 | Nameplates (dispel-glow uden purge, shield amount) | K | ✅ | Hooker EllesmereUI-internals — skrøbeligt ved EUI-opdateringer |
-| FocusKick Sound | K | ✅ | Ringede aldrig i legacy (slettede hjælpefunktioner) - rettet |
+| FocusKick Sound | K | ✅ | Ringede aldrig i legacy (slettede hjælpefunktioner) - rettet. Flettet ind i Focus Cast Bar (v. egen sektion) |
 | Focus Cast Bar (M+ Tools) | K | ✅ | Finder EUI's bar via gemt position — skrøbeligt |
 | Targeted Spell Bars | K | ✅ | |
 | Party Frames (health-tekst, debuff-stack placering) | K | ✅ | Health-teksten lyttede på alle units - nu unit-filtreret |

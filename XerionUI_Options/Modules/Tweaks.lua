@@ -25,19 +25,6 @@ O:RegisterModuleOptions("EUINameplates", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("EUIFocusKick", function(ctx, m, G)
-	return {
-		Card("Speech", {
-			{ type = "description", width = "full", text = "Speech only: whether a cast can be interrupted is hidden in keys, and only speech can follow it without Lua knowing. A sound file would play on every cast." },
-			{ type = "input", label = "Words", path = "text" },
-			{ type = "dropdown", label = "Voice", path = "voice", values = function() return XUI.Audio:Voices() end },
-			{ type = "slider", label = "Volume", path = "volume", min = 0, max = 100, step = 5 },
-			{ type = "slider", label = "Speed", path = "rate", min = -10, max = 10, step = 1 },
-			{ type = "button", text = "Test", onClick = function() m:Test() end },
-		}),
-	}
-end)
-
 O:RegisterModuleOptions("EUIFlyingBar", function(ctx, m, G)
 	return {
 		Card("Whirling Surge icon", {
@@ -75,10 +62,21 @@ O:RegisterModuleOptions("ZoneText", function(ctx, m, G)
 end)
 
 O:RegisterModuleOptions("EUIFocusCastbar", function(ctx, m, G)
+	local function off() return not m.db.kick.enabled end
 	return {
 		Card("Background", {
 			{ type = "color", label = "Background color", path = "color",
 				tip = "Tints the empty background behind the cast fill. The cast color itself is unchanged." },
+		}),
+		Card("FocusKick sound", {
+			{ type = "toggle", label = "Speak when you can interrupt", path = "kick.enabled", width = "full",
+				tip = "Speaks when your FocusKick target casts something you can interrupt and your kick is ready." },
+			{ type = "description", width = "full", text = "Speech only: whether a cast can be interrupted is hidden in keys, and only speech can follow it without Lua knowing. A sound file would play on every cast." },
+			{ type = "input", label = "Words", path = "kick.text", disabled = off },
+			{ type = "dropdown", label = "Voice", path = "kick.voice", values = function() return XUI.Audio:Voices() end, disabled = off },
+			{ type = "slider", label = "Volume", path = "kick.volume", min = 0, max = 100, step = 5, disabled = off },
+			{ type = "slider", label = "Speed", path = "kick.rate", min = -10, max = 10, step = 1, disabled = off },
+			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 	}
 end)

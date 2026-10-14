@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.2.3 - 2026-10-14
+- Merge FocusKick Sound into Focus Cast Bar (own section; old settings carried over)
+
 ## 2.2.2 - 2026-10-14
 - Fix a syntax error in Auto NPC Dialog from 2.2.1
 

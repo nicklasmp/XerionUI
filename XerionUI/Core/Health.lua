@@ -60,6 +60,9 @@ Health.CHECKS = {
 		if not (db and db.profile and db.profile.tfb and db.profile.tfb.focus) then
 			problem("the focus cast bar settings (_EMT_AceDB.profile.tfb.focus) were not found")
 		end
+		if not EUI("EllesmereUICooldownManager") then
+			problem("EllesmereUI Cooldown Manager is not loaded - the FocusKick sound falls back to your own interrupt list")
+		end
 	end,
 	EUIPartyFrames = function(problem)
 		local rf = EUI("EllesmereUIRaidFrames")
@@ -83,9 +86,6 @@ Health.CHECKS = {
 		if type(mod.TSB_SetPreview) ~= "function" then problem("Mythic+ Tools has no TSB_SetPreview - the preview link cannot work") end
 		local db = _G._EMT_AceDB
 		if not (db and db.profile and db.profile.tsb) then problem("the targeted spell bars settings (_EMT_AceDB.profile.tsb) were not found") end
-	end,
-	EUIFocusKick = function(problem)
-		if not EUI("EllesmereUICooldownManager") then problem("EllesmereUI Cooldown Manager is not loaded") end
 	end,
 	Interrupts = function(problem)
 		local m = XUI.moduleByKey.Interrupts

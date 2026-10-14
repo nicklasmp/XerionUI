@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.2.2
+## Version: 2.2.3
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -71,7 +71,6 @@ Modules\Class\DeathKnight\ReapersMark.lua
 Modules\Class\DeathKnight\ForbiddenSacrifice.lua
 Modules\Class\DeathKnight\RuneforgeAlert.lua
 Modules\Tweaks\Nameplates.lua
-Modules\Tweaks\FocusKick.lua
 Modules\Tweaks\FocusCastbar.lua
 Modules\Tweaks\TargetedSpellBars.lua
 Modules\Tweaks\PartyFrames.lua
