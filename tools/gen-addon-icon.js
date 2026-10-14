@@ -1,12 +1,14 @@
 // Generates the addon-list icon: a 128x128 full-colour TGA.
 // A thin white X in the style of the X (Twitter) mark: one bold stroke with
 // flat horizontal cuts, one hairline stroke running behind it with a gap.
-//   node tools/gen-addon-icon.js [preview.png]
+//   node tools/gen-addon-icon.js [out.png]          (also writes the TGA)
+//   ICON_SIZE=512 node tools/gen-addon-icon.js out.png   (PNG only, e.g. a GitHub avatar)
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-const N = 128, S = 4;
+const BASE = 128, S = 4;
+const N = Number(process.env.ICON_SIZE) || BASE;
 const OUT = path.join(__dirname, '..', 'XerionUI', 'Media', 'addon-icon.tga');
 
 const WHITE = [255, 255, 255], BLACK = [12, 12, 12];
@@ -17,7 +19,8 @@ const BOLD_SHIFT = 12;                      // the bold stroke is skewed steeper
 
 // Colour at a point, or null for transparent.
 function sample(x, y) {
-  const r = 22, cx = Math.min(Math.max(x, r), N - r), cy = Math.min(Math.max(y, r), N - r);
+  x *= BASE / N; y *= BASE / N;
+  const r = 22, cx = Math.min(Math.max(x, r), BASE - r), cy = Math.min(Math.max(y, r), BASE - r);
   if (Math.hypot(x - cx, y - cy) > r) return null;
   if (y < TOP || y > BOT) return BLACK;
   const t = (y - TOP) / (BOT - TOP);
@@ -54,8 +57,8 @@ for (let i = 0; i < N * N; i++) {
   tga[18 + i * 4 + 2] = px[i * 4];
   tga[18 + i * 4 + 3] = px[i * 4 + 3];
 }
-fs.writeFileSync(OUT, tga);
-console.log('wrote', OUT);
+if (N === BASE) fs.writeFileSync(OUT, tga);
+if (N === BASE) console.log('wrote', OUT);
 
 // Optional PNG preview for eyeballing (not shipped).
 if (process.argv[2]) {
