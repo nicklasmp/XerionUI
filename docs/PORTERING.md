@@ -43,7 +43,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Party Interrupts | K | ✅ | Stor (1.600 linjer); bar- og ikon-layout |
 | Co-Tank | K | ✅ | Bar + debuff-ikoner |
 | Shroud / Mass Invis bar | K | ✅ | Bar-modul: første rigtige bruger af `CreateBar` |
-| CC Tracker (bars) | K | ✖ | Fjernet oktober 2026 — ikke værdifuld |
+| CC Tracker (bars) | K | ✅ | Fjernet 11. okt, gendannet 14. okt 2026 efter ønske |
 | CC Cast Notices | K | ✖ | Virker ikke i Midnight (cast-ID'er er redigerede) — jf. legacy README |
 | Aggro Check | K | ✅ | |
 | Bloodlust ready (lyd/TTS) | K | ✅ | Kan bruge `G.Alert` direkte |

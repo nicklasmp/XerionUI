@@ -45,6 +45,7 @@ Modules\Group\Externals.lua
 Modules\Group\Interrupts.lua
 Modules\Group\CoTank.lua
 Modules\Group\Shroud.lua
+Modules\Group\CCTracker.lua
 Modules\Group\AggroCheck.lua
 Modules\Group\Bloodlust.lua
 Modules\Group\InstanceKeys.lua
