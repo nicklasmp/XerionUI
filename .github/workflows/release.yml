@@ -1,0 +1,37 @@
+# Publishes a GitHub release with an installable zip when a tag like v2.0.1 is pushed.
+# WowUp (Get Addons -> Install from URL) reads that zip and tracks new releases.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^## Version: .*/## Version: ${VERSION}/" XerionUI/XerionUI.toc
+
+      - name: Build zip
+        run: |
+          # Both addon folders must sit at the top level of the zip.
+          zip -r "XerionUI-${GITHUB_REF_NAME}.zip" XerionUI XerionUI_Options \
+            -x "*.git*" "*/.DS_Store"
+          unzip -l "XerionUI-${GITHUB_REF_NAME}.zip" | tail -3
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" "XerionUI-${GITHUB_REF_NAME}.zip" \
+            --title "XerionUI ${GITHUB_REF_NAME}" \
+            --generate-notes

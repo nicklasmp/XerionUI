@@ -4,12 +4,25 @@ Personal quality-of-life and tweak suite for World of Warcraft: Midnight — one
 
 ## Install
 
-Copy both folders into `World of Warcraft/_retail_/Interface/AddOns/`:
+**WowUp:** Get Addons → Install from URL → `https://github.com/nicklasmp/xerionui`. WowUp then follows new releases automatically (see *Releasing* below).
+
+**Manually:** copy both folders into `World of Warcraft/_retail_/Interface/AddOns/`:
 
 - `XerionUI` — the addon
 - `XerionUI_Options` — the settings window (loads the first time you open it)
 
 The old `XerionUI-Plugin` can stay installed while features are being ported; both have separate saved variables. While both are installed, use `/xerionui` (the old addon also claims `/xui`).
+
+## Releasing
+
+Push a tag and GitHub Actions builds `XerionUI-<tag>.zip` (both addon folders) and publishes it as a release:
+
+```
+git tag v2.0.1
+git push origin v2.0.1
+```
+
+The workflow stamps the tag into `## Version:` of `XerionUI.toc`. The repository must stay public for WowUp to read it.
 
 ## Commands
 
