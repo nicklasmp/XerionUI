@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.1.2 - 2026-10-14
+- Make the interrupt flash blink fewer times (1.5 s, about two pulses)
+
 ## 2.1.1 - 2026-10-14
 - Fix the module header texts running under the buttons
 - Add folding for each dungeon in the sidebar

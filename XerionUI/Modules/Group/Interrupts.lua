@@ -66,7 +66,7 @@ local M = XUI:NewModule("Interrupts", {
 		flash = T.Glow(true, { useGlobal = false, type = "PIXEL", color = { 1, 0.82, 0, 1 }, thickness = 3, lines = 12 }),
 		flashFill = true,
 		flashFillColor = { 1, 0.82, 0, 0.55 },
-		flashSecs = 3,
+		flashSecs = 1.5,
 		flashSelf = false,
 		position = T.Position(-420, 0),
 	},
@@ -215,12 +215,12 @@ local function NewRow()
 	local out = row.flashAnim:CreateAnimation("Alpha")
 	out:SetFromAlpha(1)
 	out:SetToAlpha(0.1)
-	out:SetDuration(0.25)
+	out:SetDuration(0.35)
 	out:SetOrder(1)
 	local back = row.flashAnim:CreateAnimation("Alpha")
 	back:SetFromAlpha(0.1)
 	back:SetToAlpha(1)
-	back:SetDuration(0.25)
+	back:SetDuration(0.35)
 	back:SetOrder(2)
 	row.texts = CreateFrame("Frame", nil, row)
 	row.texts:SetFrameLevel(row.flashFill:GetFrameLevel() + 1)
