@@ -15,13 +15,6 @@
 -- NPC_ReloadAll / RefreshAllSettings and the buttons are restyled. Off, the
 -- border goes back to EllesmereUI's own look.
 --
--- Hide Challenger's Might: the Mythic+ buff every enemy carries is kept off
--- EllesmereUI's buff row. The engine filters it by spell ID in C (the aura
--- itself is unreadable in a key): the buff groups' candidate filter of every
--- attached plate gets an excludeSpellIDs. EllesmereUI replaces those filters
--- when its settings change and a pooled row gets its filter when it attaches,
--- so both are hooked and the filter is put back.
---
 -- Shield amount: the mob's absorb as a number right after EllesmereUI's
 -- health text. The amount is secret in keys; it never touches Lua arithmetic
 -- - it goes straight into AbbreviateNumbers, SetText and StatusBar:SetValue.
@@ -35,14 +28,13 @@ local Style = XUI.Style
 
 local M = XUI:NewModule("EUINameplates", {
 	name = "Nameplates",
-	desc = "Dispel border color (also without purge or soothe), hidden Challenger's Might and shield amounts on EllesmereUI nameplates.",
+	desc = "Dispel border color (also without purge or soothe) and shield amounts on EllesmereUI nameplates.",
 	category = "tweaks",
 	icon = [[Interface\Icons\Spell_Holy_PowerWordShield]],
 	order = 10,
 	requires = "EllesmereUINameplates",
 	defaults = {
 		dispelAlways = true,
-		hideChallengers = true,
 		customBorder = true,
 		borderColor = { 1, 0.82, 0.25, 1 },
 		shield = { enabled = false, enemyOnly = true, offX = 0, offY = 0 },
@@ -79,7 +71,7 @@ local function HookDispel()
 end
 
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
-local stats = { wraps = 0, buttons = 0, tinted = 0, plates = 0, rows = 0, applied = 0, failed = 0, lastError = nil }
+local stats = { wraps = 0, buttons = 0, tinted = 0 }
 local borderTex = setmetatable({}, { __mode = "k" })
 local boost = setmetatable({}, { __mode = "k" })
 local BORDER_ATLAS = "UI-CooldownManager-PandemicBorder"
@@ -179,46 +171,6 @@ local function GlowSignature()
 	local c = M.db.borderColor or {}
 	return table.concat({ tostring(M.running), tostring(M.db.customBorder),
 		tostring(c[1]), tostring(c[2]), tostring(c[3]), tostring(c[4]) }, "|")
-end
-
-local HIDDEN_BUFFS = { [206150] = true } -- Challenger's Might
-
--- every buff row of the plate: its holder is a child of the plate and the
--- rows are the holder's children
-local function SetFilter(c, group, cand)
-	local ok, err = pcall(c.SetAuraGroupCandidateFilters, c, group, cand)
-	if ok then
-		stats.applied = stats.applied + 1
-	else
-		stats.failed = stats.failed + 1
-		stats.lastError = group .. ": " .. tostring(err)
-	end
-end
-
-local function ApplyHideToPlate(plate)
-	if not plate then return end
-	stats.plates = stats.plates + 1
-	local on = M.running and M.db.hideChallengers
-	local ex = on and HIDDEN_BUFFS or nil
-	for _, holder in ipairs({ plate:GetChildren() }) do
-		for _, c in ipairs({ holder:GetChildren() }) do
-			if c.SetAuraGroupCandidateFilters and c._npcAttackable ~= nil then
-				stats.rows = stats.rows + 1
-				local split = c._npbSplit
-				SetFilter(c, "np", { includeDispelTypes = split and { Magic = true } or nil, excludeSpellIDs = ex })
-				if split then
-					SetFilter(c, "np2", { excludeDispelTypes = { Magic = true }, excludeSpellIDs = ex })
-				end
-				SetFilter(c, "npnb", { excludeSpellIDs = ex })
-			end
-		end
-	end
-end
-
-local function ApplyHideAll()
-	local np = NP()
-	if not (np and np.plates) then return end
-	for _, plate in pairs(np.plates) do ApplyHideToPlate(plate) end
 end
 
 local function ReloadPlates()
@@ -413,7 +365,6 @@ function M:OnEnable()
 	local np = NP()
 	-- a rebuilt style is a new table, without our wrap
 	local function Rewrap(self)
-		ApplyHideAll()
 		if WrapStyles() then RestyleGlow() end
 		self:After(0, function() if WrapStyles() then RestyleGlow() end end)
 	end
@@ -425,10 +376,6 @@ function M:OnEnable()
 		end)
 	end
 	if np and type(np.NPC_ReloadAll) == "function" then self:SecureHook(np, "NPC_ReloadAll", Rewrap) end
-	if np and type(np.NPC_AttachPlate) == "function" then
-		self:SecureHook(np, "NPC_AttachPlate", function(_, plate) ApplyHideToPlate(plate) end)
-	end
-	ApplyHideAll()
 	-- EllesmereUI builds its styles at login, possibly after this module started
 	self:After(1, Rewrap)
 	self:After(4, Rewrap)
@@ -455,7 +402,6 @@ function M:OnDisable()
 	preview = false
 	ReloadPlates()
 	RestyleGlow()
-	ApplyHideAll()
 end
 
 function M:OnRefresh()
@@ -472,7 +418,6 @@ end
 
 function M:OnSettingChanged(path)
 	if path == "dispelAlways" then ReloadPlates() end
-	if path == "hideChallengers" then ApplyHideAll() end
 	self:RefreshSoon()
 end
 
@@ -482,10 +427,7 @@ function M:DebugInfo()
 		"EllesmereUI AuraKit: " .. tostring(AK ~= nil),
 		"style wraps installed: " .. stats.wraps,
 		"buttons styled: " .. stats.buttons .. ", borders tinted: " .. stats.tinted,
-		("challenger's might: plates %d, buff rows %d, filters set %d, failed %d"):format(
-			stats.plates, stats.rows, stats.applied, stats.failed),
 	}
-	if stats.lastError then lines[#lines + 1] = "last filter error: " .. stats.lastError end
 	for _, key in ipairs(GLOW_KEYS) do
 		local st = AK and AK.styles and AK.styles[key]
 		lines[#lines + 1] = key .. ": " .. (st and ("wrapped=" .. tostring(st.__xuiGlowWrap == true)

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.11.0 - 2026-10-15
+- Auto Mark Tank: hover effect on the button; remove the Hide Challenger's Might option from Nameplates (it could not work on enemy buffs)
+
 ## 2.10.2 - 2026-10-15
 - Auto Mark Tank: placing a marker is protected, so it is now a one-click button that appears when the tank has no marker (fixes the SetRaidTarget forbidden error)
 
