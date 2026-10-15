@@ -461,3 +461,21 @@ O:RegisterModuleOptions("Bloodlust", function(ctx, m, G)
 		Card("Alert when lust is ready again", G.Alert("alert", { test = function() m:TestAlert() end })),
 	}
 end)
+
+--------------------------------------------------------------------------------
+O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
+	return {
+		Card("Marker", {
+			{ type = "dropdown", label = "Marker", path = "marker", values = m.MARKERS },
+			{ type = "toggle", label = "Replace a marker the tank already has", path = "replace",
+				tip = "Off: a tank that already carries a marker is left alone." },
+			{ type = "toggle", label = "Only out of combat", path = "outOfCombat" },
+			{ type = "toggle", label = "Say what happened", path = "announce" },
+		}),
+		Card("Where", {
+			{ type = "toggle", label = "In parties", path = "inParty" },
+			{ type = "toggle", label = "In raids (needs lead or assist)", path = "inRaid" },
+			{ type = "button", text = "Test", onClick = function() m:Test() end },
+		}),
+	}
+end)

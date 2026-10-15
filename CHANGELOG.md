@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.10.0 - 2026-10-15
+- New module Auto Mark Tank: puts a raid marker (square by default) on the group's tank when the group forms, roles change or you zone in
+
 ## 2.9.0 - 2026-10-15
 - New module Cooldown Manager Bar Fonts: choose a font per EllesmereUI Cooldown Manager bar (cooldown numbers, keybinds, counts)
 
