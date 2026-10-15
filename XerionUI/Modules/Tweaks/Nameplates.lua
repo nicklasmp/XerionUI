@@ -79,7 +79,7 @@ local function HookDispel()
 end
 
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
-local stats = { wraps = 0, buttons = 0, tinted = 0 }
+local stats = { wraps = 0, buttons = 0, tinted = 0, plates = 0, rows = 0, applied = 0, failed = 0, lastError = nil }
 local borderTex = setmetatable({}, { __mode = "k" })
 local boost = setmetatable({}, { __mode = "k" })
 local BORDER_ATLAS = "UI-CooldownManager-PandemicBorder"
@@ -185,21 +185,31 @@ local HIDDEN_BUFFS = { [206150] = true } -- Challenger's Might
 
 -- every buff row of the plate: its holder is a child of the plate and the
 -- rows are the holder's children
+local function SetFilter(c, group, cand)
+	local ok, err = pcall(c.SetAuraGroupCandidateFilters, c, group, cand)
+	if ok then
+		stats.applied = stats.applied + 1
+	else
+		stats.failed = stats.failed + 1
+		stats.lastError = group .. ": " .. tostring(err)
+	end
+end
+
 local function ApplyHideToPlate(plate)
 	if not plate then return end
+	stats.plates = stats.plates + 1
 	local on = M.running and M.db.hideChallengers
 	local ex = on and HIDDEN_BUFFS or nil
 	for _, holder in ipairs({ plate:GetChildren() }) do
 		for _, c in ipairs({ holder:GetChildren() }) do
 			if c.SetAuraGroupCandidateFilters and c._npcAttackable ~= nil then
+				stats.rows = stats.rows + 1
 				local split = c._npbSplit
-				pcall(c.SetAuraGroupCandidateFilters, c, "np",
-					{ includeDispelTypes = split and { Magic = true } or nil, excludeSpellIDs = ex })
+				SetFilter(c, "np", { includeDispelTypes = split and { Magic = true } or nil, excludeSpellIDs = ex })
 				if split then
-					pcall(c.SetAuraGroupCandidateFilters, c, "np2",
-						{ excludeDispelTypes = { Magic = true }, excludeSpellIDs = ex })
+					SetFilter(c, "np2", { excludeDispelTypes = { Magic = true }, excludeSpellIDs = ex })
 				end
-				pcall(c.SetAuraGroupCandidateFilters, c, "npnb", { excludeSpellIDs = ex })
+				SetFilter(c, "npnb", { excludeSpellIDs = ex })
 			end
 		end
 	end
@@ -472,7 +482,10 @@ function M:DebugInfo()
 		"EllesmereUI AuraKit: " .. tostring(AK ~= nil),
 		"style wraps installed: " .. stats.wraps,
 		"buttons styled: " .. stats.buttons .. ", borders tinted: " .. stats.tinted,
+		("challenger's might: plates %d, buff rows %d, filters set %d, failed %d"):format(
+			stats.plates, stats.rows, stats.applied, stats.failed),
 	}
+	if stats.lastError then lines[#lines + 1] = "last filter error: " .. stats.lastError end
 	for _, key in ipairs(GLOW_KEYS) do
 		local st = AK and AK.styles and AK.styles[key]
 		lines[#lines + 1] = key .. ": " .. (st and ("wrapped=" .. tostring(st.__xuiGlowWrap == true)

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.10.1 - 2026-10-15
+- Nameplates diagnostics: report how many buff rows the Challenger's Might filter reached
+
 ## 2.10.0 - 2026-10-15
 - New module Auto Mark Tank: puts a raid marker (square by default) on the group's tank when the group forms, roles change or you zone in
 
