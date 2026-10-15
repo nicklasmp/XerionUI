@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.4.0 - 2026-10-15
+- Add Chat Tweaks module: EllesmereUI chat tabs on mouseover and an optional background behind the input box
+
 ## 2.3.0 - 2026-10-14
 - Auto NPC Dialog: built-in dungeon list, on by default, with a toggle
 

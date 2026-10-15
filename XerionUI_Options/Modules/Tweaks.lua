@@ -131,3 +131,13 @@ O:RegisterModuleOptions("EUIPartyFrames", function(ctx, m, G)
 		}),
 	}
 end)
+
+O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
+	return {
+		Card("Tabs", {
+			{ type = "toggle", label = "Tabs on mouseover", path = "tabsMouseover", width = "full",
+				tip = "Hides EllesmereUI's chat tabs until the cursor is over the chat or the tabs, or while the input box is open. The tabs can still be clicked while hidden." },
+		}),
+		Card("Input background", G.Background("inputBg", { toggle = "Background behind the input box" })),
+	}
+end)
