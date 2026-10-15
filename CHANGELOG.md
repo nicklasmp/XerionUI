@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.9.0 - 2026-10-15
+- New module Cooldown Manager Bar Fonts: choose a font per EllesmereUI Cooldown Manager bar (cooldown numbers, keybinds, counts)
+
 ## 2.8.2 - 2026-10-15
 - Nameplates: dispel border is stronger (three extra additive layers)
 

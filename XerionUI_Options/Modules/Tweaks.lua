@@ -160,3 +160,25 @@ O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
 		Card("Input background", G.Background("inputBg", { toggle = "Background behind the input box" })),
 	}
 end)
+
+O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
+	local cards = {}
+	for _, bar in ipairs(m.BarList()) do
+		local on = "bars." .. bar.key .. ".on"
+		local face = "bars." .. bar.key .. ".face"
+		cards[#cards + 1] = Card(tostring(bar.name), {
+			{ type = "toggle", label = "Own font for this bar", path = on, width = "full",
+				get = function() return XUI.GetPath(m.db, on) == true end },
+			{ type = "dropdown", label = "Font", path = face, media = "font",
+				get = function() return XUI.GetPath(m.db, face) or "GothamNarrowBlack" end,
+				disabled = function() return XUI.GetPath(m.db, on) ~= true end,
+				tip = "Cooldown numbers, keybinds and counts on this bar. Size, outline and color stay as set in EllesmereUI." },
+		})
+	end
+	if #cards == 0 then
+		cards[1] = Card("Bars", {
+			{ type = "description", width = "full", text = "No Cooldown Manager bars found yet. Open this page again once EllesmereUI's Cooldown Manager has loaded." },
+		})
+	end
+	return cards
+end)
