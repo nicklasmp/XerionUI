@@ -350,7 +350,9 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	local ns = { plates = {}, GetOffensiveDispelTypes = function() return false, false end }
 	_G.EllesmereNameplates_NS = ns
 	local AK = { styles = {}, RestyleSoon = function() end }
-	_G.EllesmereUI = { AuraKit = AK, _ModuleNS = {} }
+	local started = 0
+	_G.EllesmereUI = { AuraKit = AK, _ModuleNS = {},
+		Glows = { StartSpecGlow = function() started = started + 1 end, StopGlow = function() end } }
 	AK.styles["np:buffs"] = {
 		purgeGlow = true,
 		applyExtra = function() applied = applied + 1 end,
@@ -367,7 +369,7 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	style.applyExtra(button, {}, style)
 	assert(applied == 1, "original applyExtra not called")
 	local dbg = table.concat(m:DebugInfo(), "; ")
-	assert(dbg:find("glows shown: 1", 1, true), "no glow shown: " .. dbg)
+	assert(dbg:find("glows shown: 1", 1, true) and started == 1, "no glow shown: " .. dbg)
 end)
 
 Step("logout strips defaults", function()

@@ -74,6 +74,46 @@ local GLOW_KEYS = { "np:buffs", "np:buffs2" }
 local overlays = setmetatable({}, { __mode = "k" })
 local stats = { wraps = 0, buttons = 0, shown = 0 }
 
+-- Our glow types onto the styles EllesmereUI can draw on an aura button (its
+-- shared glow engine: pixel march, action button flipbook, modern flipbook).
+-- The scripted ones - autocast, shine and pulse - cannot run on an engine
+-- button, so they take the nearest drawn look.
+local TYPE_STYLE = { PIXEL = 1, BUTTON = 2, PROC = 6, PULSE = 6, SHINE = 6, AUTOCAST = 1 }
+local spec = {}
+local muted = setmetatable({}, { __mode = "k" })
+
+-- EllesmereUI's static border host: kept at alpha 0 while ours is on. Its
+-- own restyles write alpha 1 again, so its SetAlpha is wrapped (it is
+-- EllesmereUI's frame, not Blizzard's).
+local function Mute(host, on)
+	if not host then return end
+	if muted[host] == nil then
+		local original = host.SetAlpha
+		host.SetAlpha = function(self, a)
+			if muted[self] then a = 0 end
+			return original(self, a)
+		end
+	end
+	muted[host] = on and true or false
+	host:SetAlpha(on and 0 or 1)
+end
+
+local function StartGlow(overlay, style)
+	local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
+	if not (Glows and Glows.StartSpecGlow) then return false end
+	local g = Style:Resolve("glow", M.db.glow)
+	local c = g.color or {}
+	spec.style = TYPE_STYLE[g.type] or 1
+	spec.r, spec.g, spec.b = c[1] or 1, c[2] or 0.82, c[3] or 0.25
+	spec.lines, spec.thickness = g.lines, g.thickness
+	local w = style.width or 24
+	local h = style.height or w
+	overlay:SetAlpha(1)
+	overlay:Show()
+	Glows.StartSpecGlow(overlay, spec, w, h, "engine")
+	return true
+end
+
 local function OnButton(button, d, style)
 	local overlay = overlays[button]
 	-- The group is the dispellable one by construction (see EllesmereUI's
@@ -89,15 +129,28 @@ local function OnButton(button, d, style)
 			overlay:SetFrameLevel(button:GetFrameLevel() + 3)
 			overlay:EnableMouse(false)
 			overlays[button] = overlay
+			-- the regions an engine-hosted glow needs, made as early as we can
+			local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
+			if Glows and Glows.PrewarmEngineHost then
+				pcall(Glows.PrewarmEngineHost, overlay, style.width, style.height)
+			end
 		end
-		-- ours replaces EllesmereUI's static border
-		if d and d.npGlowHost then d.npGlowHost:SetAlpha(0) end
-		overlay:Show()
-		Style:ShowGlow(overlay, M.db.glow, true)
-		stats.shown = stats.shown + 1
+		if StartGlow(overlay, style) then
+			stats.shown = stats.shown + 1
+			-- ours replaces EllesmereUI's static border; its host may not exist
+			-- yet (it is built right after this pass on a new button)
+			Mute(d and d.npGlowHost, true)
+			if d and not d.npGlowHost then
+				C_Timer.After(0, function()
+					if M.running and d.npGlowHost then Mute(d.npGlowHost, true) end
+				end)
+			end
+		end
 	elseif overlay then
-		Style:HideGlow(overlay)
+		local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
+		if Glows and Glows.StopGlow then pcall(Glows.StopGlow, overlay) end
 		overlay:Hide()
+		if d and d.npGlowHost then Mute(d.npGlowHost, false) end
 	end
 end
 
