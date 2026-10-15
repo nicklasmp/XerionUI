@@ -1,18 +1,23 @@
 --------------------------------------------------------------------------------
 -- Auto Mark Tank
--- Puts a raid marker (the square by default) on the group's tank when the group
--- forms, the roles change or you zone in, so everyone can see who tanks and
--- the tank is easy to target.
+-- Offers a raid marker (the square by default) for the group's tank. Placing a
+-- marker is a protected action: an addon may only do it from a click, never on
+-- its own. So when the group forms, the roles change or you zone in and a tank
+-- is without the marker, a small button appears; one click marks the tank
+-- (through the secure /tm command) and the button goes away.
 --
--- It acts on those moments only, never on a timer, and leaves a tank that
--- already carries a marker alone unless asked to replace it. In a raid it needs
--- lead or assist; in a party anyone may mark.
+-- The button is a secure button; its macro is only rewritten out of combat and
+-- it only shows and hides out of combat, so nothing is ever blocked. A tank
+-- that already carries a marker is left alone unless asked to replace it. In a
+-- raid it needs lead or assist; in a party anyone may mark.
 --------------------------------------------------------------------------------
 local XUI = select(2, ...).XUI
+local T = XUI.Templates
+local Style = XUI.Style
 
 local M = XUI:NewModule("AutoMarkTank", {
 	name = "Auto Mark Tank",
-	desc = "Puts a raid marker (square by default) on the tank of your group.",
+	desc = "A one-click button that puts a raid marker (square by default) on the tank of your group.",
 	category = "group",
 	icon = [[Interface\TargetingFrame\UI-RaidTargetingIcon_6]],
 	order = 65,
@@ -21,8 +26,9 @@ local M = XUI:NewModule("AutoMarkTank", {
 		inParty = true,
 		inRaid = false,
 		replace = false,
-		outOfCombat = true,
-		announce = true,
+		text = T.Font(13, { color = { 1, 1, 1, 1 } }),
+		border = T.Border(),
+		position = T.Position(0, 170),
 	},
 })
 
@@ -50,40 +56,85 @@ local function Units()
 end
 
 local function Allowed()
+	if not IsInGroup() then return false end
 	if IsInRaid() then
 		if not M.db.inRaid then return false end
 		return UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")
 	end
-	return M.db.inParty and IsInGroup()
+	return M.db.inParty
 end
 
--- Marks every tank that needs it; returns how many were marked.
-function M:Mark(force)
-	if not (self.running and IsInGroup()) then return 0 end
-	if not force then
-		if not Allowed() then return 0 end
-		if self.db.outOfCombat and InCombatLockdown() then return 0 end
-	end
-	local index = self.db.marker
-	local marked = 0
+-- The tanks that need the marker.
+local function Wanted()
+	local out = {}
+	if not Allowed() then return out end
+	local index = M.db.marker
 	for _, unit in ipairs(Units()) do
-		local ok = pcall(function()
+		pcall(function()
 			if not UnitExists(unit) then return end
-			if XUI.IsSecret(UnitGroupRolesAssigned(unit)) then return end
-			if UnitGroupRolesAssigned(unit) ~= "TANK" then return end
+			local role = UnitGroupRolesAssigned(unit)
+			if XUI.IsSecret(role) or role ~= "TANK" then return end
 			local current = GetRaidTargetIndex(unit)
-			if XUI.IsSecret(current) then return end
-			if current == index then return end
-			if current and not (self.db.replace or force) then return end
-			SetRaidTarget(unit, index)
-			marked = marked + 1
-			if self.db.announce then
-				self:Print(("%s marked with %s."):format(UnitName(unit) or unit, MarkerName(index)))
-			end
+			if XUI.IsSecret(current) or current == index then return end
+			if current and not M.db.replace then return end
+			out[#out + 1] = unit
 		end)
-		if not ok then self:Trace("could not mark %s", unit) end
 	end
-	return marked
+	return out
+end
+
+local button, label, icon
+local function Button()
+	if button then return button end
+	button = CreateFrame("Button", "XUI_MarkTankButton", UIParent, "SecureActionButtonTemplate")
+	button:SetSize(170, 28)
+	button:SetFrameStrata("MEDIUM")
+	button:RegisterForClicks("AnyUp", "AnyDown")
+	button:SetAttribute("type", "macro")
+	button:Hide()
+	Style:Background(button)
+	icon = button:CreateTexture(nil, "ARTWORK")
+	icon:SetSize(18, 18)
+	icon:SetPoint("LEFT", button, "LEFT", 6, 0)
+	icon:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
+	label = button:CreateFontString(nil, "OVERLAY")
+	label:SetPoint("LEFT", icon, "RIGHT", 6, 0)
+	label:SetPoint("RIGHT", button, "RIGHT", -6, 0)
+	label:SetJustifyH("LEFT")
+	XUI.Movers:Register(button, M, "position")
+	-- one click done: look again, so the button leaves once the tank is marked
+	button:HookScript("PostClick", function() M:After(0.4, M.Check) end)
+	return button
+end
+
+local function Draw()
+	local b = Button()
+	local db = M.db
+	XUI.Movers:Apply(b)
+	Style:Border(b):Apply(db.border)
+	Style:ApplyBackground(Style:Background(b), nil)
+	Style:ApplyFont(label, db.text)
+	label:SetText(("Mark tank: %s"):format(MarkerName(db.marker)))
+	local col, row = (db.marker - 1) % 4, math.floor((db.marker - 1) / 4)
+	icon:SetTexCoord(col * 0.25, (col + 1) * 0.25, row * 0.25, (row + 1) * 0.25)
+end
+
+-- Sets the macro and shows or hides the button; out of combat only.
+function M:Check()
+	if not self.running or InCombatLockdown() then return end
+	local b = Button()
+	local units = Wanted()
+	if #units == 0 and not self:IsPreview() then
+		b:Hide()
+		return
+	end
+	local lines = {}
+	for _, unit in ipairs(units) do
+		lines[#lines + 1] = ("/tm [@%s] %d"):format(unit, self.db.marker)
+	end
+	b:SetAttribute("macrotext", table.concat(lines, "\n"))
+	Draw()
+	b:Show()
 end
 
 local pending = false
@@ -93,16 +144,31 @@ function M:Soon()
 	-- roles and unit tokens settle a moment after the event
 	self:After(1.5, function()
 		pending = false
-		self:Mark()
+		self:Check()
 	end)
 end
 
 function M:OnEnable()
+	Button()
 	self:RegisterEvent("GROUP_ROSTER_UPDATE", "Soon")
 	self:RegisterEvent("PLAYER_ROLES_ASSIGNED", "Soon")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "Soon")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "Soon")
+	self:RegisterEvent("RAID_TARGET_UPDATE", "Soon")
 	self:Soon()
+end
+
+function M:OnDisable()
+	if button and not InCombatLockdown() then button:Hide() end
+end
+
+function M:OnRefresh()
+	if not button then return end
+	if self.running then self:Check() end
+	if self:IsPreview() and not InCombatLockdown() then
+		Draw()
+		button:Show()
+	end
 end
 
 function M:Test()
@@ -111,8 +177,7 @@ function M:Test()
 		self:Print("join a group with a tank to test this.")
 		return
 	end
-	local n = self:Mark(true)
-	if n == 0 then self:Print("no tank to mark (or already marked).") end
+	self:Check()
 end
 
 function M:DebugInfo()
@@ -122,5 +187,6 @@ function M:DebugInfo()
 			lines[#lines + 1] = ("%s: role %s, marker %s"):format(unit, tostring(UnitGroupRolesAssigned(unit)), tostring(GetRaidTargetIndex(unit)))
 		end
 	end
+	lines[#lines + 1] = "button shown: " .. tostring(button and button:IsShown())
 	return lines
 end

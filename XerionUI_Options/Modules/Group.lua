@@ -466,16 +466,19 @@ end)
 O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 	return {
 		Card("Marker", {
+			{ type = "description", width = "full",
+				text = "The game only lets a click place a marker, so a small button appears when your tank has none. Click it once to mark the tank. Drag it in unlock mode." },
 			{ type = "dropdown", label = "Marker", path = "marker", values = m.MARKERS },
 			{ type = "toggle", label = "Replace a marker the tank already has", path = "replace",
 				tip = "Off: a tank that already carries a marker is left alone." },
-			{ type = "toggle", label = "Only out of combat", path = "outOfCombat" },
-			{ type = "toggle", label = "Say what happened", path = "announce" },
 		}),
 		Card("Where", {
 			{ type = "toggle", label = "In parties", path = "inParty" },
 			{ type = "toggle", label = "In raids (needs lead or assist)", path = "inRaid" },
 			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
+		Card("Text", G.Font("text", { color = true })),
+		Card("Border", G.Border("border")),
+		Card("Position", G.Position("position")),
 	}
 end)
