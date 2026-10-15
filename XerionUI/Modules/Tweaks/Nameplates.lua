@@ -6,15 +6,21 @@
 -- supported, so its engine-filtered groups still mark them (in keys too).
 -- EllesmereUI's own Dispel Glow setting still switches the glow on and off.
 --
--- Dispel glow style: EllesmereUI marks a dispellable buff with a static border
--- host on the aura button. The buff row's two glow styles (AuraKit
--- "np:buffs" / "np:buffs2") call an applyExtra for every button; that is
--- wrapped so the buttons EllesmereUI would give its border get one of our glows
--- instead (XUI.Style glows: pixel, pulse, shine...), and the border is hidden.
--- A style table is replaced whenever EllesmereUI rebuilds its styles, so the
--- wrap is repeated after each NPC_ReloadAll / RefreshAllSettings and the
--- buttons are restyled. Off, or with the glow switched off, EllesmereUI's
--- border is back.
+-- Dispel border color: EllesmereUI marks a dispellable buff with a static
+-- border (Blizzard's red pandemic art) on a host frame of the aura button.
+-- The buff row's two styles (AuraKit "np:buffs" / "np:buffs2") call an
+-- applyExtra for every button; that is wrapped so the border texture is
+-- desaturated and tinted with our color. A style table is replaced whenever
+-- EllesmereUI rebuilds its styles, so the wrap is repeated after each
+-- NPC_ReloadAll / RefreshAllSettings and the buttons are restyled. Off, the
+-- border goes back to EllesmereUI's own look.
+--
+-- Hide Challenger's Might: the Mythic+ buff every enemy carries is kept off
+-- EllesmereUI's buff row. The engine filters it by spell ID in C (the aura
+-- itself is unreadable in a key): the buff groups' candidate filter of every
+-- attached plate gets an excludeSpellIDs. EllesmereUI replaces those filters
+-- when its settings change and a pooled row gets its filter when it attaches,
+-- so both are hooked and the filter is put back.
 --
 -- Shield amount: the mob's absorb as a number right after EllesmereUI's
 -- health text. The amount is secret in keys; it never touches Lua arithmetic
@@ -29,14 +35,16 @@ local Style = XUI.Style
 
 local M = XUI:NewModule("EUINameplates", {
 	name = "Nameplates",
-	desc = "Dispel glow (own style, also without purge or soothe) and shield amounts on EllesmereUI nameplates.",
+	desc = "Dispel border color (also without purge or soothe), hidden Challenger's Might and shield amounts on EllesmereUI nameplates.",
 	category = "tweaks",
 	icon = [[Interface\Icons\Spell_Holy_PowerWordShield]],
 	order = 10,
 	requires = "EllesmereUINameplates",
 	defaults = {
 		dispelAlways = true,
-		glow = T.Glow(true, { useGlobal = false, type = "PIXEL", color = { 1, 0.82, 0.25, 1 } }),
+		hideChallengers = true,
+		customBorder = true,
+		borderColor = { 1, 0.82, 0.25, 1 },
 		shield = { enabled = false, enemyOnly = true, offX = 0, offY = 0 },
 		shieldText = T.Font(11, { color = { 1, 0.82, 0.25, 1 } }),
 	},
@@ -71,86 +79,38 @@ local function HookDispel()
 end
 
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
-local overlays = setmetatable({}, { __mode = "k" })
-local stats = { wraps = 0, buttons = 0, shown = 0 }
+local stats = { wraps = 0, buttons = 0, tinted = 0 }
+local borderTex = setmetatable({}, { __mode = "k" })
 
--- Our glow types onto the styles EllesmereUI can draw on an aura button (its
--- shared glow engine: pixel march, action button flipbook, modern flipbook).
--- The scripted ones - autocast, shine and pulse - cannot run on an engine
--- button, so they take the nearest drawn look.
-local TYPE_STYLE = { PIXEL = 1, BUTTON = 2, PROC = 6, PULSE = 6, SHINE = 6, AUTOCAST = 1 }
-local spec = {}
-local muted = setmetatable({}, { __mode = "k" })
-
--- EllesmereUI's static border host: kept at alpha 0 while ours is on. Its
--- own restyles write alpha 1 again, so its SetAlpha is wrapped (it is
--- EllesmereUI's frame, not Blizzard's).
-local function Mute(host, on)
-	if not host then return end
-	if muted[host] == nil then
-		local original = host.SetAlpha
-		host.SetAlpha = function(self, a)
-			if muted[self] then a = 0 end
-			return original(self, a)
-		end
+-- EllesmereUI's border is Blizzard's red pandemic art on a host frame that
+-- sits on the aura button. Desaturated, it takes any color: the host's
+-- texture is tinted, nothing else about the border changes.
+local function Tint(host, on)
+	local tex = borderTex[host]
+	if not tex then
+		tex = host:GetRegions()
+		if not (tex and tex.SetVertexColor) then return false end
+		borderTex[host] = tex
 	end
-	muted[host] = on and true or false
-	host:SetAlpha(on and 0 or 1)
-end
-
-local function StartGlow(overlay, style)
-	local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
-	if not (Glows and Glows.StartSpecGlow) then return false end
-	local g = Style:Resolve("glow", M.db.glow)
-	local c = g.color or {}
-	spec.style = TYPE_STYLE[g.type] or 1
-	spec.r, spec.g, spec.b = c[1] or 1, c[2] or 0.82, c[3] or 0.25
-	spec.lines, spec.thickness = g.lines, g.thickness
-	local w = style.width or 24
-	local h = style.height or w
-	overlay:SetAlpha(1)
-	overlay:Show()
-	Glows.StartSpecGlow(overlay, spec, w, h, "engine")
+	if on then
+		local c = M.db.borderColor
+		tex:SetDesaturated(true)
+		tex:SetVertexColor(c[1] or 1, c[2] or 0.82, c[3] or 0.25, c[4] or 1)
+	else
+		tex:SetDesaturated(false)
+		tex:SetVertexColor(1, 1, 1, 1)
+	end
 	return true
 end
 
 local function OnButton(button, d, style)
-	local overlay = overlays[button]
-	-- The group is the dispellable one by construction (see EllesmereUI's
-	-- buff row), so no per-aura test. With "without purge or soothe" on every
-	-- button of it glows; off, only while EllesmereUI says you can dispel.
 	stats.buttons = stats.buttons + 1
-	local on = M.running and (M.db.dispelAlways or style.purgeGlow)
-		and Style:Resolve("glow", M.db.glow).enabled ~= false
-	if on then
-		if not overlay then
-			overlay = CreateFrame("Frame", nil, button)
-			overlay:SetAllPoints(button)
-			overlay:SetFrameLevel(button:GetFrameLevel() + 3)
-			overlay:EnableMouse(false)
-			overlays[button] = overlay
-			-- the regions an engine-hosted glow needs, made as early as we can
-			local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
-			if Glows and Glows.PrewarmEngineHost then
-				pcall(Glows.PrewarmEngineHost, overlay, style.width, style.height)
-			end
-		end
-		if StartGlow(overlay, style) then
-			stats.shown = stats.shown + 1
-			-- ours replaces EllesmereUI's static border; its host may not exist
-			-- yet (it is built right after this pass on a new button)
-			Mute(d and d.npGlowHost, true)
-			if d and not d.npGlowHost then
-				C_Timer.After(0, function()
-					if M.running and d.npGlowHost then Mute(d.npGlowHost, true) end
-				end)
-			end
-		end
-	elseif overlay then
-		local Glows = _G.EllesmereUI and _G.EllesmereUI.Glows
-		if Glows and Glows.StopGlow then pcall(Glows.StopGlow, overlay) end
-		overlay:Hide()
-		if d and d.npGlowHost then Mute(d.npGlowHost, false) end
+	local host = d and d.npGlowHost
+	if host then
+		if Tint(host, M.running and M.db.customBorder) then stats.tinted = stats.tinted + 1 end
+	elseif M.running and M.db.dispelAlways and style.purgeGlow ~= true then
+		-- a group EllesmereUI does not mark: nothing to tint
+		return
 	end
 end
 
@@ -167,7 +127,7 @@ local function WrapStyles()
 			local original = style.applyExtra
 			style.applyExtra = function(button, d, st)
 				original(button, d, st)
-				if M.running or overlays[button] then XUI.SafeCallFor(M, OnButton, button, d, st) end
+				XUI.SafeCallFor(M, OnButton, button, d, st)
 			end
 			style.__xuiGlowWrap = true
 			stats.wraps = stats.wraps + 1
@@ -187,12 +147,39 @@ end
 
 local glowSig
 local function GlowSignature()
-	local g = Style:Resolve("glow", M.db.glow)
-	local c = g.color or {}
-	return table.concat({ tostring(M.running), tostring(g.enabled), tostring(g.type),
-		tostring(c[1]), tostring(c[2]), tostring(c[3]), tostring(c[4]),
-		tostring(g.lines), tostring(g.frequency), tostring(g.length), tostring(g.thickness),
-		tostring(g.particles), tostring(g.scale), tostring(g.offset) }, "|")
+	local c = M.db.borderColor or {}
+	return table.concat({ tostring(M.running), tostring(M.db.customBorder),
+		tostring(c[1]), tostring(c[2]), tostring(c[3]), tostring(c[4]) }, "|")
+end
+
+local HIDDEN_BUFFS = { [206150] = true } -- Challenger's Might
+
+-- every buff row of the plate: its holder is a child of the plate and the
+-- rows are the holder's children
+local function ApplyHideToPlate(plate)
+	if not plate then return end
+	local on = M.running and M.db.hideChallengers
+	local ex = on and HIDDEN_BUFFS or nil
+	for _, holder in ipairs({ plate:GetChildren() }) do
+		for _, c in ipairs({ holder:GetChildren() }) do
+			if c.SetAuraGroupCandidateFilters and c._npcAttackable ~= nil then
+				local split = c._npbSplit
+				pcall(c.SetAuraGroupCandidateFilters, c, "np",
+					{ includeDispelTypes = split and { Magic = true } or nil, excludeSpellIDs = ex })
+				if split then
+					pcall(c.SetAuraGroupCandidateFilters, c, "np2",
+						{ excludeDispelTypes = { Magic = true }, excludeSpellIDs = ex })
+				end
+				pcall(c.SetAuraGroupCandidateFilters, c, "npnb", { excludeSpellIDs = ex })
+			end
+		end
+	end
+end
+
+local function ApplyHideAll()
+	local np = NP()
+	if not (np and np.plates) then return end
+	for _, plate in pairs(np.plates) do ApplyHideToPlate(plate) end
 end
 
 local function ReloadPlates()
@@ -387,6 +374,7 @@ function M:OnEnable()
 	local np = NP()
 	-- a rebuilt style is a new table, without our wrap
 	local function Rewrap(self)
+		ApplyHideAll()
 		if WrapStyles() then RestyleGlow() end
 		self:After(0, function() if WrapStyles() then RestyleGlow() end end)
 	end
@@ -398,6 +386,10 @@ function M:OnEnable()
 		end)
 	end
 	if np and type(np.NPC_ReloadAll) == "function" then self:SecureHook(np, "NPC_ReloadAll", Rewrap) end
+	if np and type(np.NPC_AttachPlate) == "function" then
+		self:SecureHook(np, "NPC_AttachPlate", function(_, plate) ApplyHideToPlate(plate) end)
+	end
+	ApplyHideAll()
 	-- EllesmereUI builds its styles at login, possibly after this module started
 	self:After(1, Rewrap)
 	self:After(4, Rewrap)
@@ -424,6 +416,7 @@ function M:OnDisable()
 	preview = false
 	ReloadPlates()
 	RestyleGlow()
+	ApplyHideAll()
 end
 
 function M:OnRefresh()
@@ -440,6 +433,7 @@ end
 
 function M:OnSettingChanged(path)
 	if path == "dispelAlways" then ReloadPlates() end
+	if path == "hideChallengers" then ApplyHideAll() end
 	self:RefreshSoon()
 end
 
@@ -448,28 +442,8 @@ function M:DebugInfo()
 	local lines = {
 		"EllesmereUI AuraKit: " .. tostring(AK ~= nil),
 		"style wraps installed: " .. stats.wraps,
-		"buttons styled: " .. stats.buttons .. ", glows shown: " .. stats.shown,
+		"buttons styled: " .. stats.buttons .. ", borders tinted: " .. stats.tinted,
 	}
-	-- what the overlays that are on screen right now look like
-	local visible, sample = 0, nil
-	for button, overlay in pairs(overlays) do
-		local ok, vis = pcall(overlay.IsVisible, overlay)
-		if ok and not XUI.IsSecret(vis) and vis then
-			visible = visible + 1
-			if not sample then
-				local _, w, h = pcall(overlay.GetSize, overlay)
-				local _, bw, bh = pcall(button.GetSize, button)
-				sample = ("sample overlay %sx%s on button %sx%s, glow=%s, level %s (button %s), alpha %s"):format(
-					tostring(XUI.IsSecret(w) and "?" or w), tostring(XUI.IsSecret(h) and "?" or h),
-					tostring(XUI.IsSecret(bw) and "?" or bw), tostring(XUI.IsSecret(bh) and "?" or bh),
-					tostring(overlay.__xuiGlow), tostring(overlay:GetFrameLevel()),
-					tostring(select(2, pcall(button.GetFrameLevel, button))),
-					tostring(select(2, pcall(overlay.GetEffectiveAlpha, overlay))))
-			end
-		end
-	end
-	lines[#lines + 1] = "overlays on screen: " .. visible
-	if sample then lines[#lines + 1] = sample end
 	for _, key in ipairs(GLOW_KEYS) do
 		local st = AK and AK.styles and AK.styles[key]
 		lines[#lines + 1] = key .. ": " .. (st and ("wrapped=" .. tostring(st.__xuiGlowWrap == true)

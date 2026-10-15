@@ -15,7 +15,16 @@ O:RegisterModuleOptions("EUINameplates", function(ctx, m, G)
 			{ type = "toggle", label = "Show the glow without purge or soothe", path = "dispelAlways", width = "full",
 				tip = "EllesmereUI's own Dispel Glow setting still switches the glow on and off." },
 		}),
-		Card("Dispel glow style", G.Glow("glow", { toggle = "Replace EllesmereUI's border with this glow" })),
+		Card("Buffs", {
+			{ type = "toggle", label = "Hide Challenger's Might", path = "hideChallengers", width = "full",
+				tip = "Keeps the Mythic+ buff every enemy carries off EllesmereUI's buff row." },
+		}),
+		Card("Dispel border", {
+			{ type = "toggle", label = "Use our border color", path = "customBorder", width = "full",
+				tip = "Tints EllesmereUI's border around a dispellable buff. Off, it keeps EllesmereUI's own red." },
+			{ type = "color", label = "Color", path = "borderColor", hasAlpha = true,
+				disabled = function() return not m.db.customBorder end },
+		}),
 		Card("Shield amount", Join({
 			{ type = "toggle", label = "Show the shield amount", path = "shield.enabled" },
 			{ type = "toggle", label = "Enemies only", path = "shield.enemyOnly", disabled = off },

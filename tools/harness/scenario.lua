@@ -366,10 +366,13 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	local style = AK.styles["np:buffs"]
 	assert(style.__xuiGlowWrap, "style was not wrapped")
 	local button = CreateFrame("Button")
-	style.applyExtra(button, {}, style)
+	local host = CreateFrame("Frame", nil, button)
+	local tex = host:CreateTexture()
+	host.GetRegions = function() return tex end
+	style.applyExtra(button, { npGlowHost = host }, style)
 	assert(applied == 1, "original applyExtra not called")
 	local dbg = table.concat(m:DebugInfo(), "; ")
-	assert(dbg:find("glows shown: 1", 1, true) and started == 1, "no glow shown: " .. dbg)
+	assert(dbg:find("borders tinted: 1", 1, true), "no glow shown: " .. dbg)
 end)
 
 Step("logout strips defaults", function()

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.8.0 - 2026-10-15
+- Nameplates: the dispel border is EllesmereUI's own border again, now with a color you choose; Hide Challenger's Might option for the Mythic+ buff
+
 ## 2.7.3 - 2026-10-15
 - Nameplates: the dispel glow is drawn through EllesmereUI's own glow engine (the one built for aura buttons), so it renders; EllesmereUI's red border is kept hidden. Pixel, Action Button and Modern looks; autocast, shine and pulse map to the nearest
 
