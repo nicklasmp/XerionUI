@@ -2,15 +2,14 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.7.1 - 2026-10-15
+- Fix a duplicated header in CHANGELOG.md (it leaked into the 2.6.1 release notes); add a test for the nameplate dispel glow wrap
+
 ## 2.7.0 - 2026-10-15
 - Chat Tweaks: option to put the input box above the tab row (like ElvUI), with a fine-tune offset
 
 ## 2.6.1 - 2026-10-15
 - GitHub releases (and so WowUp's changelog) now show the matching CHANGELOG.md entry instead of an empty auto-generated note
-# Changelog
-
-Newest first. Add an entry with `node tools/bump.js` before every push.
-
 ## 2.6.0 - 2026-10-15
 - Chat Tweaks: new input box height option (sets EllesmereUI's Edit Box Height while the module runs)
 - Chat Tweaks: tabs now fade out faster on mouseover

@@ -345,6 +345,31 @@ Step("who has the key: lists this dungeon's keys", function()
 	m:Refresh()
 end)
 
+Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
+	local applied = 0
+	local ns = { plates = {}, GetOffensiveDispelTypes = function() return false, false end }
+	_G.EllesmereNameplates_NS = ns
+	local AK = { styles = {}, RestyleSoon = function() end }
+	_G.EllesmereUI = { AuraKit = AK, _ModuleNS = {} }
+	AK.styles["np:buffs"] = {
+		purgeGlow = true,
+		applyExtra = function() applied = applied + 1 end,
+	}
+	MOCK.loaded.EllesmereUINameplates = true
+	local m = XUI.modules and XUI.modules.EUINameplates or XUI:GetModule("EUINameplates")
+	XUI.DB.profile.modules.EUINameplates.enabled = true
+	XUI:UpdateModuleState(m)
+	assert(m.running, "module not running")
+	MOCK.Advance(5)
+	local style = AK.styles["np:buffs"]
+	assert(style.__xuiGlowWrap, "style was not wrapped")
+	local button = CreateFrame("Button")
+	style.applyExtra(button, {}, style)
+	assert(applied == 1, "original applyExtra not called")
+	local dbg = table.concat(m:DebugInfo(), "; ")
+	assert(dbg:find("glows shown: 1", 1, true), "no glow shown: " .. dbg)
+end)
+
 Step("logout strips defaults", function()
 	MOCK.Fire("PLAYER_LOGOUT")
 	local sv = _G.XerionUIDB
