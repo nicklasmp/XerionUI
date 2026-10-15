@@ -19,7 +19,7 @@ local Style = XUI.Style
 
 local M = XUI:NewModule("EUIChat", {
 	name = "Chat Tweaks",
-	desc = "Tabs on mouseover, a taller input box and a background behind it in EllesmereUI's chat.",
+	desc = "Tabs on mouseover, a taller input box above the tabs and a background behind it in EllesmereUI's chat.",
 	category = "tweaks",
 	icon = [[Interface\Icons\INV_Misc_Note_05]],
 	order = 100,
@@ -27,6 +27,8 @@ local M = XUI:NewModule("EUIChat", {
 	defaults = {
 		tabsMouseover = true,
 		inputHeight = 30,
+		inputAboveTabs = true,
+		inputOffsetY = 0,
 		inputBg = T.Background({
 			enabled = true,
 			useGlobal = false,
@@ -127,22 +129,87 @@ end
 
 -- EllesmereUI's own Edit Box Height setting (default 23) is set while this
 -- module runs and put back when it stops.
-local savedHeight
+--
+-- Input above the tabs: EllesmereUI's "Input on Top" puts the box over the
+-- top of the text, under the tabs. It is switched on so the panel reserves
+-- nothing below the chat, its text strip reservation is turned off (the
+-- box no longer covers the text), and the box is then anchored above the tab
+-- band instead. EllesmereUI anchors the box again in every ApplyInputPosition
+-- pass, so that pass is hooked and the anchor repeated.
+local saved = {}
+local origStrip
+local hooked = false
+
+local function Placing(m)
+	local ns = Chat()
+	return m.running and m.db.inputAboveTabs and ns and not (ns.ChatStock and ns.ChatStock())
+end
+
+local function PlaceAbove(m)
+	local ns = Chat()
+	local E = ns and ns.ECHAT
+	local cfg = E and E.DB and E.DB()
+	if not (cfg and Placing(m)) then return end
+	local tabs = (cfg.tabHeight or 24)
+		+ ((E.ExtendBgBehindTabs and E.ExtendBgBehindTabs(cfg)) and 0 or (cfg.tabPadding or 0))
+	local y = tabs + 4 + (m.db.inputOffsetY or 0)
+	for i = 1, 20 do
+		local cf = _G["ChatFrame" .. i]
+		local eb = _G["ChatFrame" .. i .. "EditBox"]
+		if cf and eb then
+			eb:ClearAllPoints()
+			eb:SetPoint("BOTTOMLEFT", cf, "TOPLEFT", -10, y)
+			eb:SetPoint("BOTTOMRIGHT", cf, "TOPRIGHT", 5, y)
+		end
+	end
+end
+
+local lastLayout
 function M:ApplyHeight()
 	local ns = Chat()
 	local E = ns and ns.ECHAT
 	local cfg = E and E.DB and E.DB()
 	if not cfg then return end
-	if self.running then
-		if savedHeight == nil then savedHeight = cfg.editBoxHeight or false end
-		cfg.editBoxHeight = self.db.inputHeight
-	elseif savedHeight ~= nil then
-		cfg.editBoxHeight = savedHeight or nil
-		savedHeight = nil
-	else
+	-- a full input layout pass only when something it depends on changed
+	local sig = table.concat({ tostring(self.running), tostring(self.db.inputHeight),
+		tostring(self.db.inputAboveTabs), tostring(self.db.inputOffsetY),
+		tostring(cfg.tabHeight), tostring(cfg.tabPadding) }, "|")
+	if sig == lastLayout then
+		PlaceAbove(self)
 		return
 	end
+	lastLayout = sig
+	local above = Placing(self)
+	if self.running then
+		if saved.height == nil then saved.height = cfg.editBoxHeight or false end
+		cfg.editBoxHeight = self.db.inputHeight
+		if above then
+			if saved.onTop == nil then saved.onTop = cfg.inputOnTop or false end
+			cfg.inputOnTop = true
+			if not origStrip then
+				origStrip = E.InputTopStripActive
+				E.InputTopStripActive = function(cf)
+					if Placing(M) then return false end
+					return origStrip(cf)
+				end
+			end
+		end
+	end
+	if not above and saved.onTop ~= nil then
+		cfg.inputOnTop = saved.onTop or nil
+		saved.onTop = nil
+	end
+	if not self.running and saved.height ~= nil then
+		cfg.editBoxHeight = saved.height or nil
+		saved.height = nil
+	end
+	if not hooked and E.ApplyInputPosition then
+		hooked = true
+		hooksecurefunc(E, "ApplyInputPosition", function() PlaceAbove(M) end)
+	end
 	if E.ApplyInputPosition then E.ApplyInputPosition() end
+	if E.RefreshInputTopStrips then E.RefreshInputTopStrips() end
+	PlaceAbove(self)
 end
 
 function M:ApplyInput()

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.7.0 - 2026-10-15
+- Chat Tweaks: option to put the input box above the tab row (like ElvUI), with a fine-tune offset
+
 ## 2.6.1 - 2026-10-15
 - GitHub releases (and so WowUp's changelog) now show the matching CHANGELOG.md entry instead of an empty auto-generated note
 # Changelog

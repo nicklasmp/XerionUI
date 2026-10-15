@@ -142,6 +142,11 @@ O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
 		Card("Input box", {
 			{ type = "slider", label = "Height", path = "inputHeight", min = 20, max = 60, step = 1,
 				tip = "Sets EllesmereUI's Edit Box Height while this module runs (EllesmereUI's own default is 23)." },
+			{ type = "toggle", label = "Input box above the tabs", path = "inputAboveTabs",
+				tip = "Puts the input box above the tab row instead of below the chat (turns on EllesmereUI's Input on Top while this module runs)." },
+			{ type = "slider", label = "Offset Y", path = "inputOffsetY", min = -20, max = 40, step = 1,
+				disabled = function() return not m.db.inputAboveTabs end,
+				tip = "Fine-tunes the gap between the tabs and the input box." },
 		}),
 		Card("Input background", G.Background("inputBg", { toggle = "Background behind the input box" })),
 	}
