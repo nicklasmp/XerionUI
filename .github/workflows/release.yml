@@ -23,9 +23,16 @@ jobs:
       - name: Package
         run: zip -r "XerionUI-${GITHUB_REF_NAME}.zip" XerionUI XerionUI_Options -x "*.git*"
 
+      - name: Release notes from CHANGELOG.md
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v v="## ${VERSION} " 'index($0, v) == 1 {on=1; next} /^## / {on=0} on' CHANGELOG.md | sed '/./,$!d' > notes.md
+          if [ ! -s notes.md ]; then echo "Release ${GITHUB_REF_NAME}" > notes.md; fi
+          cat notes.md
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "$GITHUB_REF_NAME" "XerionUI-${GITHUB_REF_NAME}.zip" \
-            --title "XerionUI ${GITHUB_REF_NAME}" --generate-notes
+            --title "XerionUI ${GITHUB_REF_NAME}" --notes-file notes.md

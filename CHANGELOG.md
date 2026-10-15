@@ -2,14 +2,25 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.6.1 - 2026-10-15
+- GitHub releases (and so WowUp's changelog) now show the matching CHANGELOG.md entry instead of an empty auto-generated note
+# Changelog
+
+Newest first. Add an entry with `node tools/bump.js` before every push.
+
 ## 2.6.0 - 2026-10-15
-- Chat Tweaks: input box height option, faster tab fade-out; Nameplates: dispel glow no longer needs EllesmereUI's Dispel Glow setting when 'without purge or soothe' is on, plus debug info
+- Chat Tweaks: new input box height option (sets EllesmereUI's Edit Box Height while the module runs)
+- Chat Tweaks: tabs now fade out faster on mouseover
+- Nameplates: the dispel glow no longer depends on EllesmereUI's own Dispel Glow setting when "Show the glow without purge or soothe" is on
+- Nameplates: glow errors are reported in the module status, and Diagnostics lists the glow wiring
 
 ## 2.5.0 - 2026-10-15
-- Nameplates: dispel glow on EllesmereUI buffs now uses our own glow styles (type, color, lines...), replacing EllesmereUI's static border; the 'without purge or soothe' option is kept
+- Nameplates: the dispel glow on EllesmereUI buffs uses XerionUI's own glow styles (type, color, lines, thickness...) instead of EllesmereUI's static border
+- Nameplates: "Show the glow without purge or soothe" is kept
 
 ## 2.4.0 - 2026-10-15
-- Add Chat Tweaks module: EllesmereUI chat tabs on mouseover and an optional background behind the input box
+- New module Chat Tweaks for EllesmereUI's chat: tabs on mouseover (hidden until the cursor is over the chat, or while typing)
+- Chat Tweaks: optional background behind the input box while typing, with its own color and texture
 
 ## 2.3.0 - 2026-10-14
 - Auto NPC Dialog: built-in dungeon list, on by default, with a toggle
