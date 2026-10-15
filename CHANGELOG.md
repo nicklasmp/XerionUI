@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.7.2 - 2026-10-15
+- Nameplates diagnostics: report the glow overlays that are on screen (size, level, alpha)
+
 ## 2.7.1 - 2026-10-15
 - Fix a duplicated header in CHANGELOG.md (it leaked into the 2.6.1 release notes); add a test for the nameplate dispel glow wrap
 

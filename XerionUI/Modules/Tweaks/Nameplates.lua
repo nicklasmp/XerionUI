@@ -397,6 +397,26 @@ function M:DebugInfo()
 		"style wraps installed: " .. stats.wraps,
 		"buttons styled: " .. stats.buttons .. ", glows shown: " .. stats.shown,
 	}
+	-- what the overlays that are on screen right now look like
+	local visible, sample = 0, nil
+	for button, overlay in pairs(overlays) do
+		local ok, vis = pcall(overlay.IsVisible, overlay)
+		if ok and not XUI.IsSecret(vis) and vis then
+			visible = visible + 1
+			if not sample then
+				local _, w, h = pcall(overlay.GetSize, overlay)
+				local _, bw, bh = pcall(button.GetSize, button)
+				sample = ("sample overlay %sx%s on button %sx%s, glow=%s, level %s (button %s), alpha %s"):format(
+					tostring(XUI.IsSecret(w) and "?" or w), tostring(XUI.IsSecret(h) and "?" or h),
+					tostring(XUI.IsSecret(bw) and "?" or bw), tostring(XUI.IsSecret(bh) and "?" or bh),
+					tostring(overlay.__xuiGlow), tostring(overlay:GetFrameLevel()),
+					tostring(select(2, pcall(button.GetFrameLevel, button))),
+					tostring(select(2, pcall(overlay.GetEffectiveAlpha, overlay))))
+			end
+		end
+	end
+	lines[#lines + 1] = "overlays on screen: " .. visible
+	if sample then lines[#lines + 1] = sample end
 	for _, key in ipairs(GLOW_KEYS) do
 		local st = AK and AK.styles and AK.styles[key]
 		lines[#lines + 1] = key .. ": " .. (st and ("wrapped=" .. tostring(st.__xuiGlowWrap == true)
