@@ -15,6 +15,7 @@ O:RegisterModuleOptions("EUINameplates", function(ctx, m, G)
 			{ type = "toggle", label = "Show the glow without purge or soothe", path = "dispelAlways", width = "full",
 				tip = "EllesmereUI's own Dispel Glow setting still switches the glow on and off." },
 		}),
+		Card("Dispel glow style", G.Glow("glow", { toggle = "Replace EllesmereUI's border with this glow" })),
 		Card("Shield amount", Join({
 			{ type = "toggle", label = "Show the shield amount", path = "shield.enabled" },
 			{ type = "toggle", label = "Enemies only", path = "shield.enemyOnly", disabled = off },

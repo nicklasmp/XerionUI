@@ -6,6 +6,16 @@
 -- supported, so its engine-filtered groups still mark them (in keys too).
 -- EllesmereUI's own Dispel Glow setting still switches the glow on and off.
 --
+-- Dispel glow style: EllesmereUI marks a dispellable buff with a static border
+-- host on the aura button. The buff row's two glow styles (AuraKit
+-- "np:buffs" / "np:buffs2") call an applyExtra for every button; that is
+-- wrapped so the buttons EllesmereUI would give its border get one of our glows
+-- instead (XUI.Style glows: pixel, pulse, shine...), and the border is hidden.
+-- A style table is replaced whenever EllesmereUI rebuilds its styles, so the
+-- wrap is repeated after each NPC_ReloadAll / RefreshAllSettings and the
+-- buttons are restyled. Off, or with the glow switched off, EllesmereUI's
+-- border is back.
+--
 -- Shield amount: the mob's absorb as a number right after EllesmereUI's
 -- health text. The amount is secret in keys; it never touches Lua arithmetic
 -- - it goes straight into AbbreviateNumbers, SetText and StatusBar:SetValue.
@@ -19,13 +29,14 @@ local Style = XUI.Style
 
 local M = XUI:NewModule("EUINameplates", {
 	name = "Nameplates",
-	desc = "Dispel glow without purge, and shield amounts on EllesmereUI nameplates.",
+	desc = "Dispel glow (own style, also without purge or soothe) and shield amounts on EllesmereUI nameplates.",
 	category = "tweaks",
 	icon = [[Interface\Icons\Spell_Holy_PowerWordShield]],
 	order = 10,
 	requires = "EllesmereUINameplates",
 	defaults = {
 		dispelAlways = true,
+		glow = T.Glow(true, { useGlobal = false, type = "PIXEL", color = { 1, 0.82, 0.25, 1 } }),
 		shield = { enabled = false, enemyOnly = true, offX = 0, offY = 0 },
 		shieldText = T.Font(11, { color = { 1, 0.82, 0.25, 1 } }),
 	},
@@ -57,6 +68,71 @@ local function HookDispel()
 		return original(...)
 	end
 	np.__xuiDispelHook = true
+end
+
+local GLOW_KEYS = { "np:buffs", "np:buffs2" }
+local overlays = setmetatable({}, { __mode = "k" })
+
+local function OnButton(button, d, style)
+	local overlay = overlays[button]
+	local on = M.running and style.purgeGlow
+		and Style:Resolve("glow", M.db.glow).enabled ~= false
+	if on then
+		if not overlay then
+			overlay = CreateFrame("Frame", nil, button)
+			overlay:SetAllPoints(button)
+			overlay:SetFrameLevel(button:GetFrameLevel() + 3)
+			overlay:EnableMouse(false)
+			overlays[button] = overlay
+		end
+		-- ours replaces EllesmereUI's static border
+		if d and d.npGlowHost then d.npGlowHost:SetAlpha(0) end
+		overlay:Show()
+		Style:ShowGlow(overlay, M.db.glow, true)
+	elseif overlay then
+		Style:HideGlow(overlay)
+		overlay:Hide()
+	end
+end
+
+-- EllesmereUI builds fresh style tables when its settings change: wrap the
+-- ones that are not wrapped yet. Returns true when anything was wrapped.
+local function WrapStyles()
+	local AK = _G.EllesmereUI and _G.EllesmereUI.AuraKit
+	local styles = AK and AK.styles
+	if type(styles) ~= "table" then return false end
+	local wrapped = false
+	for _, key in ipairs(GLOW_KEYS) do
+		local style = styles[key]
+		if style and not style.__xuiGlowWrap and type(style.applyExtra) == "function" then
+			local original = style.applyExtra
+			style.applyExtra = function(button, d, st)
+				original(button, d, st)
+				if M.running or overlays[button] then pcall(OnButton, button, d, st) end
+			end
+			style.__xuiGlowWrap = true
+			wrapped = true
+		end
+	end
+	return wrapped
+end
+
+local function RestyleGlow()
+	local AK = _G.EllesmereUI and _G.EllesmereUI.AuraKit
+	if not (AK and type(AK.RestyleSoon) == "function") then return end
+	for _, key in ipairs(GLOW_KEYS) do
+		if AK.styles and AK.styles[key] then AK.RestyleSoon(key) end
+	end
+end
+
+local glowSig
+local function GlowSignature()
+	local g = Style:Resolve("glow", M.db.glow)
+	local c = g.color or {}
+	return table.concat({ tostring(M.running), tostring(g.enabled), tostring(g.type),
+		tostring(c[1]), tostring(c[2]), tostring(c[3]), tostring(c[4]),
+		tostring(g.lines), tostring(g.frequency), tostring(g.length), tostring(g.thickness),
+		tostring(g.particles), tostring(g.scale), tostring(g.offset) }, "|")
 end
 
 local function ReloadPlates()
@@ -246,13 +322,25 @@ end
 function M:OnEnable()
 	HookDispel()
 	ReloadPlates()
+	WrapStyles()
+	RestyleGlow()
 	local np = NP()
+	-- a rebuilt style is a new table, without our wrap
+	local function Rewrap(self)
+		if WrapStyles() then RestyleGlow() end
+		self:After(0, function() if WrapStyles() then RestyleGlow() end end)
+	end
 	if np and type(np.RefreshAllSettings) == "function" then
 		self:SecureHook(np, "RefreshAllSettings", function(self)
 			StampAll()
 			self:After(0, StampAll)
+			Rewrap(self)
 		end)
 	end
+	if np and type(np.NPC_ReloadAll) == "function" then self:SecureHook(np, "NPC_ReloadAll", Rewrap) end
+	-- EllesmereUI builds its styles at login, possibly after this module started
+	self:After(1, Rewrap)
+	self:After(4, Rewrap)
 	self:RegisterEvent("NAME_PLATE_UNIT_ADDED", function(self, _, unit)
 		local plates = NP() and NP().plates
 		local plate = plates and plates[unit]
@@ -275,12 +363,19 @@ end
 function M:OnDisable()
 	preview = false
 	ReloadPlates()
+	RestyleGlow()
 end
 
 function M:OnRefresh()
 	gen = gen + 1
 	preview = self:IsPreview() and self.db.shield.enabled
 	StampAll()
+	local sig = GlowSignature()
+	if sig ~= glowSig then
+		glowSig = sig
+		if self.running then WrapStyles() end
+		RestyleGlow()
+	end
 end
 
 function M:OnSettingChanged(path)

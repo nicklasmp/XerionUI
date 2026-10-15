@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.5.0 - 2026-10-15
+- Nameplates: dispel glow on EllesmereUI buffs now uses our own glow styles (type, color, lines...), replacing EllesmereUI's static border; the 'without purge or soothe' option is kept
+
 ## 2.4.0 - 2026-10-15
 - Add Chat Tweaks module: EllesmereUI chat tabs on mouseover and an optional background behind the input box
 
