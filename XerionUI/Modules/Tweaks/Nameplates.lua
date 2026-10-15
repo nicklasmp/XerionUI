@@ -72,10 +72,15 @@ end
 
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
 local overlays = setmetatable({}, { __mode = "k" })
+local stats = { wraps = 0, buttons = 0, shown = 0 }
 
 local function OnButton(button, d, style)
 	local overlay = overlays[button]
-	local on = M.running and style.purgeGlow
+	-- The group is the dispellable one by construction (see EllesmereUI's
+	-- buff row), so no per-aura test. With "without purge or soothe" on every
+	-- button of it glows; off, only while EllesmereUI says you can dispel.
+	stats.buttons = stats.buttons + 1
+	local on = M.running and (M.db.dispelAlways or style.purgeGlow)
 		and Style:Resolve("glow", M.db.glow).enabled ~= false
 	if on then
 		if not overlay then
@@ -89,6 +94,7 @@ local function OnButton(button, d, style)
 		if d and d.npGlowHost then d.npGlowHost:SetAlpha(0) end
 		overlay:Show()
 		Style:ShowGlow(overlay, M.db.glow, true)
+		stats.shown = stats.shown + 1
 	elseif overlay then
 		Style:HideGlow(overlay)
 		overlay:Hide()
@@ -108,9 +114,10 @@ local function WrapStyles()
 			local original = style.applyExtra
 			style.applyExtra = function(button, d, st)
 				original(button, d, st)
-				if M.running or overlays[button] then pcall(OnButton, button, d, st) end
+				if M.running or overlays[button] then XUI.SafeCallFor(M, OnButton, button, d, st) end
 			end
 			style.__xuiGlowWrap = true
+			stats.wraps = stats.wraps + 1
 			wrapped = true
 		end
 	end
@@ -381,4 +388,19 @@ end
 function M:OnSettingChanged(path)
 	if path == "dispelAlways" then ReloadPlates() end
 	self:RefreshSoon()
+end
+
+function M:DebugInfo()
+	local AK = _G.EllesmereUI and _G.EllesmereUI.AuraKit
+	local lines = {
+		"EllesmereUI AuraKit: " .. tostring(AK ~= nil),
+		"style wraps installed: " .. stats.wraps,
+		"buttons styled: " .. stats.buttons .. ", glows shown: " .. stats.shown,
+	}
+	for _, key in ipairs(GLOW_KEYS) do
+		local st = AK and AK.styles and AK.styles[key]
+		lines[#lines + 1] = key .. ": " .. (st and ("wrapped=" .. tostring(st.__xuiGlowWrap == true)
+			.. ", purgeGlow=" .. tostring(st.purgeGlow)) or "missing")
+	end
+	return lines
 end

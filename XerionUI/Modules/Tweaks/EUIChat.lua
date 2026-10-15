@@ -19,13 +19,14 @@ local Style = XUI.Style
 
 local M = XUI:NewModule("EUIChat", {
 	name = "Chat Tweaks",
-	desc = "Tabs on mouseover and a background behind the input box in EllesmereUI's chat.",
+	desc = "Tabs on mouseover, a taller input box and a background behind it in EllesmereUI's chat.",
 	category = "tweaks",
 	icon = [[Interface\Icons\INV_Misc_Note_05]],
 	order = 100,
 	requires = "EllesmereUIChat",
 	defaults = {
 		tabsMouseover = true,
+		inputHeight = 30,
 		inputBg = T.Background({
 			enabled = true,
 			useGlobal = false,
@@ -87,7 +88,7 @@ function M:Poll()
 	if target > factor then
 		factor = math.min(1, factor + STEP * 5)
 	else
-		factor = math.max(0, factor - STEP * 2)
+		factor = math.max(0, factor - STEP * 7)
 	end
 	PushAlpha()
 end
@@ -124,6 +125,26 @@ local function Fill(eb)
 	return tex
 end
 
+-- EllesmereUI's own Edit Box Height setting (default 23) is set while this
+-- module runs and put back when it stops.
+local savedHeight
+function M:ApplyHeight()
+	local ns = Chat()
+	local E = ns and ns.ECHAT
+	local cfg = E and E.DB and E.DB()
+	if not cfg then return end
+	if self.running then
+		if savedHeight == nil then savedHeight = cfg.editBoxHeight or false end
+		cfg.editBoxHeight = self.db.inputHeight
+	elseif savedHeight ~= nil then
+		cfg.editBoxHeight = savedHeight or nil
+		savedHeight = nil
+	else
+		return
+	end
+	if E.ApplyInputPosition then E.ApplyInputPosition() end
+end
+
 function M:ApplyInput()
 	local on = self.running and self.db.inputBg
 	EachInput(function(eb)
@@ -150,11 +171,13 @@ function M:OnRefresh()
 	end
 	if self.db.tabsMouseover then self:StartTabs() else self:StopTabs() end
 	self:ApplyInput()
+	self:ApplyHeight()
 end
 
 function M:OnDisable()
 	self:StopTabs()
 	self:ApplyInput()
+	self:ApplyHeight()
 end
 
 function M:DebugInfo()

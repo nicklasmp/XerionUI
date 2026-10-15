@@ -139,6 +139,10 @@ O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
 			{ type = "toggle", label = "Tabs on mouseover", path = "tabsMouseover", width = "full",
 				tip = "Hides EllesmereUI's chat tabs until the cursor is over the chat or the tabs, or while the input box is open. The tabs can still be clicked while hidden." },
 		}),
+		Card("Input box", {
+			{ type = "slider", label = "Height", path = "inputHeight", min = 20, max = 60, step = 1,
+				tip = "Sets EllesmereUI's Edit Box Height while this module runs (EllesmereUI's own default is 23)." },
+		}),
 		Card("Input background", G.Background("inputBg", { toggle = "Background behind the input box" })),
 	}
 end)

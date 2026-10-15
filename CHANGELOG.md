@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.6.0 - 2026-10-15
+- Chat Tweaks: input box height option, faster tab fade-out; Nameplates: dispel glow no longer needs EllesmereUI's Dispel Glow setting when 'without purge or soothe' is on, plus debug info
+
 ## 2.5.0 - 2026-10-15
 - Nameplates: dispel glow on EllesmereUI buffs now uses our own glow styles (type, color, lines...), replacing EllesmereUI's static border; the 'without purge or soothe' option is kept
 
