@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.8.2 - 2026-10-15
+- Nameplates: dispel border is stronger (three extra additive layers)
+
 ## 2.8.1 - 2026-10-15
 - Nameplates: the tinted dispel border keeps EllesmereUI's weight (extra additive layer)
 
