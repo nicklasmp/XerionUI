@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.8.1 - 2026-10-15
+- Nameplates: the tinted dispel border keeps EllesmereUI's weight (extra additive layer)
+
 ## 2.8.0 - 2026-10-15
 - Nameplates: the dispel border is EllesmereUI's own border again, now with a color you choose; Hide Challenger's Might option for the Mythic+ buff
 

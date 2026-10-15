@@ -81,10 +81,13 @@ end
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
 local stats = { wraps = 0, buttons = 0, tinted = 0 }
 local borderTex = setmetatable({}, { __mode = "k" })
+local boost = setmetatable({}, { __mode = "k" })
+local BORDER_ATLAS = "UI-CooldownManager-PandemicBorder"
 
 -- EllesmereUI's border is Blizzard's red pandemic art on a host frame that
--- sits on the aura button. Desaturated, it takes any color: the host's
--- texture is tinted, nothing else about the border changes.
+-- sits on the aura button. Desaturated and tinted it takes any color but turns
+-- thin, because the red art is dark once it is grey: a second copy of the art
+-- is laid over it with additive blending, which brings back the weight.
 local function Tint(host, on)
 	local tex = borderTex[host]
 	if not tex then
@@ -92,13 +95,31 @@ local function Tint(host, on)
 		if not (tex and tex.SetVertexColor) then return false end
 		borderTex[host] = tex
 	end
+	local extra = boost[host]
 	if on then
 		local c = M.db.borderColor
+		local r, g, b, a = c[1] or 1, c[2] or 0.82, c[3] or 0.25, c[4] or 1
 		tex:SetDesaturated(true)
-		tex:SetVertexColor(c[1] or 1, c[2] or 0.82, c[3] or 0.25, c[4] or 1)
+		tex:SetVertexColor(r, g, b, a)
+		if not extra then
+			local ok, t = pcall(host.CreateTexture, host, nil, "ARTWORK", nil, 1)
+			if ok and t then
+				t:SetAllPoints(host)
+				t:SetAtlas(BORDER_ATLAS)
+				t:SetBlendMode("ADD")
+				extra = t
+				boost[host] = t
+			end
+		end
+		if extra then
+			extra:SetDesaturated(true)
+			extra:SetVertexColor(r, g, b, a)
+			extra:Show()
+		end
 	else
 		tex:SetDesaturated(false)
 		tex:SetVertexColor(1, 1, 1, 1)
+		if extra then extra:Hide() end
 	end
 	return true
 end
