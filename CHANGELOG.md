@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.11.1 - 2026-10-15
+- Cooldown Manager Bar Fonts: a bar with the toggle on but no font picked now uses the default font, hooked Blizzard icons are placed on their bar, the bar font wins over the Stack Font module, and Diagnostics shows how many texts were placed
+
 ## 2.11.0 - 2026-10-15
 - Auto Mark Tank: hover effect on the button; remove the Hide Challenger's Might option from Nameplates (it could not work on enemy buffs)
 

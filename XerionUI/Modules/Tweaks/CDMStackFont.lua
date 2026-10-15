@@ -66,7 +66,7 @@ local function Wrap()
 	wrapped = true
 	local icon, module = E.ApplyIconTextFont, E.ApplyModuleFont
 	E.ApplyIconTextFont = function(fs, path, size, key, ...)
-		if active and key == KEY and fs and IsStackText(fs) then
+		if active and key == KEY and fs and IsStackText(fs) and not (XUI.CDMBarFace and XUI.CDMBarFace(fs)) then
 			path = OurPath()
 			seen = seen + 1
 		end
@@ -74,7 +74,7 @@ local function Wrap()
 	end
 	if type(module) == "function" then
 		E.ApplyModuleFont = function(fs, path, size, key, ...)
-			if active and key == KEY and fs and IsStackText(fs) then
+			if active and key == KEY and fs and IsStackText(fs) and not (XUI.CDMBarFace and XUI.CDMBarFace(fs)) then
 				path = OurPath()
 				seen = seen + 1
 			end

@@ -32,6 +32,8 @@ local active = false
 local wrapped = false
 local owner = setmetatable({}, { __mode = "k" }) -- frame -> bar key
 local builtAt = -1
+local DEFAULT_FACE = "GothamNarrowBlack"
+local stats = { seen = 0, mapped = 0, changed = 0, unmapped = 0, sample = nil }
 
 local function CDM()
 	return XUI.EUI and XUI.EUI.Module("EllesmereUICooldownManager")
@@ -52,19 +54,37 @@ end
 local function BarOf(fs)
 	local ns = CDM()
 	if not ns then return nil end
+	local fc = ns._ecmeFC
 	local p = fs:GetParent()
-	for _ = 1, 5 do
+	for _ = 1, 6 do
 		if not p then return nil end
 		local key = owner[p]
+		-- a Blizzard item frame the Cooldown Manager hooked carries its bar in its record
+		if not key and fc then
+			local rec = fc[p]
+			key = type(rec) == "table" and rec.barKey or nil
+		end
 		if key then return key end
 		p = p:GetParent()
 	end
 	return nil
 end
 
+local function Describe(fs)
+	local parts, p = {}, fs:GetParent()
+	for _ = 1, 4 do
+		if not p then break end
+		parts[#parts + 1] = (p:GetName() or p:GetObjectType())
+		p = p:GetParent()
+	end
+	return table.concat(parts, " < ")
+end
+
+-- the font file chosen for the bar this text sits on, or nil
 local function FaceFor(fs)
 	local bars = M.db.bars
 	if not (active and bars and next(bars)) then return nil end
+	stats.seen = stats.seen + 1
 	local ok, key = pcall(function()
 		local k = BarOf(fs)
 		if not k then
@@ -74,12 +94,24 @@ local function FaceFor(fs)
 		end
 		return k
 	end)
-	local choice = ok and key and bars[key]
-	if type(choice) == "table" and choice.on and choice.face then
-		return XUI.Media:Fetch("font", choice.face)
+	if not (ok and key) then
+		stats.unmapped = stats.unmapped + 1
+		if not stats.sample then
+			local okd, text = pcall(Describe, fs)
+			stats.sample = okd and text or "?"
+		end
+		return nil
+	end
+	stats.mapped = stats.mapped + 1
+	local choice = bars[key]
+	if type(choice) == "table" and choice.on then
+		stats.changed = stats.changed + 1
+		return XUI.Media:Fetch("font", choice.face or DEFAULT_FACE)
 	end
 	return nil
 end
+-- the Stack Font module asks, so a bar's own font wins over it
+XUI.CDMBarFace = FaceFor
 
 local function Wrap()
 	if wrapped then return end
@@ -143,11 +175,16 @@ function M.BarList()
 end
 
 function M:DebugInfo()
-	local lines = { "wrappers installed: " .. tostring(wrapped) }
+	local lines = {
+		"wrappers installed: " .. tostring(wrapped),
+		("texts seen %d, on a bar %d, given a bar font %d, not placed on a bar %d"):format(
+			stats.seen, stats.mapped, stats.changed, stats.unmapped),
+	}
+	if stats.sample then lines[#lines + 1] = "first text not placed: " .. stats.sample end
 	for _, bar in ipairs(M.BarList()) do
 		local c = self.db.bars[bar.key]
 		lines[#lines + 1] = ("%s (%s): %s"):format(tostring(bar.name), bar.key,
-			type(c) == "table" and c.on and tostring(c.face) or "EllesmereUI font")
+			type(c) == "table" and c.on and tostring(c.face or DEFAULT_FACE) or "EllesmereUI font")
 	end
 	return lines
 end
