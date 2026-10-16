@@ -87,19 +87,47 @@ function O:Icon(parent, name, size, color, layer)
 	return t
 end
 
+-- Rounded corners: a 16px texture sliced with 6px margins keeps the radius
+-- fixed at any size. The window, header and sidebar stay square.
+local SLICE = 6
+local function Slice(tex, name)
+	tex:SetTexture(O.MEDIA .. name)
+	if tex.SetTextureSliceMargins then
+		tex:SetTextureSliceMargins(SLICE, SLICE, SLICE, SLICE)
+		tex:SetTextureSliceMode(Enum.UITextureSliceMode and Enum.UITextureSliceMode.Stretched or 0)
+	end
+end
+
+local SQUARE = { window = true, sidebar = true, header = true }
+
 -- Background fill plus a 1px border, both palette names.
 function O:Skin(frame, bg, border)
+	local round = not SQUARE[bg]
 	local tex = frame.__skinBg
 	if not tex then
 		tex = self:Rect(frame, bg, "BACKGROUND", -8)
 		tex:SetAllPoints()
+		if round then Slice(tex, "round") end
+		tex:SetVertexColor(self:Color(bg))
 		frame.__skinBg = tex
 	else
 		tex:SetVertexColor(self:Color(bg))
 	end
 	if border then
-		local b = XUI.Style:Border(frame, 1)
-		b:Apply({ useGlobal = false, style = "SOLID", size = 1, color = self.C[border] })
+		if round then
+			local line = frame.__skinLine
+			if not line then
+				line = frame:CreateTexture(nil, "BORDER", nil, 7)
+				line:SetAllPoints()
+				Slice(line, "roundline")
+				frame.__skinLine = line
+				frame.__xuiBorder = { SetColor = function(_, r, g, b, a) line:SetVertexColor(r, g, b, a or 1) end }
+			end
+			line:SetVertexColor(unpackColor(self.C[border]))
+		else
+			local b = XUI.Style:Border(frame, 1)
+			b:Apply({ useGlobal = false, style = "SOLID", size = 1, color = self.C[border] })
+		end
 	end
 	return tex
 end

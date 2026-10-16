@@ -171,3 +171,15 @@ function writeTGA(name, c, color) {
   writeTGA('layers', c);
 }
 
+
+// round / roundline: 9-slice rounded rectangle (fill and 1px outline) for cards,
+// fields and buttons. Radius 5, slice margin 6 in the addon.
+{
+  const c = canvas(16);
+  fill(c, roundRect(0, 0, 16, 16, 5));
+  writeTGA('round', c);
+  const o = canvas(16);
+  fill(o, roundRect(0, 0, 16, 16, 5));
+  cut(o, roundRect(1, 1, 15, 15, 4));
+  writeTGA('roundline', o);
+}

@@ -32,7 +32,7 @@ local EXPORT_PREFIX = "!XUI1!"
 
 -- Account-wide.
 DB.GLOBAL_DEFAULTS = {
-	accent = { 1, 0.49, 0.04, 1 },
+	accent = { 1, 0.30, 0.59, 1 },
 	loginMessage = false,
 	panel = {
 		scale = 1,
