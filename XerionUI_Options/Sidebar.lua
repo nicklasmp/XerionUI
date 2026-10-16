@@ -329,7 +329,7 @@ function O:RefreshSidebar()
 
 	local shownPages = 0
 	for _, s in ipairs(O.systemPages) do
-		if Matches((s.title .. " " .. (s.desc or "")):lower()) then
+		if not s.hidden and Matches((s.title .. " " .. (s.desc or "")):lower()) then
 			AddItem(s.key, s.title, nil, "page")
 			shownPages = shownPages + 1
 		end

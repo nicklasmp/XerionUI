@@ -12,6 +12,7 @@ local scratch = { shown = PAGE_SIZE }
 O:RegisterSystemPage({
 	key = "changelog",
 	title = "Patch notes",
+	hidden = true, -- no sidebar entry: opened from the version number in the window header
 	icon = "layers",
 	desc = "What changed in the latest versions.",
 	root = function() return scratch end,

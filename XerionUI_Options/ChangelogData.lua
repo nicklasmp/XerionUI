@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.21.3", date = "2026-10-16", notes = {
+		"Patch notes: open them by clicking the version number in the window header instead of a sidebar entry",
+	} },
 	{ version = "2.21.2", date = "2026-10-16", notes = {
 		"Cooldown Manager page: a switched-off Font or Glow part now says so, with an Enable button",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.18.0", date = "2026-10-16", notes = {
 		"New module Cooldown Manager Bar Glows: choose a glow type (Pixel, Pulse, Autocast shine, Action button, Proc) with its own color, speed and size per EllesmereUI Cooldown Manager bar",
-	} },
-	{ version = "2.17.0", date = "2026-10-16", notes = {
-		"Options sidebar: text-only accordion with foldable groups, guide line, status dot that turns into a switch on hover",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.21.3 - 2026-10-16
+- Patch notes: open them by clicking the version number in the window header instead of a sidebar entry
+
 ## 2.21.2 - 2026-10-16
 - Cooldown Manager page: a switched-off Font or Glow part now says so, with an Enable button
 
