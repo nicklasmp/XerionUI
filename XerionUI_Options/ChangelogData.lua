@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.22.1", date = "2026-10-16", notes = {
+		"Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card",
+	} },
 	{ version = "2.22.0", date = "2026-10-16", notes = {
 		"Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new",
 	} },
@@ -45,9 +48,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.18.2", date = "2026-10-16", notes = {
 		"Cleanup and performance pass: fix a leaked options listener, stop redundant page and CDM bar refreshes, cache sidebar health dots, remove dead theme and layout code",
-	} },
-	{ version = "2.18.1", date = "2026-10-16", notes = {
-		"Global Style: remove the Themes card",
-		"Profiles: remove the Switch automatically card",
 	} },
 }

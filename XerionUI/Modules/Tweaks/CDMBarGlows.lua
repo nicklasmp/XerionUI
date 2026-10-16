@@ -5,12 +5,11 @@
 -- the shared style engine. A bar without a choice keeps EllesmereUI's glow.
 --
 -- EllesmereUI lights every icon glow (active buff, cooldown ready, procs,
--- pandemic) through ns.StartNativeGlow(overlay, style, r, g, b, opts) and ends
--- it with ns.StopNativeGlow(overlay); most callers look the function up on the
--- namespace at call time, so both are wrapped. The overlay's parent is the icon.
--- On a bar with a choice, EllesmereUI's glow is ended and ours is drawn on the
--- icon instead; the overlay is still marked lit so EllesmereUI's own integrity
--- passes leave it alone. Everything else passes straight through.
+-- pandemic, bar glows) by calling one of the engine's Start functions on an
+-- overlay that sits on the icon (EllesmereUI.Glows.StartAutoCastShine and so on)
+-- and ends it with Glows.StopAllGlows. Those are wrapped: on a bar with a choice,
+-- the engine draw is skipped and ours is drawn on the icon instead, and
+-- everything else passes straight through.
 --------------------------------------------------------------------------------
 local XUI = select(2, ...).XUI
 
@@ -29,8 +28,7 @@ local M = XUI:NewModule("EUICDMBarGlows", {
 local active = false
 local wrapped = false
 local lit = setmetatable({}, { __mode = "k" }) -- overlay -> icon our glow sits on
-local origStart, origStop, ourStart, ourStop
-local stats = { asked = 0, ours = 0, gated = 0 } -- glow requests EllesmereUI made, for /xui debug
+local stats = { asked = 0, ours = 0 } -- glow requests EllesmereUI made, for /xui debug
 local barOn = {} -- bar key -> whether it had its own glow when last refreshed
 
 local function CDM()
@@ -55,51 +53,77 @@ local function Release(overlay)
 	end
 end
 
+-- The glow engine functions EllesmereUI draws every glow through. All of its
+-- glow paths end in one of them (active buff, cooldown ready, procs, pandemic,
+-- bar glows): ns.StartNativeGlow is used by some, but the cooldown-ready and proc
+-- glows call a private copy of it, so only the engine itself sees every glow.
+local ENGINE_STARTS = {
+	"StartProceduralAnts", "StartButtonGlow", "StartAutoCastShine", "StartShapeGlow",
+	"StartSolidFill", "StartFlipBookGlow", "StartAnimatedAnts",
+}
+local origs, ours = {}, {}
+local origStopAll, ourStopAll
+
+-- the Cooldown Manager icon a glow overlay sits on, or nil for any other glow
+local function IconOf(overlay)
+	local ns = CDM()
+	local fc = ns and ns._ecmeFC
+	if not (fc and overlay and overlay.GetParent) then return nil end
+	local ok, parent = pcall(overlay.GetParent, overlay)
+	if ok and parent and fc[parent] then return parent end
+	return nil
+end
+
 local function Wrap()
 	if wrapped then return end
-	local ns = CDM()
-	if not (ns and type(ns.StartNativeGlow) == "function" and type(ns.StopNativeGlow) == "function") then return end
+	local G = _G.EllesmereUI and _G.EllesmereUI.Glows
+	if not (type(G) == "table" and type(G.StopAllGlows) == "function") then return end
 	wrapped = true
-	origStart, origStop = ns.StartNativeGlow, ns.StopNativeGlow
 
-	ourStart = function(overlay, style, cr, cg, cb, opts)
-		if active and overlay then
-			stats.asked = stats.asked + 1
-			local icon = (opts and opts.owner) or overlay:GetParent()
-			-- "show glows only in combat" keeps its say: let EllesmereUI suppress it
-			local gated = ns._cdmGlowOOCGate and not InCombatLockdown()
-			if gated then stats.gated = stats.gated + 1 end
-			local block = icon and not gated and ChoiceFor(overlay)
-			if block then
-				origStop(overlay)
-				overlay._glowActive = true
-				overlay:SetAlpha(1)
-				lit[overlay] = icon
-				stats.ours = stats.ours + 1
-				XUI.Style:ShowGlow(icon, block, true)
-				return
+	for _, name in ipairs(ENGINE_STARTS) do
+		local orig = G[name]
+		if type(orig) == "function" then
+			origs[name] = orig
+			ours[name] = function(overlay, ...)
+				if active and overlay then
+					local icon = IconOf(overlay)
+					if icon then
+						stats.asked = stats.asked + 1
+						local block = ChoiceFor(overlay)
+						if block then
+							lit[overlay] = icon
+							stats.ours = stats.ours + 1
+							XUI.Style:ShowGlow(icon, block, true)
+							return
+						end
+						Release(overlay)
+					end
+				end
+				return orig(overlay, ...)
 			end
-			Release(overlay)
+			G[name] = ours[name]
 		end
-		return origStart(overlay, style, cr, cg, cb, opts)
 	end
 
-	ourStop = function(overlay)
+	origStopAll = G.StopAllGlows
+	ourStopAll = function(overlay, ...)
 		if overlay and lit[overlay] then Release(overlay) end
-		return origStop(overlay)
+		return origStopAll(overlay, ...)
 	end
-	ns.StartNativeGlow, ns.StopNativeGlow = ourStart, ourStop
+	G.StopAllGlows = ourStopAll
 end
 
 local function Unwrap()
-	local ns = CDM()
-	if wrapped and ns then
+	local G = _G.EllesmereUI and _G.EllesmereUI.Glows
+	if wrapped and G then
 		-- leave a wrapper somebody else put on top of ours; ours passes straight
 		-- through while the module is off (and stays installed for a re-enable)
-		local startBack, stopBack = ns.StartNativeGlow == ourStart, ns.StopNativeGlow == ourStop
-		if startBack then ns.StartNativeGlow = origStart end
-		if stopBack then ns.StopNativeGlow = origStop end
-		if not (startBack and stopBack) then return end
+		local allBack = true
+		for name, our in pairs(ours) do
+			if G[name] == our then G[name] = origs[name] else allBack = false end
+		end
+		if G.StopAllGlows == ourStopAll then G.StopAllGlows = origStopAll else allBack = false end
+		if not allBack then return end
 	end
 	wrapped = false
 end
@@ -181,8 +205,7 @@ function M:DebugInfo()
 	local n = 0
 	for _ in pairs(lit) do n = n + 1 end
 	lines[#lines + 1] = "icons lit by us right now: " .. n
-	lines[#lines + 1] = ("EllesmereUI asked for %d glows, %d drawn by us, %d held back by its combat-only setting"):format(
-		stats.asked, stats.ours, stats.gated)
+	lines[#lines + 1] = ("EllesmereUI started %d Cooldown Manager glows, %d drawn by us"):format(stats.asked, stats.ours)
 	if XUI.glowError then lines[#lines + 1] = "last glow error: " .. tostring(XUI.glowError) end
 	local ns = CDM()
 	if ns and type(ns.barDataByKey) == "table" then

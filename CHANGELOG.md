@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.22.1 - 2026-10-16
+- Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card
+
 ## 2.22.0 - 2026-10-16
 - Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new
 

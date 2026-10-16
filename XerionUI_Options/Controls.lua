@@ -552,18 +552,21 @@ function Controls.tabs(parent, desc, ctx)
 		f.buttons[i] = b
 		return b
 	end
-	function f:Refresh()
-		local values = O:DropdownValues(desc, ctx)
-		local current = O:GetValue(desc, ctx)
-		local x = 0
+	-- Places the labels in rows: a label that would run past the right edge starts
+	-- the next row, and the control grows to hold them.
+	local function Place(values, current)
+		local avail = f:GetWidth()
+		if not avail or avail < 60 then avail = 1e6 end
+		local x, row = 0, 0
 		for i, v in ipairs(values) do
 			local b = Button(i)
 			b.value = v.value
 			b.text:SetText(v.text)
 			local w = (b.text:GetStringWidth() or 40) + 28
+			if x > 0 and x + w > avail then x, row = 0, row + 1 end
 			b:SetWidth(w)
 			b:ClearAllPoints()
-			b:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", x, 0)
+			b:SetPoint("TOPLEFT", f, "TOPLEFT", x, -row * 30)
 			x = x + w
 			local active = v.value == current
 			b.under:SetShown(active)
@@ -572,6 +575,18 @@ function Controls.tabs(parent, desc, ctx)
 			b:Show()
 		end
 		for i = #values + 1, #f.buttons do f.buttons[i]:Hide() end
+		local h = (row + 1) * 30
+		if h ~= f.height then
+			f.height = h
+			f:SetHeight(h)
+		end
+	end
+	function f:Measure()
+		Place(O:DropdownValues(desc, ctx), O:GetValue(desc, ctx))
+		return f.height
+	end
+	function f:Refresh()
+		Place(O:DropdownValues(desc, ctx), O:GetValue(desc, ctx))
 	end
 	return f
 end
