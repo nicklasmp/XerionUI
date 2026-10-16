@@ -88,12 +88,30 @@ local function Wanted()
 	return out
 end
 
-local button, label, icon, close
+local button, label, sub, icon, close
 local dismissed -- macro text the user closed; the button stays away until it changes
+local shownUnits = {} -- tanks the button currently offers (names are read when drawing)
+
+-- "Name" or "Name +1" for the tank(s) on offer, in the tank's class colour.
+local function TankText()
+	local unit = shownUnits[1]
+	if not unit then return "Tank", 1, 1, 1 end
+	local name, r, g, b = "Tank", 1, 1, 1
+	pcall(function()
+		local n = UnitName(unit)
+		if n and not XUI.IsSecret(n) then name = n end
+		local class = UnitClassBase(unit)
+		local c = class and not XUI.IsSecret(class) and RAID_CLASS_COLORS[class]
+		if c then r, g, b = c.r, c.g, c.b end
+	end)
+	if #shownUnits > 1 then name = ("%s +%d"):format(name, #shownUnits - 1) end
+	return name, r, g, b
+end
+
 local function Button()
 	if button then return button end
 	button = CreateFrame("Button", "XUI_MarkTankButton", UIParent, "SecureActionButtonTemplate")
-	button:SetSize(170, 28)
+	button:SetSize(210, 46)
 	button:SetFrameStrata("MEDIUM")
 	button:RegisterForClicks("AnyUp", "AnyDown")
 	button:SetAttribute("type", "macro")
@@ -102,26 +120,48 @@ local function Button()
 	-- hover: a soft white wash, drawn by the client while the cursor is over it
 	local hover = button:CreateTexture(nil, "HIGHLIGHT")
 	hover:SetAllPoints(button)
-	hover:SetColorTexture(1, 1, 1, 0.2)
+	hover:SetColorTexture(1, 1, 1, 0.12)
+	-- the marker that will be placed, large and on its own
 	icon = button:CreateTexture(nil, "ARTWORK")
-	icon:SetSize(18, 18)
-	icon:SetPoint("LEFT", button, "LEFT", 6, 0)
+	icon:SetSize(28, 28)
+	icon:SetPoint("LEFT", button, "LEFT", 10, 0)
 	icon:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
+	-- who gets marked, with a quiet hint underneath
 	label = button:CreateFontString(nil, "OVERLAY")
-	label:SetPoint("LEFT", icon, "RIGHT", 6, 0)
+	label:SetPoint("BOTTOMLEFT", icon, "RIGHT", 10, 1)
+	label:SetPoint("RIGHT", button, "RIGHT", -14, 0)
 	label:SetJustifyH("LEFT")
-	label:SetPoint("RIGHT", button, "RIGHT", -24, 0)
-	-- close: not marking this time
+	sub = button:CreateFontString(nil, "OVERLAY")
+	sub:SetPoint("TOPLEFT", icon, "RIGHT", 10, -2)
+	sub:SetPoint("RIGHT", button, "RIGHT", -14, 0)
+	sub:SetJustifyH("LEFT")
+	-- close: a round badge on the corner, clear of the main click target
 	close = CreateFrame("Button", nil, button)
-	close:SetSize(18, 18)
-	close:SetPoint("RIGHT", button, "RIGHT", -4, 0)
+	close:SetSize(28, 28)
+	close:SetPoint("CENTER", button, "TOPRIGHT", -3, -3)
 	close:SetFrameLevel(button:GetFrameLevel() + 5)
+	local disc = close:CreateTexture(nil, "BACKGROUND")
+	disc:SetSize(20, 20)
+	disc:SetPoint("CENTER")
+	disc:SetColorTexture(1, 1, 1, 1)
+	disc:SetVertexColor(0.16, 0.16, 0.16, 0.95)
+	local mask = close:CreateMaskTexture()
+	mask:SetAllPoints(disc)
+	mask:SetTexture([[Interface\CharacterFrame\TempPortraitAlphaMask]], "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+	disc:AddMaskTexture(mask)
 	local x = close:CreateFontString(nil, "OVERLAY")
-	x:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
-	x:SetPoint("CENTER")
-	x:SetText("x")
-	close:SetScript("OnEnter", function() x:SetTextColor(1, 0.3, 0.3) end)
-	close:SetScript("OnLeave", function() x:SetTextColor(1, 1, 1) end)
+	x:SetFont(STANDARD_TEXT_FONT, 14, "")
+	x:SetPoint("CENTER", 0, 1)
+	x:SetText("\195\151") -- multiplication sign
+	x:SetTextColor(0.8, 0.8, 0.8)
+	close:SetScript("OnEnter", function()
+		x:SetTextColor(1, 1, 1)
+		disc:SetVertexColor(0.8, 0.2, 0.2, 1)
+	end)
+	close:SetScript("OnLeave", function()
+		x:SetTextColor(0.8, 0.8, 0.8)
+		disc:SetVertexColor(0.16, 0.16, 0.16, 0.95)
+	end)
 	close:SetScript("OnClick", function()
 		dismissed = button:GetAttribute("macrotext") or ""
 		-- a secure frame cannot be hidden in combat; Check hides it afterwards
@@ -139,8 +179,14 @@ local function Draw()
 	XUI.Movers:Apply(b)
 	Style:Border(b):Apply(db.border)
 	Style:ApplyBackground(Style:Background(b), nil)
-	Style:ApplyFont(label, db.text)
-	label:SetText(("Mark tank: %s"):format(MarkerName(db.marker)))
+	local size = db.text.size or 13
+	Style:ApplyFont(label, db.text, size + 1)
+	local name, r, g, bl = TankText()
+	label:SetText(name)
+	label:SetTextColor(r, g, bl)
+	Style:ApplyFont(sub, db.text, math.max(size - 3, 8))
+	sub:SetTextColor(0.62, 0.62, 0.62)
+	sub:SetText("Click to mark")
 	local col, row = (db.marker - 1) % 4, math.floor((db.marker - 1) / 4)
 	icon:SetTexCoord(col * 0.25, (col + 1) * 0.25, row * 0.25, (row + 1) * 0.25)
 end
@@ -158,7 +204,13 @@ function M:Check()
 	for _, unit in ipairs(units) do
 		lines[#lines + 1] = ("/tm [@%s] %d"):format(unit, self.db.marker)
 	end
-	b:SetAttribute("macrotext", table.concat(lines, "\n"))
+	local macro = table.concat(lines, "\n")
+	if macro == dismissed and not self:IsPreview() then
+		b:Hide()
+		return
+	end
+	b:SetAttribute("macrotext", macro)
+	shownUnits = units
 	Draw()
 	b:Show()
 end

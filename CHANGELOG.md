@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.14.2 - 2026-10-16
+- Auto Mark Tank: new card design showing who gets marked (class-coloured name), larger marker icon and a round close badge on the corner; dismissing now sticks until the situation changes
+
 ## 2.14.1 - 2026-10-16
 - Options sidebar: replace the on/off pill with a crisp status dot (ring = off), health badge moved to the icon
 
