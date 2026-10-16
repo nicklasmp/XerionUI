@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.26.2", date = "2026-10-16", notes = {
+		"Auto Mark Tank popup shows the tank name in the action row",
+	} },
 	{ version = "2.26.1", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.21.3", date = "2026-10-16", notes = {
 		"Patch notes: open them by clicking the version number in the window header instead of a sidebar entry",
-	} },
-	{ version = "2.21.2", date = "2026-10-16", notes = {
-		"Cooldown Manager page: a switched-off Font or Glow part now says so, with an Enable button",
 	} },
 }

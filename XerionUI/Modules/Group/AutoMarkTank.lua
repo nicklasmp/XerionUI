@@ -40,13 +40,6 @@ M.MARKERS = {
 	{ value = 7, text = "Cross" }, { value = 8, text = "Skull" },
 }
 
-local function MarkerName(index)
-	for _, m in ipairs(M.MARKERS) do
-		if m.value == index then return m.text end
-	end
-	return tostring(index)
-end
-
 local function Units()
 	local list = { "player" }
 	if IsInRaid() then
@@ -88,7 +81,7 @@ local function Wanted()
 	return out
 end
 
-local button, label, sub, icon, close, title
+local button, label, icon, close, title
 local dismissed -- macro text the user closed; the button stays away until it changes
 local shownUnits = {} -- tanks the button currently offers (names are read when drawing)
 
@@ -111,7 +104,7 @@ end
 local function Button()
 	if button then return button end
 	button = CreateFrame("Button", "XUI_MarkTankButton", UIParent, "SecureActionButtonTemplate")
-	button:SetSize(236, 100)
+	button:SetSize(236, 78)
 	button:SetFrameStrata("MEDIUM")
 	button:RegisterForClicks("AnyUp", "AnyDown")
 	button:SetAttribute("type", "macro")
@@ -125,12 +118,6 @@ local function Button()
 	head:SetColorTexture(1, 1, 1, 0.04)
 	title = button:CreateFontString(nil, "OVERLAY")
 	title:SetPoint("LEFT", head, "LEFT", 10, 0)
-	-- who gets marked, centred under the header
-	label = button:CreateFontString(nil, "OVERLAY")
-	label:SetPoint("TOP", head, "BOTTOM", 0, -8)
-	label:SetPoint("LEFT", button, "LEFT", 10, 0)
-	label:SetPoint("RIGHT", button, "RIGHT", -10, 0)
-	label:SetJustifyH("CENTER")
 	-- inset action row: marker icon + hint, the part that reads as the button
 	local row = button:CreateTexture(nil, "BORDER")
 	row:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 10, 10)
@@ -145,9 +132,10 @@ local function Button()
 	icon:SetSize(28, 28)
 	icon:SetPoint("LEFT", row, "LEFT", 6, 0)
 	icon:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
-	sub = button:CreateFontString(nil, "OVERLAY")
-	sub:SetPoint("LEFT", icon, "RIGHT", 14, 0)
-	sub:SetJustifyH("LEFT")
+	label = button:CreateFontString(nil, "OVERLAY")
+	label:SetPoint("LEFT", icon, "RIGHT", 12, 0)
+	label:SetPoint("RIGHT", button, "RIGHT", -18, 0)
+	label:SetJustifyH("LEFT")
 	-- close: a square in the header corner
 	close = CreateFrame("Button", nil, button)
 	close:SetSize(26, 26)
@@ -190,13 +178,10 @@ local function Draw()
 	Style:ApplyFont(title, db.text, math.max(size - 1, 8))
 	title:SetTextColor(0.85, 0.85, 0.85)
 	title:SetText("Auto Mark Tank")
-	Style:ApplyFont(label, db.text, size + 3)
+	Style:ApplyFont(label, db.text, size + 1)
 	local name, r, g, bl = TankText()
 	label:SetText(name)
 	label:SetTextColor(r, g, bl)
-	Style:ApplyFont(sub, db.text, size)
-	sub:SetTextColor(1, 1, 1)
-	sub:SetText("Mark " .. MarkerName(db.marker):lower())
 	local col, row = (db.marker - 1) % 4, math.floor((db.marker - 1) / 4)
 	icon:SetTexCoord(col * 0.25, (col + 1) * 0.25, row * 0.25, (row + 1) * 0.25)
 end

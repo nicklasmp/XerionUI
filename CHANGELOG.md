@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.26.2 - 2026-10-16
+- Auto Mark Tank popup shows the tank name in the action row
+
 ## 2.26.1 - 2026-10-16
 - Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row
 
