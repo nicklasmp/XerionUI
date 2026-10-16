@@ -30,6 +30,7 @@ local active = false
 local wrapped = false
 local lit = setmetatable({}, { __mode = "k" }) -- overlay -> icon our glow sits on
 local origStart, origStop, ourStart, ourStop
+local stats = { asked = 0, ours = 0, gated = 0 } -- glow requests EllesmereUI made, for /xui debug
 local barOn = {} -- bar key -> whether it had its own glow when last refreshed
 
 local function CDM()
@@ -63,15 +64,18 @@ local function Wrap()
 
 	ourStart = function(overlay, style, cr, cg, cb, opts)
 		if active and overlay then
+			stats.asked = stats.asked + 1
 			local icon = (opts and opts.owner) or overlay:GetParent()
 			-- "show glows only in combat" keeps its say: let EllesmereUI suppress it
 			local gated = ns._cdmGlowOOCGate and not InCombatLockdown()
+			if gated then stats.gated = stats.gated + 1 end
 			local block = icon and not gated and ChoiceFor(overlay)
 			if block then
 				origStop(overlay)
 				overlay._glowActive = true
 				overlay:SetAlpha(1)
 				lit[overlay] = icon
+				stats.ours = stats.ours + 1
 				XUI.Style:ShowGlow(icon, block, true)
 				return
 			end
@@ -177,6 +181,9 @@ function M:DebugInfo()
 	local n = 0
 	for _ in pairs(lit) do n = n + 1 end
 	lines[#lines + 1] = "icons lit by us right now: " .. n
+	lines[#lines + 1] = ("EllesmereUI asked for %d glows, %d drawn by us, %d held back by its combat-only setting"):format(
+		stats.asked, stats.ours, stats.gated)
+	if XUI.glowError then lines[#lines + 1] = "last glow error: " .. tostring(XUI.glowError) end
 	local ns = CDM()
 	if ns and type(ns.barDataByKey) == "table" then
 		for key, bd in pairs(ns.barDataByKey) do
