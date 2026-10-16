@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.14.0 - 2026-10-16
+- Options: remove the Modules overview page (the sidebar switches replace it); add an Inactive filter chip; sidebar lists switched-on modules first, then switched-off, each alphabetical; crisper sidebar switch
+
 ## 2.13.1 - 2026-10-16
 - Options sidebar: larger fold chevrons with hover hit area
 
