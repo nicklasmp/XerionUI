@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.24.1 - 2026-10-16
+- Patch notes: remove the header button again; the version number opens the notes and carries the unread dot
+
 ## 2.24.0 - 2026-10-16
 - Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on
 

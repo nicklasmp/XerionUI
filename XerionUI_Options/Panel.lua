@@ -186,13 +186,10 @@ local function CreateWindow()
 		XUI:SetUnlocked(true)
 	end)
 	unlock:SetPoint("RIGHT", close, "LEFT", -4, 0)
-	local notes = O:IconButton(header, "notes", 30, "Patch notes", function() O:Open("changelog") end)
-	notes:SetPoint("RIGHT", unlock, "LEFT", -4, 0)
-	-- accent dot while there are patch notes you have not opened
-	notes.dot = O:Icon(notes, "circle", 9, nil, "OVERLAY")
-	notes.dot:SetVertexColor(O:Accent())
-	notes.dot:SetPoint("TOPRIGHT", -3, -3)
-	S.notesButton = notes
+	-- accent dot by the version number while there are patch notes you have not opened
+	versionBtn.dot = O:Icon(versionBtn, "circle", 7, nil, "OVERLAY")
+	versionBtn.dot:SetPoint("LEFT", versionBtn, "RIGHT", 1, 3)
+	S.notesButton = versionBtn
 	O:RefreshNotesButton()
 
 	-- sidebar
@@ -314,13 +311,12 @@ local function CreateWindow()
 	end)
 end
 
--- Dot and highlight of the Patch notes button; call after the notes were read.
+-- Unread dot by the version number; call after the notes were read.
 function O:RefreshNotesButton()
 	local b = S.notesButton
 	if not b then return end
 	b.dot:SetShown(O.ChangelogUnread() > 0)
 	b.dot:SetVertexColor(O:Accent())
-	b:SetActive(S.currentKey == "changelog")
 end
 
 function O:Open(key)

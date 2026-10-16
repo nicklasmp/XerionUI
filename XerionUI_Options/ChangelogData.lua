@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.24.1", date = "2026-10-16", notes = {
+		"Patch notes: remove the header button again; the version number opens the notes and carries the unread dot",
+	} },
 	{ version = "2.24.0", date = "2026-10-16", notes = {
 		"Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.20.2", date = "2026-10-16", notes = {
 		"Melee Indicator: remove the alert sound",
-	} },
-	{ version = "2.20.1", date = "2026-10-16", notes = {
-		"Classes: Well-Honed Instincts moves under Guardian; Reaper's Mark, Control Undead and Runeforge Alert removed",
 	} },
 }
