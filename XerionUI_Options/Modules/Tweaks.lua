@@ -157,33 +157,6 @@ O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("EUICDMBarGlows", function(ctx, m, G)
-	local cards = {}
-	for _, bar in ipairs(XUI:GetModule("EUICDMBarFonts").BarList()) do
-		local choice = m.SeedBar(bar.key)
-		local base = "bars." .. bar.key
-		local on = base .. ".on"
-		local function off() return choice.on ~= true end
-		local items = {
-			{ type = "toggle", label = "Own glow for this bar", path = on,
-				get = function() return choice.on == true end,
-				tip = "Replaces EllesmereUI's glow on this bar's icons (active, cooldown ready, procs, pandemic) with the glow set here." },
-		}
-		for _, item in ipairs(G.Glow(base .. ".glow", { global = true })) do
-			local was = item.disabled
-			item.disabled = function(c) return off() or (was and was(c)) or false end
-			items[#items + 1] = item
-		end
-		cards[#cards + 1] = Card(tostring(bar.name), items, { bar = bar.key })
-	end
-	if #cards == 0 then
-		cards[1] = Card("Bars", {
-			{ type = "description", text = "No Cooldown Manager bars found yet. Open this page again once EllesmereUI's Cooldown Manager has loaded." },
-		})
-	end
-	return cards
-end)
-
 O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
 	local cards = {}
 	for _, bar in ipairs(m.BarList()) do
@@ -207,15 +180,14 @@ O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
--- Cooldown Manager page: the three modules on one short page. Which bar and
--- which part (font or glow) is picked with tabs, so a single card shows at a
--- time instead of one card per bar and module.
+-- Cooldown Manager page: the two modules on one short page. Which bar and
+-- bar is picked with tabs, so a single card shows at a time instead of one
+-- card per bar.
 --------------------------------------------------------------------------------
 O.groupPages["grp:cdm"] = function(g)
 	local fonts = XUI:GetModule("EUICDMBarFonts")
 	local stack = XUI:GetModule("EUICDMStackFont")
-	local glows = XUI:GetModule("EUICDMBarGlows")
-	local state = { bar = nil, part = "font" }
+	local state = { bar = nil }
 
 	local function Feature(m, label)
 		return {
@@ -241,7 +213,6 @@ O.groupPages["grp:cdm"] = function(g)
 				O.Card("Features", {
 					Feature(fonts, "Font per bar"),
 					Feature(stack, "Stack and charge font"),
-					Feature(glows, "Glow per bar"),
 					{ type = "description", color = "danger",
 						hidden = function()
 							for _, m in ipairs(g.members) do if #XUI.Health.Issues(m) > 0 then return false end end
@@ -269,27 +240,21 @@ O.groupPages["grp:cdm"] = function(g)
 			cards[#cards + 1] = O.Card("Bar", {
 				{ type = "tabs", values = barTabs,
 					get = function() return state.bar end, set = function(_, v) state.bar = v end },
-				{ type = "tabs", values = { { value = "font", text = "Font" }, { value = "glow", text = "Glow" } },
-					get = function() return state.part end, set = function(_, v) state.part = v end },
 			})
-			local function Part(m, part)
-				local ctx = O.ModuleContext(m)
-				-- a part that is switched off does nothing in the game: say so, with the way to switch it on
-				cards[#cards + 1] = O.Card(nil, {
-					{ type = "description", color = "label",
-						text = "This part is switched off, so nothing below has an effect in the game yet." },
-					{ type = "button", text = "Enable", primary = true,
-						onClick = function() m:SetEnabled(true) O:RefreshSidebar() O:RefreshPageHead() end },
-				}, { hidden = function() return m.db.enabled or state.part ~= part end })
-				for _, card in ipairs(O.moduleBuilders[m.key](ctx, m, O.Groups)) do
-					card.ctx = ctx
-					card.title = part == "font" and "Font" or "Glow"
-					card.hidden = function() return state.bar ~= card.bar or state.part ~= part end
-					cards[#cards + 1] = card
-				end
+			local ctx = O.ModuleContext(fonts)
+			-- a module that is switched off does nothing in the game: say so, with the way to switch it on
+			cards[#cards + 1] = O.Card(nil, {
+				{ type = "description", color = "label",
+					text = "This part is switched off, so nothing below has an effect in the game yet." },
+				{ type = "button", text = "Enable", primary = true,
+					onClick = function() fonts:SetEnabled(true) O:RefreshSidebar() O:RefreshPageHead() end },
+			}, { hidden = function() return fonts.db.enabled end })
+			for _, card in ipairs(O.moduleBuilders[fonts.key](ctx, fonts, O.Groups)) do
+				card.ctx = ctx
+				card.title = "Font"
+				card.hidden = function() return state.bar ~= card.bar end
+				cards[#cards + 1] = card
 			end
-			Part(fonts, "font")
-			Part(glows, "glow")
 			return cards
 		end,
 	}

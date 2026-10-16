@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.22.3", date = "2026-10-16", notes = {
+		"Removed the Cooldown Manager Bar Glows module: glow types per bar are set in EllesmereUI itself",
+	} },
 	{ version = "2.22.2", date = "2026-10-16", notes = {
 		"Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows",
 	} },
@@ -45,8 +48,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.19.0", date = "2026-10-16", notes = {
 		"Navigation: related modules share one sidebar entry (Cooldown Manager, Cast Bars, Tank, Party Tracking, Group Utility, Encounter Tools); each part keeps its own switch and settings",
-	} },
-	{ version = "2.18.3", date = "2026-10-16", notes = {
-		"Remove the unused automatic profile switching",
 	} },
 }

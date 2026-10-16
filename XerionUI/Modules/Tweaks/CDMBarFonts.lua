@@ -110,21 +110,6 @@ local function FaceFor(fs)
 	end
 	return nil
 end
--- the bar key a frame (or anything whose parents lead to an icon) sits on, or nil;
--- shared with the Cooldown Manager Bar Glows module, works while this module is off
-function XUI.CDMBarKey(frame)
-	local ok, key = pcall(function()
-		local k = BarOf(frame)
-		if not k then
-			local ns = CDM()
-			if ns then Rebuild(ns) end
-			k = BarOf(frame)
-		end
-		return k
-	end)
-	return ok and key or nil
-end
-
 -- the Stack Font module asks, so a bar's own font wins over it
 XUI.CDMBarFace = FaceFor
 

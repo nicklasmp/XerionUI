@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.22.3 - 2026-10-16
+- Removed the Cooldown Manager Bar Glows module: glow types per bar are set in EllesmereUI itself
+
 ## 2.22.2 - 2026-10-16
 - Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows
 

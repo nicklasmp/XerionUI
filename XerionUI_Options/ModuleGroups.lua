@@ -15,8 +15,8 @@ if not O then return end
 O.MODULE_GROUPS = {
 	{
 		key = "grp:cdm", name = "Cooldown Manager", category = "tweaks",
-		desc = "Fonts, stack counts and glows for the EllesmereUI Cooldown Manager bars.",
-		members = { { "EUICDMBarFonts", "Bar fonts" }, { "EUICDMStackFont", "Stack font" }, { "EUICDMBarGlows", "Bar glows" } },
+		desc = "Fonts and stack counts for the EllesmereUI Cooldown Manager bars.",
+		members = { { "EUICDMBarFonts", "Bar fonts" }, { "EUICDMStackFont", "Stack font" } },
 	},
 	{
 		key = "grp:cast", name = "Cast Bars", category = "tweaks",
