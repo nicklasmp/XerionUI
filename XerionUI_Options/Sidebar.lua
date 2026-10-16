@@ -381,6 +381,19 @@ function O:RefreshSidebar()
 					if Keep(m) then list[#list + 1] = m end
 				end
 			end
+			if cat.key == "dungeon" then
+				-- Auto NPC Dialog: one entry under every dungeon with a seen dialog
+				local gm = XUI:GetModule("AutoGossip")
+				if gm and gm:IsAvailable() then
+					for _, zone in ipairs(O.DialogZones()) do
+						local e = O:DialogEntry(zone)
+						if e and ModuleMatches(e, cat.name:lower() .. " " .. zone:lower() .. " dialog gossip") then
+							all[#all + 1] = gm
+							if Keep(e) then list[#list + 1] = e end
+						end
+					end
+				end
+			end
 			table.sort(list, ByStateThenName)
 			if #list > 0 then
 				AddHead(cat.name, { folded = folded, toggle = function()

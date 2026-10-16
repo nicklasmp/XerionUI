@@ -32,15 +32,20 @@ O.MODULE_GROUPS = {
 	},
 	{
 		key = "grp:party", name = "Party Tracking", category = "group",
-		desc = "Interrupts, cooldowns and externals of your party members.",
-		members = { { "Interrupts", "Interrupts" }, { "PartyCDs", "Party cooldowns" }, { "Externals", "Externals" } },
+		desc = "Interrupts and cooldowns of your party members.",
+		members = { { "Interrupts", "Interrupts" }, { "PartyCDs", "Party cooldowns" } },
+	},
+	{
+		key = "grp:externals", name = "Externals", category = "group",
+		desc = "Externals your party members use on each other.",
+		members = { { "Externals", "Externals" } },
 	},
 	{
 		key = "grp:utility", name = "Group Utility", category = "group",
 		desc = "Small helpers for dungeons and groups.",
 		members = {
 			{ "Shroud", "Shroud / Mass Invis" }, { "InstanceKeys", "Who has the key" },
-			{ "BonusRollConfirm", "Bonus roll confirm" }, { "AutoGossip", "Auto NPC dialog" },
+			{ "BonusRollConfirm", "Bonus roll confirm" },
 		},
 	},
 	{
@@ -137,7 +142,8 @@ end
 function O.CategoryEntries(category)
 	local out = {}
 	for _, m in ipairs(XUI:SortedModules(category)) do
-		if not O.groupOf[m.key] then out[#out + 1] = m end
+		-- Auto NPC Dialog is listed under each dungeon (see O:DialogEntry)
+		if not O.groupOf[m.key] and m.key ~= "AutoGossip" then out[#out + 1] = m end
 	end
 	-- a group sits in its own category, whatever the categories of its members
 	for _, def in ipairs(O.MODULE_GROUPS) do
@@ -145,6 +151,38 @@ function O.CategoryEntries(category)
 		if g and g.category == category then out[#out + 1] = g end
 	end
 	return out
+end
+
+-- Auto NPC Dialog is split per dungeon: every dungeon that has a seen dialog
+-- gets an "NPC dialogs" entry under it in the sidebar. The entry is a group of
+-- the one module; its page (O.DialogPage, Modules/Group.lua) shows that
+-- dungeon's dialogs.
+function O.DialogZones()
+	local m = XUI:GetModule("AutoGossip")
+	local out, have = {}, {}
+	if not m then return out end
+	for _, e in ipairs(m:Catalogue()) do
+		if e.zone and not have[e.zone] then
+			have[e.zone] = true
+			out[#out + 1] = e.zone
+		end
+	end
+	return out
+end
+
+function O:DialogEntry(zone)
+	local key = "dlg:" .. zone
+	local entry = O.groupByKey[key]
+	if entry then return entry end
+	entry = Register({
+		key = key, name = "NPC dialogs", category = "dungeon", dungeon = zone,
+		desc = "Dialogs to skip in " .. zone .. ".", members = { { "AutoGossip", "Auto NPC dialog" } },
+	}, false)
+	if entry then
+		entry.zone = zone
+		O.groupPages[key] = function(g) return O.DialogPage(g) end
+	end
+	return entry
 end
 
 -- The texture shown for a group: its first member's.

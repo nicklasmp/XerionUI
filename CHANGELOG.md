@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.25.0 - 2026-10-16
+- Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)
+- Externals gets its own group under Group instead of sitting in Party Tracking
+
 ## 2.24.1 - 2026-10-16
 - Patch notes: remove the header button again; the version number opens the notes and carries the unread dot
 

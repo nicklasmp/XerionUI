@@ -337,11 +337,11 @@ O:RegisterModuleOptions("AggroCheck", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
--- Auto NPC Dialog: every dialog seen in a dungeon, grouped by dungeon, with a
+-- Auto NPC Dialog: the dialogs seen in a dungeon, with a
 -- switch to pick it and one to answer its "are you sure?" box.
 local GOSSIP_HEAD_H, GOSSIP_ROW_H = 30, 44
 
-local function GossipList(parent, ctx, m)
+local function GossipList(parent, ctx, m, zoneOnly)
 	local f = CreateFrame("Frame", nil, parent)
 	f.height = 40
 	f.heads, f.rows = {}, {}
@@ -459,7 +459,7 @@ local function GossipList(parent, ctx, m)
 		local filter = ctx.gossipFilter or "all"
 		local list = {}
 		for _, e in ipairs(m:Catalogue()) do
-			if filter == "all" or e.picked then list[#list + 1] = e end
+			if (filter == "all" or e.picked) and (not zoneOnly or e.zone == zoneOnly) then list[#list + 1] = e end
 		end
 		local y, nh, nr, i = 0, 0, 0, 1
 		while i <= #list do
@@ -500,7 +500,7 @@ local function GossipList(parent, ctx, m)
 		for k = nr + 1, #self.rows do self.rows[k]:Hide() end
 		if #list == 0 then
 			self.empty:SetText(filter == "all"
-				and "No dialogs seen yet. Talk to an NPC inside a dungeon and its options show up here, sorted by dungeon."
+				and "No dialogs seen yet. Talk to an NPC inside a dungeon and its options show up under that dungeon."
 				or "Nothing is picked. Switch a dialog on under All.")
 			self.empty:Show()
 			y = 40
@@ -676,3 +676,54 @@ O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 		Card("Position", G.Position("position")),
 	}
 end)
+
+--------------------------------------------------------------------------------
+-- The "NPC dialogs" page under a dungeon: that dungeon's dialogs, and the
+-- module's own settings on a second tab.
+function O.DialogPage(g)
+	local m = XUI:GetModule("AutoGossip")
+	local zone = g.zone
+	local state = { tab = "dialogs" }
+	local mctx = O.ModuleContext(m)
+	return {
+		ctx = O:NewContext(function() return state end, nil, { group = g }),
+		build = function()
+			local function Only(tab, card)
+				card.ctx = mctx
+				card.hidden = function() return state.tab ~= tab end
+				return card
+			end
+			local cards = {
+				O.Card(nil, {
+					{ type = "tabs", values = { { value = "dialogs", text = "Dialogs" }, { value = "settings", text = "Settings" } },
+						get = function() return state.tab end, set = function(_, v) state.tab = v end },
+				}),
+				O.Card("Auto NPC Dialog", {
+					{ type = "description", text = m.desc or "" },
+					{ type = "toggle", label = "Enabled",
+						get = function() return m.db.enabled end,
+						set = function(_, on)
+							m:SetEnabled(on)
+							O:RefreshSidebar()
+							O:RefreshPageHead()
+						end },
+				}, { ctx = mctx }),
+				Only("dialogs", O.Card(zone, {
+					{ type = "description",
+						text = "Every NPC dialog you open in this dungeon is listed here. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically." },
+					{ type = "tabs",
+						values = { { value = "all", text = "All" }, { value = "picked", text = "Picked" } },
+						get = function(c) return c.gossipFilter or "all" end,
+						set = function(c, v) c.gossipFilter = v end },
+					{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, zone) end },
+					{ type = "button", text = "Forget unpicked", tip = "Removes every dialog of this dungeon that is not switched on.",
+						onClick = function() m:ForgetUnpicked(zone) mctx:Changed("options") end },
+				})),
+			}
+			for _, card in ipairs(O.moduleBuilders.AutoGossip(mctx, m, O.Groups)) do
+				if card.title ~= "Dialogs" then cards[#cards + 1] = Only("settings", card) end
+			end
+			return cards
+		end,
+	}
+end

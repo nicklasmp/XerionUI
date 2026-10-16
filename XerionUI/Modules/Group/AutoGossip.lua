@@ -219,11 +219,11 @@ function M:Forget(id)
 	XUI:Fire("GossipSeen", true)
 end
 
--- Removes every seen dialog that is not picked.
-function M:ForgetUnpicked()
+-- Removes every seen dialog that is not picked (only the ones of one dungeon with zone).
+function M:ForgetUnpicked(zone)
 	local seen = Seen()
-	for id in pairs(seen) do
-		if not self:IsPicked(id) then seen[id] = nil end
+	for id, e in pairs(seen) do
+		if not self:IsPicked(id) and (not zone or e.zone == zone) then seen[id] = nil end
 	end
 	XUI:Fire("GossipSeen", true)
 end

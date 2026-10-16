@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.25.0", date = "2026-10-16", notes = {
+		"Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)",
+		"Externals gets its own group under Group instead of sitting in Party Tracking",
+	} },
 	{ version = "2.24.1", date = "2026-10-16", notes = {
 		"Patch notes: remove the header button again; the version number opens the notes and carries the unread dot",
 	} },
@@ -46,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.20.3", date = "2026-10-16", notes = {
 		"Cooldown Manager page: pick a bar and Font or Glow with tabs so one card shows at a time instead of one per bar and module",
-	} },
-	{ version = "2.20.2", date = "2026-10-16", notes = {
-		"Melee Indicator: remove the alert sound",
 	} },
 }

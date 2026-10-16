@@ -379,6 +379,22 @@ Step("auto NPC dialog: records dungeon dialogs and picks switched-on ones", func
 	MOCK.Advance(0.1)
 	assert(selected[1] == 555001, "a switched-on dialog should be selected, got " .. tostring(selected[1]))
 
+	-- the dungeon gets its own sidebar entry and page with its dialogs
+	local zones = XUI.Options.DialogZones()
+	local hasZone
+	for _, z in ipairs(zones) do if z == "Ara-Kara" then hasZone = true end end
+	assert(hasZone, "the seen dungeon should be listed for the sidebar")
+	local entry = XUI.Options:DialogEntry("Ara-Kara")
+	assert(entry and entry.dungeon == "Ara-Kara", "a dungeon entry should exist")
+	XUI.Options:Open(entry.key)
+	MOCK.Advance(0.1)
+	XUI.Options:RefreshSidebar()
+	for _, c in ipairs(Controls()) do
+		local ok, err = xpcall(Exercise, debug.traceback, c)
+		assert(ok, "dungeon dialog page control: " .. tostring(err))
+	end
+	XUI.Options:Open("style")
+
 	-- built-ins can be switched off one by one
 	assert(m:IsPicked(131567), "a built-in is picked by default")
 	m:SetPicked(131567, false)
