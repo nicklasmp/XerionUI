@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.11.4 - 2026-10-16
+- Auto Mark Tank: only offer the marker inside dungeons
+
 ## 2.11.3 - 2026-10-16
 - Add 512px addon icon
 

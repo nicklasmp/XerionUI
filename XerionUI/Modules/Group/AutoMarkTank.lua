@@ -10,7 +10,8 @@
 -- it only shows and hides out of combat, so nothing is ever blocked. A tank
 -- that already carries a marker is left alone unless asked to replace it. The
 -- small x on the button dismisses it until the situation changes. In a
--- raid it needs lead or assist; in a party anyone may mark.
+-- raid it needs lead or assist; in a party anyone may mark. Only active inside
+-- dungeons (5-player instances).
 --------------------------------------------------------------------------------
 local XUI = select(2, ...).XUI
 local T = XUI.Templates
@@ -58,6 +59,9 @@ end
 
 local function Allowed()
 	if not IsInGroup() then return false end
+	-- dungeons only (5-player instances)
+	local _, kind = IsInInstance()
+	if kind ~= "party" then return false end
 	if IsInRaid() then
 		if not M.db.inRaid then return false end
 		return UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")
