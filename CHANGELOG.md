@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.11.3 - 2026-10-16
+- Add 512px addon icon
+
 ## 2.11.2 - 2026-10-16
 - Auto Mark Tank: add a close (x) button to dismiss the popup without marking
 
