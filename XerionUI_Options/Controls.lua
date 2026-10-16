@@ -528,54 +528,78 @@ function Controls.description(parent, desc, ctx)
 end
 
 --------------------------------------------------------------------------------
--- Tabs: a row of labels, one active (desc.values = { { value, text } })
+-- Tabs: a row of pills, one active (desc.values = { { value, text } }).
+-- The active pill is filled in the accent, the others lift on hover. With
+-- desc.status(value) a small dot shows whether that part is switched on
+-- (accent) or off (dim), so a group's modules can be told apart at a glance.
 --------------------------------------------------------------------------------
+local PILL_H, PILL_GAP, ROW_GAP = 28, 6, 6
+
 function Controls.tabs(parent, desc, ctx)
-	local f = Base(parent, desc, ctx, 30)
+	local f = Base(parent, desc, ctx, PILL_H + 6)
 	f.buttons = {}
-	f.line = O:Rect(f, "line", "BACKGROUND")
-	f.line:SetHeight(1)
-	f.line:SetPoint("BOTTOMLEFT")
-	f.line:SetPoint("BOTTOMRIGHT")
 	local function Button(i)
 		local b = f.buttons[i]
 		if b then return b end
 		b = CreateFrame("Button", nil, f)
-		b:SetHeight(30)
-		b.text = O:Text(b, O.SIZE.text, "label")
-		b.text:SetPoint("CENTER", 0, 1)
-		b.under = O:Rect(b, nil, "ARTWORK")
-		b.under:SetHeight(2)
-		b.under:SetPoint("BOTTOMLEFT")
-		b.under:SetPoint("BOTTOMRIGHT")
+		b:SetHeight(PILL_H)
+		O:Skin(b, "control", "controlLine")
+		b.text = O:Text(b, O.SIZE.text, "muted")
+		b.dot = O:Icon(b, "circle", 7, nil, "OVERLAY")
 		b:SetScript("OnClick", function(self) O:SetValue(desc, ctx, self.value) end)
+		b:SetScript("OnEnter", function(self) self.hot = true f:Refresh() end)
+		b:SetScript("OnLeave", function(self) self.hot = false f:Refresh() end)
 		f.buttons[i] = b
 		return b
 	end
-	-- Places the labels in rows: a label that would run past the right edge starts
+	-- Places the pills in rows: one that would run past the right edge starts
 	-- the next row, and the control grows to hold them.
 	local function Place(values, current)
 		local avail = f:GetWidth()
 		if not avail or avail < 60 then avail = 1e6 end
 		local x, row = 0, 0
+		local ar, ag, ab = O:Accent()
 		for i, v in ipairs(values) do
 			local b = Button(i)
 			b.value = v.value
 			b.text:SetText(v.text)
-			local w = (b.text:GetStringWidth() or 40) + 28
+			local hasDot = desc.status ~= nil
+			local w = (b.text:GetStringWidth() or 40) + 26 + (hasDot and 13 or 0)
 			if x > 0 and x + w > avail then x, row = 0, row + 1 end
 			b:SetWidth(w)
 			b:ClearAllPoints()
-			b:SetPoint("TOPLEFT", f, "TOPLEFT", x, -row * 30)
-			x = x + w
+			b:SetPoint("TOPLEFT", f, "TOPLEFT", x, -row * (PILL_H + ROW_GAP))
+			x = x + w + PILL_GAP
 			local active = v.value == current
-			b.under:SetShown(active)
-			if active then b.under:SetVertexColor(O:Accent()) end
-			b.text:SetTextColor(O:Color(active and "text" or "muted"))
+			b.text:ClearAllPoints()
+			if hasDot then
+				b.dot:Show()
+				b.dot:ClearAllPoints()
+				b.dot:SetPoint("LEFT", 11, 0)
+				b.text:SetPoint("LEFT", 24, 1)
+				if desc.status(v.value) then
+					b.dot:SetVertexColor(ar, ag, ab, 1)
+				else
+					b.dot:SetVertexColor(O:Color("faint"))
+				end
+			else
+				b.dot:Hide()
+				b.text:SetPoint("CENTER", 0, 1)
+			end
+			if active then
+				O:SetSkinColor(b, "control")
+				b.__skinBg:SetVertexColor(ar, ag, ab, 0.2)
+				O:SetBorderColor(b, ar, ag, ab, 0.9)
+				b.text:SetTextColor(O:Color("text"))
+			else
+				O:SetSkinColor(b, b.hot and "controlHover" or "control")
+				O:SetBorderColor(b, O:Color("controlLine"))
+				b.text:SetTextColor(O:Color(b.hot and "label" or "muted"))
+			end
 			b:Show()
 		end
 		for i = #values + 1, #f.buttons do f.buttons[i]:Hide() end
-		local h = (row + 1) * 30
+		local h = (row + 1) * PILL_H + row * ROW_GAP + 6
 		if h ~= f.height then
 			f.height = h
 			f:SetHeight(h)

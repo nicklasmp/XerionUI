@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.24.0", date = "2026-10-16", notes = {
+		"Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on",
+	} },
 	{ version = "2.23.2", date = "2026-10-16", notes = {
 		"Patch notes: back to the list view (no tabs)",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.20.1", date = "2026-10-16", notes = {
 		"Classes: Well-Honed Instincts moves under Guardian; Reaper's Mark, Control Undead and Runeforge Alert removed",
-	} },
-	{ version = "2.20.0", date = "2026-10-16", notes = {
-		"Classes: sidebar is now Classes > class > specialization with a page per level; only Blood Death Knight and Guardian Druid kept for now (Blightfall and Forbidden Sacrifice removed)",
 	} },
 }

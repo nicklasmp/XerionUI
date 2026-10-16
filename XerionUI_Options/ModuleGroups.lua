@@ -176,6 +176,10 @@ function O:GroupPageSpec(key)
 				for _, m in ipairs(g.members) do tabs[#tabs + 1] = { value = m.key, text = g.labels[m.key] } end
 				cards[#cards + 1] = O.Card(nil, {
 					{ type = "tabs", values = tabs,
+						status = function(key)
+							local m = XUI:GetModule(key)
+							return m and m.db.enabled and true or false
+						end,
 						get = function() return state.member end, set = function(_, v) state.member = v end },
 				})
 			end

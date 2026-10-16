@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.24.0 - 2026-10-16
+- Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on
+
 ## 2.23.2 - 2026-10-16
 - Patch notes: back to the list view (no tabs)
 
