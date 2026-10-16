@@ -201,10 +201,46 @@ local function BuildCard(page, spec)
 	return card
 end
 
+-- A long page is split with tabs, one per card title, so the level under a
+-- component never reads as one endless list. Pages that bring their own tabs
+-- set spec.tabbed; cards without a title (notices, switches) stay on every tab.
+local AUTO_TABS_FROM = 4
+
+local function AutoTabs(specs)
+	local order, seen = {}, {}
+	for _, s in ipairs(specs) do
+		if s.title and not seen[s.title] then
+			seen[s.title] = true
+			order[#order + 1] = { value = s.title, text = s.title }
+		end
+	end
+	if #order < AUTO_TABS_FROM then return specs end
+	local state = { tab = order[1].value }
+	for _, s in ipairs(specs) do
+		local title, own = s.title, s.hidden
+		if title then
+			s.hidden = function(ctx)
+				if state.tab ~= title then return true end
+				if type(own) == "function" then return own(ctx) and true or false end
+				return own and true or false
+			end
+		end
+	end
+	-- the tab bar goes below the cards that lead the page without a title
+	local at = 1
+	while specs[at] and not specs[at].title do at = at + 1 end
+	table.insert(specs, at, O.Card(nil, {
+		{ type = "tabs", values = order,
+			get = function() return state.tab end, set = function(_, v) state.tab = v end },
+	}))
+	return specs
+end
+
 function Page:Build()
 	if self.built then return end
 	self.built = true
 	local specs = self.spec.build(self.ctx) or {}
+	if not self.spec.tabbed then specs = AutoTabs(specs) end
 	for _, spec in ipairs(specs) do
 		self.cards[#self.cards + 1] = BuildCard(self, spec)
 	end

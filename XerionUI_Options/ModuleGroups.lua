@@ -12,6 +12,8 @@ local O = XUI and XUI.Options
 if not O then return end
 
 -- members: { module key, section label }
+-- A group page shows one member at a time, picked with tabs, instead of every
+-- member's cards in one long list (tabs = false keeps the list).
 O.MODULE_GROUPS = {
 	{
 		key = "grp:cdm", name = "Cooldown Manager", category = "tweaks",
@@ -69,7 +71,7 @@ local function MakeEntry(def)
 	if #members == 0 and not def.allowEmpty then return nil end
 	local entry = {
 		isGroup = true, key = def.key, name = def.name, desc = def.desc,
-		category = def.category, dungeon = def.dungeon, untested = false,
+		category = def.category, dungeon = def.dungeon, untested = false, tabs = def.tabs ~= false,
 		members = members, labels = labels, texture = def.texture, empty = def.empty,
 	}
 	entry.db = setmetatable({}, { __index = function(_, k)
@@ -158,11 +160,25 @@ local function HasIssues(m) return #XUI.Health.Issues(m) > 0 end
 function O:GroupPageSpec(key)
 	local g = O.groupByKey[key]
 	if not g then return nil end
-	if O.groupPages[key] then return O.groupPages[key](g) end
+	if O.groupPages[key] then
+		local spec = O.groupPages[key](g)
+		spec.tabbed = true
+		return spec
+	end
+	local state = { member = g.members[1] and g.members[1].key }
 	return {
-		ctx = O:NewContext(function() return {} end, nil, { group = g }),
+		tabbed = g.tabs and #g.members > 1,
+		ctx = O:NewContext(function() return state end, nil, { group = g }),
 		build = function()
 			local cards = {}
+			if g.tabs and #g.members > 1 then
+				local tabs = {}
+				for _, m in ipairs(g.members) do tabs[#tabs + 1] = { value = m.key, text = g.labels[m.key] } end
+				cards[#cards + 1] = O.Card(nil, {
+					{ type = "tabs", values = tabs,
+						get = function() return state.member end, set = function(_, v) state.member = v end },
+				})
+			end
 			if #g.members == 0 then
 				cards[#cards + 1] = O.Card(nil, { { type = "description", text = g.empty or "Nothing here yet." } })
 			end
@@ -190,11 +206,22 @@ function O:GroupPageSpec(key)
 					items[#items + 1] = { type = "button", text = "Test",
 						onClick = function() XUI.SafeCallFor(m, m.Test, m) end }
 				end
-				cards[#cards + 1] = O.Card(g.labels[m.key], items, { ctx = mctx })
+				local function Tabbed(card)
+					if g.tabs and #g.members > 1 then
+						local own = card.hidden
+						card.hidden = function(ctx)
+							if state.member ~= m.key then return true end
+							if type(own) == "function" then return own(ctx) and true or false end
+							return own and true or false
+						end
+					end
+					return card
+				end
+				cards[#cards + 1] = Tabbed(O.Card(g.labels[m.key], items, { ctx = mctx }))
 				local build = O.moduleBuilders[m.key]
 				for _, card in ipairs(build and build(mctx, m, O.Groups) or {}) do
 					card.ctx = mctx
-					cards[#cards + 1] = card
+					cards[#cards + 1] = Tabbed(card)
 				end
 			end
 			return cards

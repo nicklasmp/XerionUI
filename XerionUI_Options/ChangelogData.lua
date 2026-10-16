@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.23.0", date = "2026-10-16", notes = {
+		"Options: groups show one member at a time with tabs, and long pages split into tabs by card title instead of one long list",
+		"New module Cooldown Manager Glow Probe: diagnostics for why custom spell IDs get no active glow in EllesmereUI",
+	} },
 	{ version = "2.22.3", date = "2026-10-16", notes = {
 		"Removed the Cooldown Manager Bar Glows module: glow types per bar are set in EllesmereUI itself",
 	} },
@@ -45,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.19.1", date = "2026-10-16", notes = {
 		"Navigation: Dungeons category lists each dungeon with its own modules; Aggro Check moves to a new Reminders group with Bloodlust Ready and Meter Reset",
-	} },
-	{ version = "2.19.0", date = "2026-10-16", notes = {
-		"Navigation: related modules share one sidebar entry (Cooldown Manager, Cast Bars, Tank, Party Tracking, Group Utility, Encounter Tools); each part keeps its own switch and settings",
 	} },
 }
