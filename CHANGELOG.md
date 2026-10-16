@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.26.3 - 2026-10-16
+- Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret
+
 ## 2.26.2 - 2026-10-16
 - Auto Mark Tank popup shows the tank name in the action row
 

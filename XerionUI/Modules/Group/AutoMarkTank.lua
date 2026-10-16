@@ -88,16 +88,27 @@ local shownUnits = {} -- tanks the button currently offers (names are read when 
 -- "Name" or "Name +1" for the tank(s) on offer, in the tank's class colour.
 local function TankText()
 	local unit = shownUnits[1]
-	if not unit then return "Tank", 1, 1, 1 end
+	if not unit then
+		-- preview or nothing on offer: show any tank in the group, else yourself
+		unit = "player"
+		for _, u in ipairs(Units()) do
+			local ok, isTank = pcall(function() return UnitExists(u) and UnitGroupRolesAssigned(u) == "TANK" end)
+			if ok and isTank == true then
+				unit = u
+				break
+			end
+		end
+	end
 	local name, r, g, b = "Tank", 1, 1, 1
 	pcall(function()
+		-- a secret name still draws through SetText, it just cannot be concatenated
 		local n = UnitName(unit)
-		if n and not XUI.IsSecret(n) then name = n end
+		if n then name = n end
 		local class = UnitClassBase(unit)
 		local c = class and not XUI.IsSecret(class) and RAID_CLASS_COLORS[class]
 		if c then r, g, b = c.r, c.g, c.b end
 	end)
-	if #shownUnits > 1 then name = ("%s +%d"):format(name, #shownUnits - 1) end
+	if #shownUnits > 1 and not XUI.IsSecret(name) then name = ("%s +%d"):format(name, #shownUnits - 1) end
 	return name, r, g, b
 end
 

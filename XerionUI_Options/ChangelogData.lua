@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.26.3", date = "2026-10-16", notes = {
+		"Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret",
+	} },
 	{ version = "2.26.2", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup shows the tank name in the action row",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.22.0", date = "2026-10-16", notes = {
 		"Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new",
-	} },
-	{ version = "2.21.3", date = "2026-10-16", notes = {
-		"Patch notes: open them by clicking the version number in the window header instead of a sidebar entry",
 	} },
 }
