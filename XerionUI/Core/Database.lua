@@ -49,8 +49,6 @@ DB.GLOBAL_DEFAULTS = {
 	-- gossip options seen inside instances, [optionID] = { text, npc, zone, ... }
 	-- (Modules/Group/AutoGossip.lua)
 	gossipSeen = {},
-	-- switch profile by instance type or specialization (Core/AutoProfile.lua)
-	autoProfiles = { enabled = false, spec = {}, instance = {} },
 	unlock = {
 		gridSize = 32,
 		snap = true,

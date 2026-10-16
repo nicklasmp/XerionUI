@@ -220,7 +220,6 @@ The harness (fengari, Lua 5.3) mocks the WoW API closely enough to load the TOCs
 | Preview looks and card eye buttons | `module.PREVIEW_STATES`, `Module:SetPreviewState`, card option `previewState` |
 | Test button | optional `module:Test()` (use `self:RequireRunning()`) |
 | Style themes | Global Style page, `DB:SaveTheme/ApplyTheme` (account-wide) |
-| Automatic profile by content or spec | `Core/AutoProfile.lua`, Profiles page |
 | Attach a position to another frame | `position.attach` (+ `point`/`relPoint`), `Movers:Apply`, `G.Position` |
 | Unlock mode snapping to other movers, guides, double-click to open settings | `Core/Movers.lua` |
 | Window spacing | General: `panel.density`, `O:SetDensity` |

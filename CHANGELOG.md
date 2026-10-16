@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.18.3 - 2026-10-16
+- Remove the unused automatic profile switching
+
 ## 2.18.2 - 2026-10-16
 - Cleanup and performance pass: fix a leaked options listener, stop redundant page and CDM bar refreshes, cache sidebar health dots, remove dead theme and layout code
 
