@@ -173,7 +173,7 @@ Prefer the widgets in `Widgets.lua` over hand-built frames: `CreateText`, `Creat
 | `Page.lua` | contexts, cards, grid layout, scroll |
 | `Groups.lua` | the shared option groups (see below) |
 | `Panel.lua` | window, sidebar + search, page header (enable / preview) |
-| `Pages/*.lua` | Global Style, General, Profiles |
+| `Pages/*.lua` | Global Style, General, Profiles, Patch notes (data in `ChangelogData.lua`, generated from `CHANGELOG.md` by `tools/genchangelog.js`, run by `bump.js`) |
 | `Modules/*.lua` | one builder per module, grouped by category |
 
 A module's options are a list of cards built from descriptors:

@@ -66,9 +66,19 @@ function Glow.StartAnts(owner, o)
 
 	local w, h = Size(owner)
 	if not w or w <= 0 or h <= 0 then
+		-- not laid out yet (a freshly built icon): look again in a moment
 		f:Hide()
+		st.retries = (st.retries or 0) + 1
+		if st.retries <= 8 and not st.waiting then
+			st.waiting = true
+			C_Timer.After(0.25, function()
+				st.waiting = false
+				if not st.stopped and owner.__xuiShine == st then Glow.StartShine(owner, o, true) end
+			end)
+		end
 		return
 	end
+	st.retries = 0
 	w, h = w + 2 * off, h + 2 * off
 
 	local lines = max(1, floor(o.lines or 8))
@@ -204,19 +214,21 @@ end
 -- began and the sparks stay evenly spaced. This is the Autocast shine on the
 -- engine's aura buttons, where LibCustomGlow's OnUpdate version cannot run.
 --------------------------------------------------------------------------------
--- one small spark cut out of the artifact sheet: the same cell LibCustomGlow draws
--- its Autocast Shine with (the whole sheet shows as a smudge)
-local SPARK = [[Interface\Artifacts\Artifacts]]
-local SPARK_COORDS = { 0.3984375, 0.4453125, 0.40234375, 0.44921875 }
+-- our own soft spark (Media/spark.tga, made by tools/gen-media.js): the game's
+-- artifact sheet moved between builds, and cutting a spark out of it showed
+-- nothing but a smudge
+local SPARK = [[Interface\AddOns\XerionUI\Media\spark]]
 
 -- o: color, particles (sparks), frequency (laps per second), scale, offset
-function Glow.StartShine(owner, o)
+function Glow.StartShine(owner, o, isRetry)
 	local st = owner.__xuiShine
 	if not st then
 		st = { sparks = {} }
 		st.frame = CreateFrame("Frame", nil, owner)
 		owner.__xuiShine = st
 	end
+	if not isRetry then st.retries = 0 end
+	st.stopped = false
 	local f = st.frame
 	Level(f, owner, 4)
 	local off = o.offset or 0
@@ -250,8 +262,6 @@ function Glow.StartShine(owner, o)
 			if not sp then
 				sp = { tex = f:CreateTexture(nil, "OVERLAY", nil, 7) }
 				sp.tex:SetTexture(SPARK)
-				sp.tex:SetTexCoord(SPARK_COORDS[1], SPARK_COORDS[2], SPARK_COORDS[3], SPARK_COORDS[4])
-				sp.tex:SetDesaturated(true) -- the colour is ours: tinted from white
 				sp.tex:SetBlendMode("ADD")
 				sp.ag = sp.tex:CreateAnimationGroup()
 				sp.ag:SetLooping("REPEAT")
@@ -308,6 +318,7 @@ end
 function Glow.StopShine(owner)
 	local st = owner.__xuiShine
 	if not st then return end
+	st.stopped = true
 	for _, sp in ipairs(st.sparks) do
 		sp.ag:Stop()
 		sp.tex:Hide()

@@ -24,7 +24,7 @@ XUI:GetModule("AutoGossip"):SetPicked(555001, true)
 SlashCmdList.XERIONUI("")
 MOCK.Advance(0.5)
 MOCK.crop = "XUI_OptionsFrame"
-local keys = { "style", "general", "profiles" }
+local keys = { "style", "general", "profiles", "changelog" }
 for _, m in ipairs(XUI.modules) do keys[#keys + 1] = m.key end
 for key in pairs(XUI.Options.groupByKey) do keys[#keys + 1] = key end
 for _, key in ipairs(keys) do

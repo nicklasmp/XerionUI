@@ -28,3 +28,4 @@ const date = new Date().toISOString().slice(0, 10);
 const entry = `\n## ${next} - ${date}\n${notes.map((n) => "- " + n).join("\n")}\n`;
 fs.writeFileSync(cl, head + entry + old.replace(/^\n+/, "\n"));
 console.log(`${m[1]}.${m[2]}.${m[3]} -> ${next}`);
+require("./genchangelog.js");

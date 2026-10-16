@@ -21,11 +21,13 @@ Panel.lua
 PageHead.lua
 Sidebar.lua
 Preview.lua
+ChangelogData.lua
 
 # System pages, in sidebar order
 Pages\Style.lua
 Pages\General.lua
 Pages\Profiles.lua
+Pages\Changelog.lua
 
 # Module options
 Modules\Combat.lua

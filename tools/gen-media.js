@@ -183,3 +183,13 @@ function writeTGA(name, c, color) {
   cut(o, roundRect(1, 1, 15, 15, 4));
   writeTGA('roundline', o);
 }
+
+// spark: a soft round glow with a bright core, the sparks of the autocast shine
+{
+  const c = canvas(32);
+  for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) {
+    const r = Math.hypot(x + 0.5 - 16, y + 0.5 - 16) / 16;
+    c.a[y * 32 + x] = r >= 1 ? 0 : Math.min(1, Math.pow(1 - r, 1.6) * 1.25);
+  }
+  writeTGA('spark', c);
+}

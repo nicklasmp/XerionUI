@@ -400,15 +400,15 @@ end
 
 --------------------------------------------------------------------------------
 -- Glows
--- PIXEL and PULSE are our own animation-group glows (Core/Glow.lua): no Lua
--- per frame, and safe on the engine's aura buttons. AUTOCAST, BUTTON and
--- PROC come from LibCustomGlow, which animates in OnUpdate scripts; on an
--- engine button (engineSafe) those fall back to PIXEL.
+-- PIXEL, PULSE and the autocast shine are our own animation-group glows
+-- (Core/Glow.lua): no Lua per frame, and safe on the engine's aura buttons.
+-- BUTTON and PROC come from LibCustomGlow, which animates in OnUpdate scripts;
+-- on an engine button (engineSafe) those fall back to PIXEL.
 -- Starting the same glow again is a no-op, so callers may simply call
 -- ShowGlow on every refresh.
 --------------------------------------------------------------------------------
 local GLOW_KEY = "XerionUI"
-local SCRIPTED = { AUTOCAST = true, BUTTON = true, PROC = true }
+local SCRIPTED = { BUTTON = true, PROC = true }
 
 local function GlowSignature(kind, g)
 	local r, gg, b, a = UnpackColor(g.color)
@@ -426,8 +426,6 @@ function Style:HideGlow(frame)
 		XUI.Glow.StopPulse(frame)
 	elseif current == "SHINE" then
 		XUI.Glow.StopShine(frame)
-	elseif current == "AUTOCAST" then
-		LCG.AutoCastGlow_Stop(frame, GLOW_KEY)
 	elseif current == "BUTTON" then
 		LCG.ButtonGlow_Stop(frame)
 	elseif current == "PROC" then
@@ -443,10 +441,12 @@ function Style:ShowGlow(frame, block, engineSafe)
 		self:HideGlow(frame)
 		return
 	end
-	if engineSafe and SCRIPTED[kind] then
-		-- LibCustomGlow animates in scripts, which an engine button never runs:
-		-- the shine has a script-free twin, the rest fall back to the pixel glow
-		kind = (kind == "AUTOCAST") and "SHINE" or "PIXEL"
+	if kind == "AUTOCAST" then
+		-- the autocast shine is always our script-free one
+		kind = "SHINE"
+	elseif engineSafe and SCRIPTED[kind] then
+		-- LibCustomGlow animates in scripts, which an engine button never runs
+		kind = "PIXEL"
 	end
 	local ok, w, h = pcall(frame.GetSize, frame)
 	if not ok or XUI.IsSecret(w) then w, h = 0, 0 end
@@ -476,9 +476,6 @@ function Style:ShowGlow(frame, block, engineSafe)
 			})
 			kind = "PIXEL"
 		end
-	elseif kind == "AUTOCAST" then
-		LCG.AutoCastGlow_Start(frame, color, floor(g.particles or 4), g.frequency or 0.25,
-			g.scale or 1, offset, offset, GLOW_KEY)
 	elseif kind == "BUTTON" then
 		LCG.ButtonGlow_Start(frame, color, g.frequency or 0.25)
 	elseif kind == "PROC" then

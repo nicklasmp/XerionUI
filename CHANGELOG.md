@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.21.0 - 2026-10-16
+- New Patch notes page in the options sidebar: shows the latest 5 versions from the changelog with a button for older ones (up to 15)
+
 ## 2.20.3 - 2026-10-16
 - Cooldown Manager page: pick a bar and Font or Glow with tabs so one card shows at a time instead of one per bar and module
 
