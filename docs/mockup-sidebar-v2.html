@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XerionUI sidebar forslag</title>
+<style>
+:root{--accent:#ff4d97;--bg:#0f0f0f;--win:#141414;--card:#1b1b1b;--line:#252525;--text:#ececec;--mut:#8a8a8a;--faint:#555;--green:#3ddc84;--amber:#f5a524;--red:#ff5a4f;
+ font-family:"Arial Narrow","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#2a2f36;color:var(--text);padding:28px 20px 48px;min-height:100vh}
+h1{font-size:20px;font-weight:700;margin-bottom:4px;font-family:"Segoe UI",system-ui,sans-serif}
+.sub{color:#b5bac2;font-size:13px;margin-bottom:22px;font-family:"Segoe UI",system-ui,sans-serif;max-width:640px;line-height:1.5}
+.row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.col{width:268px}
+.cap{font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;color:#cfd3d9;margin-bottom:8px}
+.cap b{color:#fff}.cap span{color:#97a0ab;display:block;font-size:12px;margin-top:2px;line-height:1.4}
+.pn{background:var(--bg);border:1px solid var(--line);border-radius:6px;height:640px;display:flex;flex-direction:column;overflow:hidden}
+.top{padding:14px 14px 8px}
+.brand{font-size:17px;font-weight:700;margin-bottom:12px}.brand b{color:var(--accent)}.brand i{font-style:normal;color:var(--faint);font-size:11px;margin-left:6px;font-weight:400}
+.search{height:30px;border-radius:5px;background:var(--card);border:1px solid var(--line);padding:0 10px;display:flex;align-items:center;font-size:13px;color:var(--faint)}
+.list{flex:1;overflow:auto;padding-bottom:12px}.list::-webkit-scrollbar{width:0}
+.it{cursor:pointer;user-select:none;position:relative}
+.sg{display:flex;gap:6px;padding:10px 14px 2px;font-size:12px}
+.sg button{all:unset;cursor:pointer;color:var(--faint);padding:3px 9px;border-radius:12px}
+.sg button.on{color:var(--text);background:var(--card)}
+
+/* A: text list, accent group headings (like the reference) */
+.A .gh{font-size:19px;font-weight:700;color:var(--accent);padding:18px 16px 6px;display:flex;justify-content:space-between;align-items:baseline;cursor:pointer}
+.A .gh small{font-size:12px;color:var(--faint);font-weight:400}
+.A .it{padding:7px 16px 7px 34px;font-size:15px;font-weight:700;color:#c9c9c9;letter-spacing:.01em}
+.A .it:hover{color:#fff}
+.A .it.off{color:#555}
+.A .it.sel{color:#fff}
+.A .it.sel:before{content:"";position:absolute;left:14px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:var(--accent)}
+.A .it.warn:after,.A .it.err:after{content:"";position:absolute;right:16px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--amber)}
+.A .it.err:after{background:var(--red)}
+.A .sys .it{padding-left:16px}.A .sys .it.sel:before{left:2px}
+.A .sys{padding-top:6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+
+/* B: quiet, hairline headings, selected row filled */
+.B .gh{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--faint);padding:18px 16px 6px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.B .gh:after{content:"";flex:1;height:1px;background:var(--line)}
+.B .gh small{order:2;font-weight:400;letter-spacing:0}
+.B .it{margin:1px 8px;padding:0 10px;height:30px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#aaa;border-radius:5px}
+.B .it:hover{background:#171717;color:#fff}
+.B .it.sel{background:var(--card);color:#fff;box-shadow:inset 2px 0 0 var(--accent)}
+.B .it.off{color:#5a5a5a}
+.B .it .st{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.B .it.off .st{background:transparent;box-shadow:inset 0 0 0 1px #555}
+.B .it.warn .st{background:var(--amber)}.B .it.err .st{background:var(--red)}
+.B .sys .it{color:#cfcfcf}
+
+/* C: accordion with a single open group, big touch rows, switch on hover */
+.C .gh{margin:8px 8px 0;padding:0 10px;height:34px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;border-radius:5px;cursor:pointer;color:#ddd}
+.C .gh:hover{background:#171717}
+.C .gh svg{width:9px;height:9px;transition:.15s;color:var(--faint)}
+.C .gh.open svg{transform:rotate(90deg);color:var(--accent)}
+.C .gh em{margin-left:auto;font-style:normal;font-size:11px;color:var(--faint);font-weight:400}
+.C .gh em.on{color:var(--accent)}
+.C .kids{margin:0 8px 4px 22px;border-left:1px solid var(--line)}
+.C .it{padding:0 10px;height:28px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#a8a8a8;border-radius:0 5px 5px 0;margin-left:-1px;border-left:2px solid transparent}
+.C .it:hover{background:#171717;color:#fff}
+.C .it.sel{color:#fff;border-left-color:var(--accent);background:#1a1a1a}
+.C .it.off{color:#5a5a5a}
+.C .it .mini{margin-left:auto;width:22px;height:12px;border-radius:6px;background:#333;position:relative;display:none}
+.C .it:hover .mini,.C .it.sel .mini{display:block}
+.C .it .mini:after{content:"";position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:#888}
+.C .it .mini.on{background:var(--accent)}.C .it .mini.on:after{left:12px;background:#fff}
+.C .it .dot{margin-left:auto;width:6px;height:6px;border-radius:50%}
+.C .it:hover .dot,.C .it.sel .dot{display:none}
+.C .sys{padding:8px 0 4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.C .sys .it{margin:0 8px;border-radius:5px;border-left:0}
+.C .sys .it.sel{box-shadow:inset 2px 0 0 var(--accent)}
+.legend{margin-top:22px;font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;color:#aab1bb;line-height:1.7;max-width:900px}
+.legend b{color:#fff}
+</style></head><body>
+<h1>XerionUI sidebar &mdash; tre nye bud</h1>
+<p class="sub">Inspireret af EllesmereUI-listen: ingen ikoner, ren tekst, tydelige gruppeoverskrifter. Alle tre er klikbare. Skriv A, B eller C (eller bland), s&aring; bygger jeg den i spillet.</p>
+<div class="row" id="row"></div>
+<p class="legend"><b>Fælles for alle:</b> modulnavne i den tunge smalle font, slukkede moduler dæmpet, amber/rød prik ved problem, filter All/Active/Inactive og søgning beholdes, grupper kan foldes. Spell-ikonerne udgår, fordi de gør listen uroligere end navnene.</p>
+<script>
+const SYS=['Global Style','General','Profiles'];
+const GROUPS=[
+ ['Combat',[['Melee Indicator',1],['Stoneform Bleed Alert',1,'warn']]],
+ ['Group',[['Aggro Check',1],['Auto Mark Tank',1],['Auto NPC Dialog',1],['Bloodlust Ready',0],['Bonus Roll Confirm',1],['CC Tracker',1,'err'],['Co-Tank',0],['Externals',1],['Meter Reset',1],['Party Cooldowns',1],['Party Interrupts',1]]],
+ ['Tweaks',[['Nameplates',1],['FocusKick Sound',0],['Zone Text',1]]],
+ ['Death Knight',[['Rune Alert',1],['Reaper\u2019s Mark',0]]]];
+const st={A:{sel:'Aggro Check',closed:{}},B:{sel:'Aggro Check',closed:{}},C:{sel:'Aggro Check',closed:{Combat:1,Tweaks:1,'Death Knight':1}}};
+const caps={A:['A &middot; Ren tekstliste','Store accentfarvede gruppenavne, prik ved valgt. N&aelig;rmest referencen.'],
+ B:['B &middot; Rolig liste','Små versaler med streg, valgt r&aelig;kke fyldt, status-prik til h&oslash;jre.'],
+ C:['C &middot; Harmonika','Grupper folder sammen, undermoduler med tr&aelig;linje, switch ved hover.']};
+const chev='<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 1.500 4 3.500-4 3.500"/></svg>';
+function item(v,n,on,h,extra=''){const cls=['it',st[v].sel==n?'sel':'',on?'':'off',h||''].join(' ');
+ let inner=n;
+ if(v=='B')inner=`${n}<span class="st"></span>`;
+ if(v=='C')inner=`${n}${h||on?`<span class="dot" style="background:${h=='err'?'var(--red)':h=='warn'?'var(--amber)':'var(--green)'}"></span>`:'<span class="dot" style="box-shadow:inset 0 0 0 1px #555"></span>'}<span class="mini ${on?'on':''}"></span>`;
+ return `<div class="${cls}" onclick="pick('${v}',\`${n.replace(/'/g,"\\'")}\`)">${inner}</div>`;}
+function panel(v){
+ let h=`<div class="top"><div class="brand"><b>Xerion</b>UI<i>2.16.0</i></div><div class="search">Search</div></div><div class="sg"><button class="on">All</button><button>Active</button><button>Inactive</button></div><div class="list">`;
+ h+=`<div class="sys">${SYS.map(n=>item(v,n,1)).join('')}</div>`;
+ GROUPS.forEach(([g,its])=>{const on=its.filter(i=>i[1]).length,closed=st[v].closed[g];
+  if(v=='A')h+=`<div class="gh" onclick="fold('${v}','${g}')">${g}<small>${on}/${its.length}</small></div>`;
+  if(v=='B')h+=`<div class="gh" onclick="fold('${v}','${g}')">${g.toUpperCase()}<small>${on}/${its.length}</small></div>`;
+  if(v=='C')h+=`<div class="gh ${closed?'':'open'}" onclick="fold('${v}','${g}')">${chev}${g}<em class="${on?'on':''}">${on}/${its.length}</em></div>`;
+  if(!closed||v!='C'&&!closed){ if(!closed){ if(v=='C')h+='<div class="kids">'; h+=its.map(i=>item(v,i[0],i[1],i[2])).join(''); if(v=='C')h+='</div>'; } }
+ });
+ return h+'</div>';}
+function draw(){document.getElementById('row').innerHTML=['A','B','C'].map(v=>`<div class="col"><div class="cap"><b>${caps[v][0]}</b><span>${caps[v][1]}</span></div><div class="pn ${v}">${panel(v)}</div></div>`).join('');}
+function pick(v,n){st[v].sel=n;draw();}
+function fold(v,g){st[v].closed[g]=!st[v].closed[g];draw();}
+draw();
+</script></body></html>

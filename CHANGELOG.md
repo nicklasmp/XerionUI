@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.17.0 - 2026-10-16
+- Options sidebar: text-only accordion with foldable groups, guide line, status dot that turns into a switch on hover
+
 ## 2.16.1 - 2026-10-16
 - Auto Mark Tank: slimmer card with the close button integrated as an edge strip
 

@@ -157,6 +157,33 @@ O:RegisterModuleOptions("EUIChat", function(ctx, m, G)
 	}
 end)
 
+O:RegisterModuleOptions("EUICDMBarGlows", function(ctx, m, G)
+	local cards = {}
+	for _, bar in ipairs(XUI:GetModule("EUICDMBarFonts").BarList()) do
+		local choice = m.SeedBar(bar.key)
+		local base = "bars." .. bar.key
+		local on = base .. ".on"
+		local function off() return choice.on ~= true end
+		local items = {
+			{ type = "toggle", label = "Own glow for this bar", path = on, width = "full",
+				get = function() return choice.on == true end,
+				tip = "Replaces EllesmereUI's glow on this bar's icons (active, cooldown ready, procs, pandemic) with the glow set here." },
+		}
+		for _, item in ipairs(G.Glow(base .. ".glow", { global = true })) do
+			local was = item.disabled
+			item.disabled = function(c) return off() or (was and was(c)) or false end
+			items[#items + 1] = item
+		end
+		cards[#cards + 1] = Card(tostring(bar.name), items)
+	end
+	if #cards == 0 then
+		cards[1] = Card("Bars", {
+			{ type = "description", width = "full", text = "No Cooldown Manager bars found yet. Open this page again once EllesmereUI's Cooldown Manager has loaded." },
+		})
+	end
+	return cards
+end)
+
 O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
 	local cards = {}
 	for _, bar in ipairs(m.BarList()) do
