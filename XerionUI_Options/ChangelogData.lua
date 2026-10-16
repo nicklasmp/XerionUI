@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.22.2", date = "2026-10-16", notes = {
+		"Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows",
+	} },
 	{ version = "2.22.1", date = "2026-10-16", notes = {
 		"Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card",
 	} },
@@ -45,8 +48,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.18.3", date = "2026-10-16", notes = {
 		"Remove the unused automatic profile switching",
-	} },
-	{ version = "2.18.2", date = "2026-10-16", notes = {
-		"Cleanup and performance pass: fix a leaked options listener, stop redundant page and CDM bar refreshes, cache sidebar health dots, remove dead theme and layout code",
 	} },
 }
