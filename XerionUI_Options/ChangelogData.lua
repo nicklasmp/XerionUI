@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.21.1", date = "2026-10-16", notes = {
+		"Autocast shine: draw the sparks from our own spark texture (the game's artifact sheet cut-out showed nothing), always use the script-free shine, retry when the icon has no size yet; Cooldown Manager Bar Glows debug shows what EllesmereUI asked for",
+	} },
 	{ version = "2.21.0", date = "2026-10-16", notes = {
 		"New Patch notes page in the options sidebar: shows the latest 5 versions from the changelog with a button for older ones (up to 15)",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.16.1", date = "2026-10-16", notes = {
 		"Auto Mark Tank: slimmer card with the close button integrated as an edge strip",
-	} },
-	{ version = "2.16.0", date = "2026-10-16", notes = {
-		"Options: rounded cards, fields and buttons (9-slice), pink default accent, brighter labels",
 	} },
 }
