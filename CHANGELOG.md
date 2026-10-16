@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.18.1 - 2026-10-16
+- Global Style: remove the Themes card
+- Profiles: remove the Switch automatically card
+
 ## 2.18.0 - 2026-10-16
 - New module Cooldown Manager Bar Glows: choose a glow type (Pixel, Pulse, Autocast shine, Action button, Proc) with its own color, speed and size per EllesmereUI Cooldown Manager bar
 
