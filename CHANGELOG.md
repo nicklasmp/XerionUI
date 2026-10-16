@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.13.0 - 2026-10-16
+- Auto NPC Dialog: records every dialog opened in a dungeon (dungeon, NPC, option text) and lists them by dungeon in the options with a switch each for auto-pick and confirm; built-ins can be switched off one by one
+
 ## 2.12.0 - 2026-10-16
 - Options sidebar: on/off switch per module and an All/Active filter
 

@@ -4,6 +4,13 @@ MOCK.Fire("PLAYER_LOGIN")
 MOCK.Advance(0.5)
 local XUI = _G.XerionUI
 for _, m in ipairs(XUI.modules) do m:SetEnabled(true) end
+-- a few dialogs for the Auto NPC Dialog page
+XUI.DB.global.gossipSeen = {
+	[555001] = { text = "We're ready. Open the gate.", npc = "Kaelen Dawnward", zone = "Ara-Kara", kind = "Dungeon" },
+	[555002] = { text = "Tell me what happened here.", npc = "Kaelen Dawnward", zone = "Ara-Kara", kind = "Dungeon" },
+	[131567] = { text = "Take us to the boss.", npc = "Scout Velra", zone = "Murder Row", kind = "Dungeon" },
+}
+XUI:GetModule("AutoGossip"):SetPicked(555001, true)
 SlashCmdList.XERIONUI("")
 MOCK.Advance(0.5)
 MOCK.crop = "XUI_OptionsFrame"

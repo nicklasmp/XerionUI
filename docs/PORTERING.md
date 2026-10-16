@@ -57,7 +57,7 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Raid Frame Manager | I | ❓ | Erstatter Blizzards manager — stor |
 | Dungeon Teleports | I | ❓ | Du har allerede TeleportMenu installeret |
 | Party Cooldowns (Party CDs) | K | ✅ | Port 14. okt 2026: ikoner pr. party-medlem med nedtælling, læst via sensor-containere i keys. Droppet: radial swipe, HealerExternal-ikon, generisk party-frame-søgning (kun EllesmereUI + fri blok). Utestet i spillet |
-| Auto NPC Dialog (Auto Gossip) | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. Utestet i spillet |
+| Auto NPC Dialog (Auto Gossip) | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. 16. okt: registrerer dialoger i instanser (dungeon, NPC, tekst) og viser dem pr. dungeon med switch til auto-valg og bekræft. Utestet i spillet |
 | Kira Reminders: Damage Amp + Chaos Barrage (Murder Row, Kystia Manaheart) | K | ✅ | Port 14. okt 2026 som to moduler (DamageAmp, ChaosBarrage). Droppet: nameplate-fastgørelse på EllesmereUI (brug position.attach), chat-debug/log, manuel target-bar. Utestet i spillet |
 | Kira Reminders: resten (BigWigs-lister pr. dungeon, boss-HP-kald, wrong target, trash aura-lyde) | K | ❌ | Fravalgt af Nicklas 14. okt 2026; kan tages op senere (5.400 linjer, kun to dungeons har indbyggede regler) |
 | MDT Compact / MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |

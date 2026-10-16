@@ -337,17 +337,211 @@ O:RegisterModuleOptions("AggroCheck", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+-- Auto NPC Dialog: every dialog seen in a dungeon, grouped by dungeon, with a
+-- switch to pick it and one to answer its "are you sure?" box.
+local GOSSIP_HEAD_H, GOSSIP_ROW_H = 30, 44
+
+local function GossipList(parent, ctx, m)
+	local f = CreateFrame("Frame", nil, parent)
+	f.height = 40
+	f.heads, f.rows = {}, {}
+	f.empty = O:Text(f, O.SIZE.text, "muted")
+	f.empty:SetPoint("TOPLEFT", 0, -4)
+	f.empty:SetPoint("TOPRIGHT", 0, -4)
+	f.empty:SetJustifyH("LEFT")
+	f.empty:SetWordWrap(true)
+
+	local function Changed() ctx:Changed("options") end
+
+	local function Head(i)
+		local h = f.heads[i]
+		if h then return h end
+		h = CreateFrame("Frame", nil, f)
+		h:SetHeight(GOSSIP_HEAD_H)
+		h.name = O:Text(h, O.SIZE.text, "text")
+		h.name:SetPoint("BOTTOMLEFT", 0, 6)
+		h.info = O:Text(h, O.SIZE.small, "muted")
+		h.info:SetPoint("BOTTOMRIGHT", 0, 7)
+		h.line = O:Rect(h, "line", "ARTWORK")
+		h.line:SetHeight(1)
+		h.line:SetPoint("BOTTOMLEFT")
+		h.line:SetPoint("BOTTOMRIGHT")
+		f.heads[i] = h
+		return h
+	end
+
+	local function Row(i)
+		local r = f.rows[i]
+		if r then return r end
+		r = CreateFrame("Frame", nil, f)
+		r:SetHeight(GOSSIP_ROW_H - 2)
+		r.bg = O:Rect(r, "control", "BACKGROUND")
+		r.bg:SetAllPoints()
+		r.bg:SetAlpha(0.45)
+
+		r.pick = CreateFrame("Button", nil, r)
+		r.pick:SetPoint("TOPLEFT")
+		r.pick:SetPoint("BOTTOMLEFT")
+		r.pick:SetWidth(44)
+		r.pick.switch = O.Switch(r.pick)
+		r.pick.switch:SetPoint("LEFT", 8, 0)
+		r.pick:SetScript("OnClick", function()
+			m:SetPicked(r.entry.id, not r.entry.picked)
+			Changed()
+		end)
+		O:Tooltip(r.pick, "Pick automatically")
+
+		r.forget = O:IconButton(r, "close", 22, "Forget this dialog", function()
+			m:Forget(r.entry.id)
+			Changed()
+		end)
+		r.forget:SetPoint("RIGHT", -6, 0)
+
+		r.confirm = CreateFrame("Button", nil, r)
+		r.confirm:SetSize(86, GOSSIP_ROW_H - 2)
+		r.confirm.switch = O.Switch(r.confirm)
+		r.confirm.switch:SetPoint("LEFT", 0, 0)
+		r.confirm.label = O:Text(r.confirm, O.SIZE.small, "label")
+		r.confirm.label:SetPoint("LEFT", r.confirm.switch, "RIGHT", 6, 0)
+		r.confirm.label:SetText("Confirm")
+		r.confirm:SetScript("OnClick", function()
+			m:SetConfirm(r.entry.id, not r.entry.confirm)
+			Changed()
+		end)
+		r.confirm:SetScript("OnEnter", function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+			GameTooltip:SetText("Answer \"are you sure?\"")
+			GameTooltip:AddLine("Also accepts the confirmation box this option opens.", 1, 1, 1, true)
+			local t = r.entry and r.entry.confirmText
+			if t then GameTooltip:AddLine("\"" .. t .. "\"", 0.7, 0.7, 0.7, true) end
+			GameTooltip:Show()
+		end)
+		r.confirm:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+		r.text = O:Text(r, O.SIZE.text, "text")
+		r.text:SetPoint("TOPLEFT", 52, -7)
+		r.text:SetJustifyH("LEFT")
+		r.text:SetWordWrap(false)
+		r.sub = O:Text(r, O.SIZE.small, "muted")
+		r.sub:SetPoint("TOPLEFT", 52, -25)
+		r.sub:SetJustifyH("LEFT")
+		r.sub:SetWordWrap(false)
+		f.rows[i] = r
+		return r
+	end
+
+	local function Fill(r, e)
+		r.entry = e
+		r.pick.switch:SetState(e.picked, false)
+		if e.text then
+			r.text:SetText("\"" .. e.text .. "\"")
+			r.text:SetTextColor(O:Color(e.picked and "text" or "label"))
+		else
+			r.text:SetText("Text not seen yet - talk to the NPC once")
+			r.text:SetTextColor(O:Color("faint"))
+		end
+		local sub = { e.npc or "Unknown NPC", "ID " .. e.id }
+		if e.builtin then sub[#sub + 1] = "built-in" end
+		r.sub:SetText(table.concat(sub, "  -  "))
+		r.confirm.switch:SetState(e.confirm, false)
+		r.forget:SetShown(not e.builtin)
+		r.confirm:ClearAllPoints()
+		if e.builtin then
+			r.confirm:SetPoint("RIGHT", -6, 0)
+		else
+			r.confirm:SetPoint("RIGHT", r.forget, "LEFT", -8, 0)
+		end
+		r.text:SetPoint("RIGHT", r.confirm, "LEFT", -8, 0)
+		r.sub:SetPoint("RIGHT", r.confirm, "LEFT", -8, 0)
+	end
+
+	function f:Refresh()
+		local filter = ctx.gossipFilter or "all"
+		local list = {}
+		for _, e in ipairs(m:Catalogue()) do
+			if filter == "all" or e.picked then list[#list + 1] = e end
+		end
+		local y, nh, nr, i = 0, 0, 0, 1
+		while i <= #list do
+			-- one dungeon: a header, then its dialogs
+			local zone, first = list[i].zone, list[i]
+			local j, on = i, 0
+			while j <= #list and list[j].zone == zone do
+				if list[j].picked then on = on + 1 end
+				j = j + 1
+			end
+			nh = nh + 1
+			local h = Head(nh)
+			h.name:SetText(zone or "Not seen in a dungeon yet")
+			h.name:SetTextColor(O:Color(zone and "text" or "muted"))
+			local info = {}
+			if first.kind then info[#info + 1] = first.kind end
+			info[#info + 1] = ("%d of %d picked"):format(on, j - i)
+			h.info:SetText(table.concat(info, "  -  "))
+			h:ClearAllPoints()
+			h:SetPoint("TOPLEFT", 0, -y)
+			h:SetPoint("TOPRIGHT", 0, -y)
+			h:Show()
+			y = y + GOSSIP_HEAD_H + 4
+			for k = i, j - 1 do
+				nr = nr + 1
+				local r = Row(nr)
+				Fill(r, list[k])
+				r:ClearAllPoints()
+				r:SetPoint("TOPLEFT", 0, -y)
+				r:SetPoint("TOPRIGHT", 0, -y)
+				r:Show()
+				y = y + GOSSIP_ROW_H
+			end
+			y = y + 6
+			i = j
+		end
+		for k = nh + 1, #self.heads do self.heads[k]:Hide() end
+		for k = nr + 1, #self.rows do self.rows[k]:Hide() end
+		if #list == 0 then
+			self.empty:SetText(filter == "all"
+				and "No dialogs seen yet. Talk to an NPC inside a dungeon and its options show up here, sorted by dungeon."
+				or "Nothing is picked. Switch a dialog on under All.")
+			self.empty:Show()
+			y = 40
+		else
+			self.empty:Hide()
+		end
+		self.height = y
+	end
+
+	function f:Measure()
+		self:SetHeight(self.height)
+		return self.height
+	end
+
+	-- a dialog seen while the window is open shows up straight away
+	XUI:On("GossipSeen", f, function() if ctx.page then ctx.page:RefreshSoon() end end)
+	return f
+end
+
 O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 	return {
 		Card("When", {
 			{ type = "toggle", label = "Use the built-in dungeon list", path = "useBuiltin",
-				tip = "Dialogs shipped with XerionUI, picked automatically. On by default. Your own IDs below are used either way." },
+				tip = "Dialogs shipped with XerionUI, picked automatically. On by default; each can be switched off below." },
 			{ type = "toggle", label = "Only inside instances", path = "instanceOnly" },
 			{ type = "toggle", label = "Say what it picked", path = "announce" },
 		}),
-		Card("Options", {
+		Card("Dialogs", {
 			{ type = "description", width = "full",
-				text = "Your own gossip option IDs on top of the built-in list, comma separated. Talk to the NPC and press the button to see the IDs on offer." },
+				text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically." },
+			{ type = "tabs", width = "full",
+				values = { { value = "all", text = "All" }, { value = "picked", text = "Picked" } },
+				get = function(c) return c.gossipFilter or "all" end,
+				set = function(c, v) c.gossipFilter = v end },
+			{ type = "custom", width = "full", build = function(parent, c) return GossipList(parent, c, m) end },
+			{ type = "button", text = "Forget unpicked", tip = "Removes every listed dialog that is not switched on.",
+				onClick = function() m:ForgetUnpicked() ctx:Changed("options") end },
+		}, { columns = 1 }),
+		Card("Manual IDs", {
+			{ type = "description", width = "full",
+				text = "Gossip option IDs typed by hand, comma separated. The switches above edit these lists too. Talk to the NPC and press the button to print the IDs on offer." },
 			{ type = "input", label = "Pick automatically", width = "full",
 				get = function() return m.ListText(m.db.options) end,
 				set = function(_, v) m.db.options = m.ParseList(v) end },
@@ -355,7 +549,6 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 				get = function() return m.ListText(m.db.confirm) end,
 				set = function(_, v) m.db.confirm = m.ParseList(v) end },
 			{ type = "button", text = "Print the open options", onClick = function() m:PrintOptions() end },
-			{ type = "description", width = "full", text = function() return "Listed now:\n" .. m:ListLabels() end },
 		}),
 	}
 end)

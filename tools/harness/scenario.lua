@@ -345,6 +345,73 @@ Step("who has the key: lists this dungeon's keys", function()
 	m:Refresh()
 end)
 
+Step("auto NPC dialog: records dungeon dialogs and picks switched-on ones", function()
+	local m = XUI:GetModule("AutoGossip")
+	assert(m and m.running, "the module should be running")
+	local saved = {
+		GetInstanceInfo = _G.GetInstanceInfo, IsInInstance = _G.IsInInstance, UnitName = _G.UnitName,
+		UnitGUID = _G.UnitGUID, C_GossipInfo = _G.C_GossipInfo,
+	}
+	local selected = {}
+	local inside = true
+	_G.GetInstanceInfo = function()
+		if inside then return "Ara-Kara", "party", 23, "Mythic", 5, 0, false, 2660 end
+		return "Dornogal", "none", 0, "", 0, 0, false, 1
+	end
+	_G.IsInInstance = function() return inside, inside and "party" or "none" end
+	_G.UnitName = function(u) return u == "npc" and "|cffffd200Kaelen|r" or "Xerion" end
+	_G.UnitGUID = function(u) return u == "npc" and "Creature-0-1-2-3-219123-000ABC" or "Player-1-" .. tostring(u) end
+	_G.C_GossipInfo = {
+		GetOptions = function()
+			return { { gossipOptionID = 555001, name = "Let's go!" }, { gossipOptionID = 555002, name = "Tell me more." } }
+		end,
+		SelectOption = function(id) selected[#selected + 1] = id end,
+	}
+	local seen = XUI.DB.global.gossipSeen
+	seen[555001], seen[555002] = nil, nil
+
+	MOCK.Fire("GOSSIP_SHOW")
+	MOCK.Advance(0.1)
+	local e = seen[555001]
+	assert(e and e.text == "Let's go!" and e.npc == "Kaelen" and e.npcID == 219123, "the dialog should be recorded with its NPC")
+	assert(e.zone == "Ara-Kara" and e.kind == "Dungeon", "the dialog should be recorded with its dungeon")
+	assert(#selected == 0, "nothing is picked before it is switched on")
+
+	local found
+	for _, c in ipairs(m:Catalogue()) do if c.id == 555001 then found = c end end
+	assert(found and not found.picked and found.zone == "Ara-Kara", "the catalogue should list the seen dialog")
+
+	m:SetPicked(555001, true)
+	assert(m:IsPicked(555001) and m:IsPicked(555002) == false, "switching on picks only that dialog")
+	MOCK.Fire("GOSSIP_SHOW")
+	MOCK.Advance(0.1)
+	assert(selected[1] == 555001, "a switched-on dialog should be selected, got " .. tostring(selected[1]))
+
+	-- built-ins can be switched off one by one
+	assert(m:IsPicked(131567), "a built-in is picked by default")
+	m:SetPicked(131567, false)
+	assert(not m:IsPicked(131567), "a built-in can be switched off")
+	m:SetPicked(131567, true)
+	assert(m:IsPicked(131567), "and on again")
+	assert(m:IsConfirm(48126), "a built-in confirm is on by default")
+	m:SetConfirm(48126, false)
+	assert(not m:IsConfirm(48126), "a built-in confirm can be switched off")
+	m:SetConfirm(48126, true)
+
+	-- outside instances nothing is recorded
+	inside = false
+	MOCK.Advance(6)
+	seen[555002] = nil
+	MOCK.Fire("GOSSIP_SHOW")
+	MOCK.Advance(0.1)
+	assert(seen[555002] == nil, "dialogs outside instances are not recorded")
+
+	m:SetPicked(555001, false)
+	m:Forget(555001)
+	assert(seen[555001] == nil, "forget removes a dialog")
+	for k, v in pairs(saved) do _G[k] = v end
+end)
+
 Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	local applied = 0
 	local ns = { plates = {}, GetOffensiveDispelTypes = function() return false, false end }

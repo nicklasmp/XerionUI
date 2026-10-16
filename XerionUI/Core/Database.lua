@@ -47,6 +47,9 @@ DB.GLOBAL_DEFAULTS = {
 	},
 	-- named looks of the global style, shared by every profile
 	themes = {},
+	-- gossip options seen inside instances, [optionID] = { text, npc, zone, ... }
+	-- (Modules/Group/AutoGossip.lua)
+	gossipSeen = {},
 	-- switch profile by instance type or specialization (Core/AutoProfile.lua)
 	autoProfiles = { enabled = false, spec = {}, instance = {} },
 	unlock = {
