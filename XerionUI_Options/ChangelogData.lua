@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.26.1", date = "2026-10-16", notes = {
+		"Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row",
+	} },
 	{ version = "2.26.0", date = "2026-10-16", notes = {
 		"Style cards (Font, Border, Glow, Icon, Bar, Background) get a Reset to default button that puts that card back to the module's or the Global Style default",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.21.2", date = "2026-10-16", notes = {
 		"Cooldown Manager page: a switched-off Font or Glow part now says so, with an Enable button",
-	} },
-	{ version = "2.21.1", date = "2026-10-16", notes = {
-		"Autocast shine: draw the sparks from our own spark texture (the game's artifact sheet cut-out showed nothing), always use the script-free shine, retry when the icon has no size yet; Cooldown Manager Bar Glows debug shows what EllesmereUI asked for",
 	} },
 }

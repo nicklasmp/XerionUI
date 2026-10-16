@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.26.1 - 2026-10-16
+- Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row
+
 ## 2.26.0 - 2026-10-16
 - Style cards (Font, Border, Glow, Icon, Bar, Background) get a Reset to default button that puts that card back to the module's or the Global Style default
 
