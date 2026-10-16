@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.22.0", date = "2026-10-16", notes = {
+		"Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new",
+	} },
 	{ version = "2.21.3", date = "2026-10-16", notes = {
 		"Patch notes: open them by clicking the version number in the window header instead of a sidebar entry",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	{ version = "2.18.1", date = "2026-10-16", notes = {
 		"Global Style: remove the Themes card",
 		"Profiles: remove the Switch automatically card",
-	} },
-	{ version = "2.18.0", date = "2026-10-16", notes = {
-		"New module Cooldown Manager Bar Glows: choose a glow type (Pixel, Pulse, Autocast shine, Action button, Proc) with its own color, speed and size per EllesmereUI Cooldown Manager bar",
 	} },
 }

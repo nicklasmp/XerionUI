@@ -185,6 +185,14 @@ local function CreateWindow()
 		XUI:SetUnlocked(true)
 	end)
 	unlock:SetPoint("RIGHT", close, "LEFT", -4, 0)
+	local notes = O:IconButton(header, "notes", 30, "Patch notes", function() O:Open("changelog") end)
+	notes:SetPoint("RIGHT", unlock, "LEFT", -4, 0)
+	-- accent dot while there are patch notes you have not opened
+	notes.dot = O:Icon(notes, "circle", 9, nil, "OVERLAY")
+	notes.dot:SetVertexColor(O:Accent())
+	notes.dot:SetPoint("TOPRIGHT", -3, -3)
+	S.notesButton = notes
+	O:RefreshNotesButton()
 
 	-- sidebar
 	local side = CreateFrame("Frame", nil, S.frame)
@@ -305,6 +313,15 @@ local function CreateWindow()
 	end)
 end
 
+-- Dot and highlight of the Patch notes button; call after the notes were read.
+function O:RefreshNotesButton()
+	local b = S.notesButton
+	if not b then return end
+	b.dot:SetShown(O.ChangelogUnread() > 0)
+	b.dot:SetVertexColor(O:Accent())
+	b:SetActive(S.currentKey == "changelog")
+end
+
 function O:Open(key)
 	if not S.frame then CreateWindow() end
 	key = key or S.currentKey or (O.systemPages[1] and O.systemPages[1].key)
@@ -317,6 +334,11 @@ function O:Open(key)
 	end
 	if S.currentKey and S.pages[S.currentKey] and S.currentKey ~= key then S.pages[S.currentKey]:Hide() end
 	S.currentKey = key
+	if key == "changelog" then
+		O.ChangelogOpened()
+		if S.pages[key] then S.pages[key]:Rebuild() end
+	end
+	O:RefreshNotesButton()
 	S.frame:Show()
 	O.SyncAutoPreview(key)
 	S.UpdateDockSoon()

@@ -34,6 +34,7 @@ local EXPORT_PREFIX = "!XUI1!"
 DB.GLOBAL_DEFAULTS = {
 	accent = { 1, 0.30, 0.59, 1 },
 	loginMessage = false,
+	seenVersion = "", -- newest version whose patch notes were opened
 	panel = {
 		scale = 1,
 		-- from SharedMedia_MyMedia; Media:Fetch falls back to Arial Narrow without it

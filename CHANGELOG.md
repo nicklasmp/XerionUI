@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.22.0 - 2026-10-16
+- Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new
+
 ## 2.21.3 - 2026-10-16
 - Patch notes: open them by clicking the version number in the window header instead of a sidebar entry
 

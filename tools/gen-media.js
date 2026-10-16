@@ -172,6 +172,16 @@ function writeTGA(name, c, color) {
 }
 
 
+// notes (patch notes): a page with text lines
+{
+  const c = canvas(32);
+  const page = (x, y) => x >= 8 && x <= 24 && y >= 5 && y <= 27;
+  fill(c, page);
+  cut(c, (x, y) => x >= 10 && x <= 22 && y >= 7 && y <= 25);
+  for (const y of [11.5, 16, 20.5]) fill(c, line(12, y, 20, y, 1.8));
+  writeTGA('notes', c);
+}
+
 // round / roundline: 9-slice rounded rectangle (fill and 1px outline) for cards,
 // fields and buttons. Radius 5, slice margin 6 in the addon.
 {
