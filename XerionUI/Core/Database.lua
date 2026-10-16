@@ -88,7 +88,7 @@ DB.STYLE_DEFAULTS = {
 		frequency = 0.25,
 		length = 0,
 		thickness = 2,
-		particles = 4,
+		particles = 16,
 		scale = 1,
 		offset = 0,
 	},

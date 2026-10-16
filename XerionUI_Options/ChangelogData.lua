@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.25.1", date = "2026-10-16", notes = {
+		"Autocast shine: default particles 16 (EllesmereUI's default of four layers of four sparks); speed and scale already match",
+	} },
 	{ version = "2.25.0", date = "2026-10-16", notes = {
 		"Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)",
 		"Externals gets its own group under Group instead of sitting in Party Tracking",
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.21.0", date = "2026-10-16", notes = {
 		"New Patch notes page in the options sidebar: shows the latest 5 versions from the changelog with a button for older ones (up to 15)",
-	} },
-	{ version = "2.20.3", date = "2026-10-16", notes = {
-		"Cooldown Manager page: pick a bar and Font or Glow with tabs so one card shows at a time instead of one per bar and module",
 	} },
 }

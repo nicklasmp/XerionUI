@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.25.1 - 2026-10-16
+- Autocast shine: default particles 16 (EllesmereUI's default of four layers of four sparks); speed and scale already match
+
 ## 2.25.0 - 2026-10-16
 - Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)
 - Externals gets its own group under Group instead of sitting in Party Tracking
