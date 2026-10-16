@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.23.1 - 2026-10-16
+- Removed the Cooldown Manager Glow Probe diagnostics module
+
 ## 2.23.0 - 2026-10-16
 - Options: groups show one member at a time with tabs, and long pages split into tabs by card title instead of one long list
 - New module Cooldown Manager Glow Probe: diagnostics for why custom spell IDs get no active glow in EllesmereUI
