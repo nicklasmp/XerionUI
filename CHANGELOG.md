@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.21.2 - 2026-10-16
+- Cooldown Manager page: a switched-off Font or Glow part now says so, with an Enable button
+
 ## 2.21.1 - 2026-10-16
 - Autocast shine: draw the sparks from our own spark texture (the game's artifact sheet cut-out showed nothing), always use the script-free shine, retry when the icon has no size yet; Cooldown Manager Bar Glows debug shows what EllesmereUI asked for
 

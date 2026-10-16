@@ -274,6 +274,13 @@ O.groupPages["grp:cdm"] = function(g)
 			})
 			local function Part(m, part)
 				local ctx = O.ModuleContext(m)
+				-- a part that is switched off does nothing in the game: say so, with the way to switch it on
+				cards[#cards + 1] = O.Card(nil, {
+					{ type = "description", color = "label",
+						text = "This part is switched off, so nothing below has an effect in the game yet." },
+					{ type = "button", text = "Enable", primary = true,
+						onClick = function() m:SetEnabled(true) O:RefreshSidebar() O:RefreshPageHead() end },
+				}, { hidden = function() return m.db.enabled or state.part ~= part end })
 				for _, card in ipairs(O.moduleBuilders[m.key](ctx, m, O.Groups)) do
 					card.ctx = ctx
 					card.title = part == "font" and "Font" or "Glow"
