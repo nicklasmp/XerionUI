@@ -16,6 +16,7 @@ Dropdown.lua
 Page.lua
 Groups.lua
 Classes.lua
+ModuleGroups.lua
 Panel.lua
 PageHead.lua
 Sidebar.lua

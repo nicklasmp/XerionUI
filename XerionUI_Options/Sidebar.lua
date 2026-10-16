@@ -63,7 +63,7 @@ local function SidebarItem(i)
 	b.sw.switch:SetPoint("CENTER")
 	b.sw:SetScript("OnClick", function()
 		local m = b.module
-		if not m then return end
+		if not m or m.isGroup then return end
 		m:SetEnabled(not m.db.enabled)
 		O:RefreshSidebar()
 		O:RefreshPageHead()
@@ -71,7 +71,7 @@ local function SidebarItem(i)
 	end)
 	b.sw:SetScript("OnEnter", function()
 		O:PaintItem(b)
-		if b.module then
+		if b.module and not b.module.isGroup then
 			GameTooltip:SetOwner(b.sw, "ANCHOR_RIGHT")
 			GameTooltip:SetText(b.module.db.enabled and "Switch off" or "Switch on")
 			GameTooltip:Show()
@@ -114,11 +114,26 @@ end
 
 -- The dot's state is only read when the list is rebuilt (full); hovering just
 -- repaints from the cached state, so it does no health checks.
-local function DotState(m)
-	if not m.db.enabled then return "off" end
+local function ModuleDot(m)
 	if not m:CanRun() or (m.errorCount or 0) > 0 then return "bad" end
 	if #XUI.Health.Issues(m) > 0 then return "warn" end
 	return "on"
+end
+
+-- a group shows its worst member
+local RANK = { off = 0, on = 1, warn = 2, bad = 3 }
+local function DotState(m)
+	if not m.isGroup then
+		return m.db.enabled and ModuleDot(m) or "off"
+	end
+	local worst = "off"
+	for _, member in ipairs(m.members) do
+		if member.db.enabled then
+			local s = ModuleDot(member)
+			if RANK[s] > RANK[worst] then worst = s end
+		end
+	end
+	return worst
 end
 
 -- Paints one row from its state: open page, hover, on/off, health.
@@ -137,7 +152,7 @@ function O:PaintItem(b, full)
 		b.text:SetTextColor(O:Color(color))
 		-- dot colour: accent = running, amber/red = problem, ring = off
 		b.sw.hole:Hide()
-		local showSwitch = hot or selected
+		local showSwitch = (hot or selected) and not m.isGroup
 		if full or not b.dot then b.dot = DotState(m) end
 		b.sw.switch:SetShown(showSwitch)
 		b.sw.ring:SetShown(not showSwitch)
@@ -163,9 +178,13 @@ end
 -- Lower-case words the search matches a module against: its name, category,
 -- description and the labels of its options.
 local searchIndex = {}
-local function ModuleWords(m)
+local ModuleWords
+function ModuleWords(m)
 	if searchIndex[m.key] then return searchIndex[m.key] end
 	local words = { m.name:lower(), (m.desc or ""):lower() }
+	if m.isGroup then
+		for _, member in ipairs(m.members) do words[#words + 1] = ModuleWords(member) end
+	end
 	local build = O.moduleBuilders[m.key]
 	if build then
 		local ok, cards = pcall(build, O.ModuleContext(m), m, O.Groups)
@@ -361,9 +380,13 @@ function O:RefreshSidebar()
 				end
 			end
 		else
-			for _, m in ipairs(XUI:SortedModules(cat.key)) do
+			for _, m in ipairs(O.CategoryEntries(cat.key)) do
 				if m:IsAvailable() and ModuleMatches(m, cat.name:lower() .. " " .. (m.dungeon or ""):lower()) then
-					all[#all + 1] = m
+					if m.isGroup then
+						for _, member in ipairs(m.members) do all[#all + 1] = member end
+					else
+						all[#all + 1] = m
+					end
 					if Keep(m) then list[#list + 1] = m end
 				end
 			end

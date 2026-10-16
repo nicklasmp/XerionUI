@@ -200,6 +200,14 @@ function O:RefreshPageHead()
 			f.preview.icon:SetVertexColor(O:Color("muted"))
 			f.preview.text:SetTextColor(O:Color("label"))
 		end
+	elseif O.groupByKey[S.currentKey] then
+		local g = O.groupByKey[S.currentKey]
+		f.icon:SetTexture(O.GroupIcon(g))
+		f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+		f.icon:SetVertexColor(1, 1, 1)
+		f.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
+		f.title:SetText(g.name)
+		f.desc:SetText(g.desc or "")
 	elseif O.ClassKey(S.currentKey) then
 		local c = O.classByToken[O.ClassKey(S.currentKey)]
 		f.icon:SetTexture(c and c.icon or 134400)

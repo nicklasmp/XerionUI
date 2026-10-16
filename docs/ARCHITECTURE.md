@@ -238,4 +238,4 @@ Add a check by putting a function in `Health.CHECKS[moduleKey]` that calls `prob
 
 ## Options window files
 
-`Panel.lua` (window, opening, page lookup, the shared state table `O.S`), `PageHead.lua` (page header, Diagnostics popup), `Sidebar.lua` (search, class folding, entries), `Preview.lua` (preview that follows the page, window docking). Aura-engine helpers shared by modules are in `Core/Engine.lua` (`XUI.Engine`).
+`Panel.lua` (window, opening, page lookup, the shared state table `O.S`), `PageHead.lua` (page header, Diagnostics popup), `Sidebar.lua` (search, class folding, entries), `ModuleGroups.lua` (modules that share one sidebar entry and page, `O.MODULE_GROUPS`; every member keeps its own module, switch and saved settings), `Preview.lua` (preview that follows the page, window docking). Aura-engine helpers shared by modules are in `Core/Engine.lua` (`XUI.Engine`).

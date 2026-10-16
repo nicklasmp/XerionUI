@@ -16,6 +16,7 @@ MOCK.Advance(0.5)
 MOCK.crop = "XUI_OptionsFrame"
 local keys = { "style", "general", "profiles" }
 for _, m in ipairs(XUI.modules) do keys[#keys + 1] = m.key end
+for _, g in ipairs(XUI.Options.MODULE_GROUPS) do keys[#keys + 1] = g.key end
 for _, key in ipairs(keys) do
 	XUI.Options:Open(key)
 	MOCK.Advance(0.2)

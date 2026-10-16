@@ -166,7 +166,10 @@ function O:CreatePage(parent, spec)
 end
 
 local function BuildCard(page, spec)
-	local card = { spec = spec, items = {} }
+	-- a card may bring its own context (a group page mixes several modules)
+	local ctx = spec.ctx or page.ctx
+	ctx.page = page
+	local card = { spec = spec, items = {}, ctx = ctx }
 	local f = CreateFrame("Frame", nil, page.child)
 	O:Skin(f, "card", "cardBorder")
 	card.frame = f
@@ -180,8 +183,8 @@ local function BuildCard(page, spec)
 		card.head.text:SetText(spec.title:upper())
 	end
 	-- an eye on the card's corner puts the preview in the look this card edits
-	if spec.previewState and page.ctx.module then
-		local m = page.ctx.module
+	if spec.previewState and ctx.module then
+		local m = ctx.module
 		local b = O:IconButton(f, "eye", 22, "Show this in the preview", function()
 			if spec.previewState == true then m:SetPreview(true) else m:SetPreviewState(spec.previewState) end
 		end)
@@ -191,7 +194,7 @@ local function BuildCard(page, spec)
 	for _, desc in ipairs(spec.items or {}) do
 		local make = O.Controls[desc.type]
 		assert(make, "XerionUI options: unknown control type " .. tostring(desc.type))
-		local control = make(f, desc, page.ctx)
+		local control = make(f, desc, ctx)
 		control.page = page
 		card.items[#card.items + 1] = control
 	end
@@ -222,7 +225,7 @@ function Page:Layout()
 	local y = PAGE_PAD
 	for _, card in ipairs(self.cards) do
 		local spec, f = card.spec, card.frame
-		if Hidden(spec, self.ctx) then
+		if Hidden(spec, card.ctx) then
 			f:Hide()
 			if card.head then card.head:Hide() end
 		else
@@ -237,7 +240,7 @@ function Page:Layout()
 			for _, control in ipairs(card.items) do
 				local desc = control.desc
 				local kind = desc.type
-				if Hidden(desc, self.ctx) or kind == "spacer" then
+				if Hidden(desc, card.ctx) or kind == "spacer" then
 					control:Hide()
 				else
 					control:SetWidth(inner)

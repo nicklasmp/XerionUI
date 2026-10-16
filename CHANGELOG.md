@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.19.0 - 2026-10-16
+- Navigation: related modules share one sidebar entry (Cooldown Manager, Cast Bars, Tank, Party Tracking, Group Utility, Encounter Tools); each part keeps its own switch and settings
+
 ## 2.18.3 - 2026-10-16
 - Remove the unused automatic profile switching
 
