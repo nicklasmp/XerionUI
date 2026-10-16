@@ -36,7 +36,8 @@ DB.GLOBAL_DEFAULTS = {
 	loginMessage = false,
 	panel = {
 		scale = 1,
-		font = "Arial Narrow",
+		-- from SharedMedia_MyMedia; Media:Fetch falls back to Arial Narrow without it
+		font = "GothamNarrowBlack",
 		autoPreview = true,
 		dock = true,
 		density = "normal",

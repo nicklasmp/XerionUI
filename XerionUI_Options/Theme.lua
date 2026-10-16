@@ -31,11 +31,13 @@ O.C = {
 	danger       = { 0.90, 0.30, 0.30, 1 },
 }
 
+-- Gotham Narrow Black is a heavy, narrow face, so the sizes sit a point above
+-- what a regular face would use.
 O.SIZE = {
-	title = 20,
-	heading = 12,
-	text = 13,
-	small = 11,
+	title = 24,
+	heading = 11,
+	text = 14,
+	small = 12,
 }
 
 local unpackColor = XUI.UnpackColor

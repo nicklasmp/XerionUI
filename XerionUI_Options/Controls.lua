@@ -19,7 +19,9 @@ O.Controls = {}
 local Controls = O.Controls
 
 local LABEL_H = 16
-local FIELD_H = 24
+local FIELD_H = 26
+local FIELD_W = 250 -- the control half of a row: dropdown, text box, slider
+
 
 --------------------------------------------------------------------------------
 -- Binding
@@ -69,7 +71,7 @@ local function AddTooltip(f, desc)
 end
 
 --------------------------------------------------------------------------------
--- Toggle: [switch] Label
+-- Toggle: Label ........... [switch]
 --------------------------------------------------------------------------------
 -- w/h default to 30x16; pass whole, even pixel sizes (never SetScale it, that
 -- blurs the round ends)
@@ -109,11 +111,11 @@ function Controls.toggle(parent, desc, ctx)
 	local btn = CreateFrame("Button", nil, f)
 	btn:SetPoint("TOPLEFT")
 	btn:SetPoint("BOTTOMRIGHT")
-	f.switch = Switch(btn)
-	f.switch:SetPoint("LEFT", 0, 0)
+	f.switch = Switch(btn, 34, 18)
+	f.switch:SetPoint("RIGHT")
 	f.label = O:Text(btn, O.SIZE.text, "label")
-	f.label:SetPoint("LEFT", f.switch, "RIGHT", 8, 0)
-	f.label:SetPoint("RIGHT", btn, "RIGHT", 0, 0)
+	f.label:SetPoint("LEFT")
+	f.label:SetPoint("RIGHT", f.switch, "LEFT", -12, 0)
 	f.label:SetText(Resolve(desc.label, ctx) or "")
 	btn:SetScript("OnClick", function()
 		if f.disabled then return end
@@ -152,41 +154,41 @@ local function Snap(v, desc)
 end
 
 function Controls.slider(parent, desc, ctx)
-	local f = Base(parent, desc, ctx, LABEL_H + 22)
-	f.label = Label(f, desc.label)
-	f.label:SetPoint("TOPLEFT")
+	local f = Base(parent, desc, ctx, 24)
+	f.label = O:Text(f, O.SIZE.text, "label")
+	f.label:SetText(Resolve(desc.label, ctx) or "")
+	f.label:SetPoint("LEFT")
 
 	local box = CreateFrame("EditBox", nil, f)
-	box:SetSize(46, 16)
-	box:SetPoint("TOPRIGHT", 0, 1)
+	box:SetSize(48, 20)
+	box:SetPoint("RIGHT")
 	box:SetAutoFocus(false)
-	box:SetFont(O:FontPath(), O.SIZE.small, "")
+	box:SetFont(O:FontPath(), O.SIZE.text, "")
 	box:SetTextColor(O:Color("text"))
 	box:SetJustifyH("RIGHT")
 	box:SetTextInsets(0, 2, 0, 0)
 	f.box = box
-	f.label:SetPoint("RIGHT", box, "LEFT", -6, 0)
 
 	local s = CreateFrame("Slider", nil, f)
 	s:SetOrientation("HORIZONTAL")
-	s:SetPoint("BOTTOMLEFT", 0, 0)
-	s:SetPoint("BOTTOMRIGHT", 0, 0)
-	s:SetHeight(16)
+	s:SetPoint("RIGHT", box, "LEFT", -10, 0)
+	s:SetSize(FIELD_W - 56, 16) -- box (48) + gap (8): ends level with the dropdowns
+	f.label:SetPoint("RIGHT", s, "LEFT", -12, 0)
 	s:SetHitRectInsets(0, 0, -4, -4)
 	s:SetMinMaxValues(desc.min, desc.max)
 	s:SetValueStep(desc.step or 1)
 	s:SetObeyStepOnDrag(true)
 	local thumb = s:CreateTexture(nil, "OVERLAY")
 	thumb:SetTexture(O.MEDIA .. "circle")
-	thumb:SetSize(12, 12)
+	thumb:SetSize(14, 14)
 	s:SetThumbTexture(thumb)
 	f.thumb = thumb
 	local track = O:Rect(s, "track", "BACKGROUND")
-	track:SetHeight(4)
+	track:SetHeight(3)
 	track:SetPoint("LEFT", 0, 0)
 	track:SetPoint("RIGHT", 0, 0)
 	local fill = O:Rect(s, nil, "ARTWORK")
-	fill:SetHeight(4)
+	fill:SetHeight(3)
 	fill:SetPoint("LEFT", track, "LEFT")
 	fill:SetPoint("RIGHT", thumb, "CENTER")
 	f.fill, f.slider = fill, s
@@ -249,7 +251,7 @@ end
 
 --------------------------------------------------------------------------------
 -- Dropdown: Label
---           [ value               v ]
+--  Label ........ [ value      v ]
 -- values: list of { value = x, text = "..." } or a function(ctx) returning one.
 -- desc.media = "font" | "statusbar" | "sound" | "border" | "background" lists
 -- LibSharedMedia names and previews them in the list.
@@ -313,13 +315,14 @@ local function TextFor(values, value, isMedia)
 end
 
 function Controls.dropdown(parent, desc, ctx)
-	local f = Base(parent, desc, ctx, LABEL_H + FIELD_H + 2)
-	f.label = Label(f, desc.label)
-	f.label:SetPoint("TOPLEFT")
-	f.label:SetPoint("TOPRIGHT")
+	local f = Base(parent, desc, ctx, FIELD_H)
+	f.label = O:Text(f, O.SIZE.text, "label")
+	f.label:SetText(Resolve(desc.label, ctx) or "")
+	f.label:SetPoint("LEFT")
 	f.field = Field(f)
-	f.field:SetPoint("BOTTOMLEFT")
-	f.field:SetPoint("BOTTOMRIGHT")
+	f.field:SetPoint("RIGHT")
+	f.field:SetWidth(FIELD_W)
+	f.label:SetPoint("RIGHT", f.field, "LEFT", -12, 0)
 	f.field:SetScript("OnClick", function(self)
 		if f.disabled then return end
 		O:OpenDropdown(self, desc, ctx, f.value, function(v)
@@ -343,7 +346,7 @@ function Controls.dropdown(parent, desc, ctx)
 end
 
 --------------------------------------------------------------------------------
--- Color: [swatch] Label
+-- Color: Label ........... [swatch]
 --------------------------------------------------------------------------------
 local function OpenColorPicker(color, hasAlpha, onChange)
 	local r, g, b, a = XUI.UnpackColor(color)
@@ -367,15 +370,15 @@ function Controls.color(parent, desc, ctx)
 	local btn = CreateFrame("Button", nil, f)
 	btn:SetAllPoints()
 	local sw = CreateFrame("Frame", nil, btn)
-	sw:SetSize(30, 16)
-	sw:SetPoint("LEFT")
+	sw:SetSize(34, 20)
+	sw:SetPoint("RIGHT")
 	O:Skin(sw, "control", "controlLine")
 	f.swatch = O:Rect(sw, nil, "ARTWORK")
 	f.swatch:SetPoint("TOPLEFT", 2, -2)
 	f.swatch:SetPoint("BOTTOMRIGHT", -2, 2)
 	f.label = O:Text(btn, O.SIZE.text, "label")
-	f.label:SetPoint("LEFT", sw, "RIGHT", 8, 0)
-	f.label:SetPoint("RIGHT")
+	f.label:SetPoint("LEFT")
+	f.label:SetPoint("RIGHT", sw, "LEFT", -12, 0)
 	f.label:SetText(Resolve(desc.label, ctx) or "")
 	btn:SetScript("OnClick", function()
 		if f.disabled then return end
@@ -401,13 +404,22 @@ end
 --------------------------------------------------------------------------------
 function Controls.input(parent, desc, ctx)
 	local multiline = desc.multiline
-	local f = Base(parent, desc, ctx, LABEL_H + (multiline or FIELD_H) + 2)
-	f.label = Label(f, desc.label)
-	f.label:SetPoint("TOPLEFT")
-
+	local f = Base(parent, desc, ctx, multiline and (LABEL_H + multiline + 2) or FIELD_H)
 	local holder = CreateFrame("Frame", nil, f)
-	holder:SetPoint("TOPLEFT", 0, -LABEL_H - 2)
-	holder:SetPoint("BOTTOMRIGHT")
+	if multiline then
+		-- a text area stacks: label above, box below
+		f.label = Label(f, desc.label)
+		f.label:SetPoint("TOPLEFT")
+		holder:SetPoint("TOPLEFT", 0, -LABEL_H - 2)
+		holder:SetPoint("BOTTOMRIGHT")
+	else
+		f.label = O:Text(f, O.SIZE.text, "label")
+		f.label:SetText(Resolve(desc.label, ctx) or "")
+		f.label:SetPoint("LEFT")
+		holder:SetPoint("RIGHT")
+		holder:SetSize(FIELD_W, FIELD_H)
+		f.label:SetPoint("RIGHT", holder, "LEFT", -12, 0)
+	end
 	O:Skin(holder, "control", "controlLine")
 
 	local box
@@ -476,12 +488,17 @@ function Controls.button(parent, desc, ctx)
 		if desc.onClick then desc.onClick(ctx, f) end
 		if f.page then f.page:Refresh() end
 	end, desc.primary)
-	f.button:SetPoint("TOPLEFT")
-	f.button:SetPoint("BOTTOMRIGHT")
+	f.button:SetPoint("LEFT")
+	f.button:SetSize(desc.buttonWidth or 140, FIELD_H)
+	local function FitWidth()
+		if desc.buttonWidth then return end
+		f.button:SetWidth(math.max(110, (f.button.text:GetStringWidth() or 0) + 32))
+	end
 	AddTooltip(f.button, desc)
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)
 		self.button.text:SetText(Resolve(desc.text or desc.label, ctx) or "")
+		FitWidth()
 		self.button:SetDisabled(self.disabled)
 	end
 	return f
@@ -563,14 +580,14 @@ end
 -- Subheading inside a card
 --------------------------------------------------------------------------------
 function Controls.heading(parent, desc, ctx)
-	local f = Base(parent, desc, ctx, 22)
+	local f = Base(parent, desc, ctx, 28)
+	-- a darker band across the whole card, like a section row in a list
+	f.band = O:Rect(f, "sidebar", "BACKGROUND")
+	f.band:SetPoint("TOPLEFT", -O.CARD_PAD, 0)
+	f.band:SetPoint("BOTTOMRIGHT", O.CARD_PAD, 0)
 	f.text = O:Text(f, O.SIZE.small, "muted")
-	f.text:SetPoint("BOTTOMLEFT", 0, 4)
+	f.text:SetPoint("LEFT")
 	f.text:SetText((Resolve(desc.label, ctx) or ""):upper())
-	f.line = O:Rect(f, "line", "ARTWORK")
-	f.line:SetHeight(1)
-	f.line:SetPoint("BOTTOMLEFT")
-	f.line:SetPoint("BOTTOMRIGHT")
 	function f:Refresh() end
 	return f
 end

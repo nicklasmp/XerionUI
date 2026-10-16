@@ -1,12 +1,14 @@
 --------------------------------------------------------------------------------
 -- XerionUI_Options - Page.lua
--- A page is a scrolling column of cards; a card is a titled grid of controls.
+-- A page is a scrolling column of cards; a card is a list of rows under a small
+-- title, one control per row: label on the left, the control on the right.
+-- Descriptions, tabs, text areas and custom controls stack across the row.
 -- Pages are described with plain tables and built the first time they are
 -- shown:
---     { O.Card("Text", { control, control, ... }, { columns = 2 }), ... }
--- A control spans one column, or the whole row with width = "full" (or
--- span = n). hidden(ctx) / disabled(ctx) are re-evaluated after every change,
--- so dependent options appear and grey out as you click.
+--     { O.Card("Text", { control, control, ... }), ... }
+-- (width / span / columns from the old grid are accepted and ignored.)
+-- hidden(ctx) / disabled(ctx) are re-evaluated after every change, so
+-- dependent options appear and grey out as you click.
 --------------------------------------------------------------------------------
 local XUI = _G.XerionUI
 local O = XUI and XUI.Options
@@ -14,25 +16,31 @@ if not O then return end
 
 local max = math.max
 
-local PAGE_PAD = 16
-local CARD_PAD = 14
+local PAGE_PAD = 20
+local CARD_PAD = 16
 local CARD_GAP = 12
-local COL_GAP = 18
-local ROW_GAP = 12
+local ROW_H = 38     -- a control row
+local STACK_PAD = 10 -- above and below a stacked control
+local HEAD_H = 28    -- a sub-heading band inside a card
+local MAX_CARD_W = 720
 
 -- How tightly the pages are packed: compact, normal or roomy.
 local DENSITY = {
-	compact = { page = 10, card = 10, cardGap = 8, col = 14, row = 7 },
-	normal = { page = 16, card = 14, cardGap = 12, col = 18, row = 12 },
-	roomy = { page = 20, card = 18, cardGap = 16, col = 22, row = 16 },
+	compact = { page = 14, card = 12, cardGap = 8, row = 30, stack = 8 },
+	normal = { page = 20, card = 16, cardGap = 12, row = 38, stack = 10 },
+	roomy = { page = 24, card = 20, cardGap = 18, row = 46, stack = 14 },
 }
 function O:SetDensity(name)
 	local d = DENSITY[name] or DENSITY.normal
-	PAGE_PAD, CARD_PAD, CARD_GAP, COL_GAP, ROW_GAP = d.page, d.card, d.cardGap, d.col, d.row
+	PAGE_PAD, CARD_PAD, CARD_GAP, ROW_H, STACK_PAD = d.page, d.card, d.cardGap, d.row, d.stack
+	O.CARD_PAD = CARD_PAD
 end
 O.DENSITIES = { { value = "compact", text = "Compact" }, { value = "normal", text = "Normal" }, { value = "roomy", text = "Roomy" } }
 O:SetDensity(XUI.DB.global.panel.density)
-local TITLE_H = 26
+local TITLE_H = 24
+
+-- controls that sit in a one-line row; the rest stack across it
+local ROW_TYPES = { toggle = true, slider = true, dropdown = true, color = true, button = true, input = true }
 
 --------------------------------------------------------------------------------
 -- Context: where a page's controls read and write.
@@ -163,10 +171,14 @@ local function BuildCard(page, spec)
 	local f = CreateFrame("Frame", nil, page.child)
 	O:Skin(f, "card", "cardBorder")
 	card.frame = f
+	card.lines = {}
+	-- the title sits above the card, not in it
 	if spec.title then
-		f.title = O:Text(f, O.SIZE.heading, "muted")
-		f.title:SetPoint("TOPLEFT", CARD_PAD, -CARD_PAD + 2)
-		f.title:SetText(spec.title:upper())
+		card.head = CreateFrame("Frame", nil, page.child)
+		card.head:SetHeight(TITLE_H)
+		card.head.text = O:Text(card.head, O.SIZE.heading, "muted")
+		card.head.text:SetPoint("BOTTOMLEFT", 2, 5)
+		card.head.text:SetText(spec.title:upper())
 	end
 	-- an eye on the card's corner puts the preview in the look this card edits
 	if spec.previewState and page.ctx.module then
@@ -174,7 +186,7 @@ local function BuildCard(page, spec)
 		local b = O:IconButton(f, "eye", 22, "Show this in the preview", function()
 			if spec.previewState == true then m:SetPreview(true) else m:SetPreviewState(spec.previewState) end
 		end)
-		b:SetPoint("TOPRIGHT", f, "TOPRIGHT", -CARD_PAD + 4, -CARD_PAD + 6)
+		b:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", 0, 1)
 		card.previewButton = b
 	end
 	for _, desc in ipairs(spec.items or {}) do
@@ -205,59 +217,70 @@ end
 function Page:Layout()
 	local width = self.scroll:GetWidth()
 	if not width or width <= 1 then return end
-	local cardW = width - PAGE_PAD * 2 - 8
+	local cardW = math.min(width - PAGE_PAD * 2 - 8, MAX_CARD_W)
+	local x0 = math.floor((width - 8 - cardW) / 2)
+	local inner = cardW - CARD_PAD * 2
 	local y = PAGE_PAD
 	for _, card in ipairs(self.cards) do
 		local spec, f = card.spec, card.frame
 		if Hidden(spec, self.ctx) then
 			f:Hide()
+			if card.head then card.head:Hide() end
 		else
-			local cols = spec.columns or 2
-			local inner = cardW - CARD_PAD * 2
-			local cellW = (inner - COL_GAP * (cols - 1)) / cols
-			local top = spec.title and (CARD_PAD + TITLE_H - 8) or CARD_PAD
-			local rowY, rowH, col = top, 0, 0
-			local row = {}
-			-- Controls in a row share its bottom edge, so a button lines up
-			-- with the field of the labelled dropdown beside it.
-			local function Flush()
-				for _, it in ipairs(row) do
-					local y = it.alignTop and rowY or (rowY + rowH - it.h)
-					it.control:ClearAllPoints()
-					it.control:SetPoint("TOPLEFT", f, "TOPLEFT", it.x, -y)
-				end
-				wipe(row)
-				rowY = rowY + rowH + ROW_GAP
-				rowH, col = 0, 0
+			if card.head then
+				card.head:ClearAllPoints()
+				card.head:SetPoint("TOPLEFT", self.child, "TOPLEFT", x0, -y)
+				card.head:SetWidth(cardW)
+				card.head:Show()
+				y = y + TITLE_H
 			end
+			local rowY, lines, prevBand = 0, 0, true
 			for _, control in ipairs(card.items) do
 				local desc = control.desc
-				if Hidden(desc, self.ctx) then
+				local kind = desc.type
+				if Hidden(desc, self.ctx) or kind == "spacer" then
 					control:Hide()
 				else
-					local span = desc.width == "full" and cols or math.min(cols, desc.span or 1)
-					if col > 0 and (col + span > cols or desc.newRow) then Flush() end
-					control:SetWidth(cellW * span + COL_GAP * (span - 1))
+					control:SetWidth(inner)
 					if control.Measure then control:Measure() end
+					local band = kind == "heading"
+					local rowH, at
+					if band then
+						rowH, at = HEAD_H, rowY
+						control:SetHeight(HEAD_H)
+					elseif ROW_TYPES[kind] and not (kind == "input" and desc.multiline) then
+						rowH, at = ROW_H, rowY
+						control:SetHeight(ROW_H - 4)
+						at = rowY + 2
+					else
+						local h = control.height or control:GetHeight()
+						rowH, at = h + STACK_PAD * 2, rowY + STACK_PAD
+					end
+					-- a hairline between rows, but not against a band
+					if not prevBand and not band then
+						lines = lines + 1
+						local line = card.lines[lines]
+						if not line then
+							line = O:Rect(f, "line", "ARTWORK")
+							line:SetHeight(1)
+							card.lines[lines] = line
+						end
+						line:ClearAllPoints()
+						line:SetPoint("TOPLEFT", f, "TOPLEFT", CARD_PAD, -rowY)
+						line:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -rowY)
+						line:Show()
+					end
+					prevBand = band
+					control:ClearAllPoints()
+					control:SetPoint("TOPLEFT", f, "TOPLEFT", CARD_PAD, -at)
 					control:Show()
-					local h = control.height or control:GetHeight()
-					row[#row + 1] = {
-						control = control, h = h, alignTop = desc.alignTop or desc.type == "description",
-						x = CARD_PAD + col * (cellW + COL_GAP),
-					}
-					rowH = max(rowH, h)
-					col = col + span
-					if col >= cols then Flush() end
+					rowY = rowY + rowH
 				end
 			end
-			if col > 0 then
-				Flush()
-			end
-			col = 0
-			local h = rowY + rowH + CARD_PAD - (col == 0 and ROW_GAP or 0)
+			for i = lines + 1, #card.lines do card.lines[i]:Hide() end
 			f:ClearAllPoints()
-			f:SetPoint("TOPLEFT", self.child, "TOPLEFT", PAGE_PAD, -y)
-			f:SetSize(cardW, max(h, top + CARD_PAD))
+			f:SetPoint("TOPLEFT", self.child, "TOPLEFT", x0, -y)
+			f:SetSize(cardW, max(rowY, 8))
 			f:Show()
 			y = y + f:GetHeight() + CARD_GAP
 		end
@@ -290,7 +313,11 @@ end
 
 -- Rebuilds the page from its spec (after a profile switch, say).
 function Page:Rebuild()
-	for _, card in ipairs(self.cards) do card.frame:Hide() card.frame:SetParent(nil) end
+	for _, card in ipairs(self.cards) do
+		card.frame:Hide()
+		card.frame:SetParent(nil)
+		if card.head then card.head:Hide() card.head:SetParent(nil) end
+	end
 	wipe(self.cards)
 	self.built = false
 	if self.scroll:IsShown() then self:Show() end

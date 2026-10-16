@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.15.0 - 2026-10-16
+- Options redesign: flat row-based pages (label left, control right) with titled cards, underline filter tabs, bigger type
+- Options font defaults to GothamNarrowBlack (SharedMedia_MyMedia), falling back to Arial Narrow
+
 ## 2.14.2 - 2026-10-16
 - Auto Mark Tank: new card design showing who gets marked (class-coloured name), larger marker icon and a round close badge on the corner; dismissing now sticks until the situation changes
 

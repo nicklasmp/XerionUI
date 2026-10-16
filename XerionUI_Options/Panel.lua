@@ -12,7 +12,7 @@ local W, H = 980, 680
 local SIDEBAR_W = 228
 local HEADER_H = 50
 local PAGEHEAD_H = 78
-local ITEM_H = 28
+local ITEM_H = 30
 O.LAYOUT = { SIDEBAR_W = SIDEBAR_W, HEADER_H = HEADER_H, PAGEHEAD_H = PAGEHEAD_H, ITEM_H = ITEM_H }
 
 O.systemPages = {}      -- ordered list of { key, title, desc, icon, build }
@@ -215,28 +215,34 @@ local function CreateWindow()
 	-- filter chips: all modules, only the ones switched on, or only the ones off
 	if XUI.DB.global.panel.onlyActive then XUI.DB.global.panel.filter, XUI.DB.global.panel.onlyActive = "on", nil end
 	local chips = {}
+	-- underlined tabs: the open one gets the accent line
+	local tabsLine = O:Rect(side, "line", "ARTWORK")
+	tabsLine:SetHeight(1)
+	tabsLine:SetPoint("TOPLEFT", 12, -66)
+	tabsLine:SetPoint("TOPRIGHT", -12, -66)
 	local function PaintChips()
 		for _, c in ipairs(chips) do
 			if c.filter == XUI.DB.global.panel.filter then
-				O:SetSkinColor(c, "selected")
-				c.text:SetTextColor(O:Accent())
-				O:SetBorderColor(c, O:Accent())
+				c.under:Show()
+				c.under:SetVertexColor(O:Accent())
+				c.text:SetTextColor(O:Color("text"))
 			else
-				O:SetSkinColor(c, "control")
+				c.under:Hide()
 				c.text:SetTextColor(O:Color("muted"))
-				O:SetBorderColor(c, O:Color("controlLine"))
 			end
 		end
 	end
-	local x = 12
-	for i, def in ipairs({ { "All", nil, 40 }, { "Active", "on", 56 }, { "Inactive", "off", 64 } }) do
+	local tabW = (SIDEBAR_W - 24) / 3
+	for i, def in ipairs({ { "All", nil }, { "Active", "on" }, { "Inactive", "off" } }) do
 		local c = CreateFrame("Button", nil, side)
-		c:SetSize(def[3], 20)
-		c:SetPoint("TOPLEFT", x, -46)
-		x = x + def[3] + 6
-		O:Skin(c, "control", "controlLine")
+		c:SetSize(tabW, 24)
+		c:SetPoint("TOPLEFT", 12 + (i - 1) * tabW, -43)
+		c.under = O:Rect(c, nil, "OVERLAY")
+		c.under:SetHeight(2)
+		c.under:SetPoint("BOTTOMLEFT")
+		c.under:SetPoint("BOTTOMRIGHT")
 		c.text = O:Text(c, O.SIZE.small, "muted")
-		c.text:SetPoint("CENTER")
+		c.text:SetPoint("CENTER", 0, 1)
 		c.text:SetText(def[1])
 		c.filter = def[2]
 		c:SetScript("OnClick", function(self)
@@ -249,7 +255,7 @@ local function CreateWindow()
 	PaintChips()
 
 	local list = CreateFrame("Frame", nil, side)
-	list:SetPoint("TOPLEFT", 0, -74)
+	list:SetPoint("TOPLEFT", 0, -72)
 	list:SetPoint("BOTTOMRIGHT", -1, 8)
 	S.sidebar = O:CreateScroll(list)
 	S.sidebar:SetAllPoints(list)
