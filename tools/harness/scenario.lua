@@ -131,14 +131,6 @@ Step("party cooldowns: group, buffs and casts", function()
 	MOCK.Advance(1)
 end)
 
-Step("stoneform bleed", function()
-	MOCK.bleed = true
-	MOCK.Fire("UNIT_AURA", "player")
-	MOCK.Fire("SPELL_UPDATE_COOLDOWN")
-	MOCK.bleed = false
-	MOCK.Fire("UNIT_AURA", "player")
-end)
-
 Step("previews on / off", function()
 	for _, m in ipairs(XUI.modules) do m:SetPreview(true) end
 	MOCK.Advance(0.1)

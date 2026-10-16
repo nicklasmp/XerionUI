@@ -22,7 +22,7 @@ for _, key in ipairs(keys) do
 	MOCK.Advance(0.2)
 	MOCK.Shot("page-" .. key)
 end
-XUI.Options:Open("Stoneform")
+XUI.Options:Open("MeleeIndicator")
 for _, m in ipairs(XUI.modules) do m:SetPreview(true) end
 MOCK.Advance(0.2)
 XUI.Options:Close()

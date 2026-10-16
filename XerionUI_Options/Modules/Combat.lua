@@ -8,19 +8,6 @@ if not O then return end
 
 local Card, Join = O.Card, O.Join
 
-O:RegisterModuleOptions("Stoneform", function(ctx, m, G)
-	return {
-		Card("Icon", G.Icon("icon", { square = true })),
-		Card("Border", G.Border("border")),
-		Card("Glow", G.Glow("glow")),
-		Card("Alert", G.Alert("alert", {
-			label = "Alert when a bleed appears",
-			fallbackText = "Bleed detected",
-		})),
-		Card("Position", G.Position("position")),
-	}
-end)
-
 O:RegisterModuleOptions("MeleeIndicator", function(ctx, m, G)
 	return {
 		Card("Marker", {

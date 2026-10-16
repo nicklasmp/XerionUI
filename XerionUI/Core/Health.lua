@@ -97,7 +97,6 @@ Health.CHECKS = {
 	Shroud = NeedAuraContainers,
 	ReapersMark = NeedAuraContainers,
 	ForbiddenSacrifice = NeedAuraContainers,
-	Stoneform = NeedAuraContainers,
 	WellHoned = NeedAuraSounds,
 	BoneShield = NeedCooldownManager,
 	DRWSound = NeedCooldownManager,

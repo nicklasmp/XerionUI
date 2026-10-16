@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.19.1
+## Version: 2.19.2
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -40,7 +40,6 @@ Integrations\EllesmereUI.lua
 
 # Modules
 Modules\Combat\MeleeIndicator.lua
-Modules\Combat\Stoneform.lua
 Modules\Group\Externals.lua
 Modules\Group\Interrupts.lua
 Modules\Group\PartyCDsData.lua

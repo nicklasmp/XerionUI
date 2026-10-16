@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.19.2 - 2026-10-16
+- Remove the Stoneform Bleed Alert; Reminders moves under Combat and takes the Melee Indicator
+
 ## 2.19.1 - 2026-10-16
 - Navigation: Dungeons category lists each dungeon with its own modules; Aggro Check moves to a new Reminders group with Bloodlust Ready and Meter Reset
 

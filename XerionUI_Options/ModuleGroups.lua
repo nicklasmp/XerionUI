@@ -40,9 +40,12 @@ O.MODULE_GROUPS = {
 		},
 	},
 	{
-		key = "grp:reminders", name = "Reminders", category = "group",
+		key = "grp:reminders", name = "Reminders", category = "combat",
 		desc = "Warnings and prompts that tell you when something needs your attention.",
-		members = { { "AggroCheck", "Aggro check" }, { "Bloodlust", "Bloodlust ready" }, { "MeterReset", "Meter reset" } },
+		members = {
+			{ "MeleeIndicator", "Melee indicator" }, { "AggroCheck", "Aggro check" },
+			{ "Bloodlust", "Bloodlust ready" }, { "MeterReset", "Meter reset" },
+		},
 	},
 }
 
@@ -90,15 +93,14 @@ end
 -- What a category lists in the sidebar: its modules, with the members of a
 -- group replaced by the group itself.
 function O.CategoryEntries(category)
-	local out, added = {}, {}
+	local out = {}
 	for _, m in ipairs(XUI:SortedModules(category)) do
-		local g = O.groupOf[m.key]
-		if not g then
-			out[#out + 1] = m
-		elseif not added[g] and g.category == category then
-			added[g] = true
-			out[#out + 1] = g
-		end
+		if not O.groupOf[m.key] then out[#out + 1] = m end
+	end
+	-- a group sits in its own category, whatever the categories of its members
+	for _, def in ipairs(O.MODULE_GROUPS) do
+		local g = O.groupByKey[def.key]
+		if g and g.category == category then out[#out + 1] = g end
 	end
 	return out
 end
