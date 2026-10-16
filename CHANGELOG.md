@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.22.2 - 2026-10-16
+- Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows
+
 ## 2.22.1 - 2026-10-16
 - Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card
 

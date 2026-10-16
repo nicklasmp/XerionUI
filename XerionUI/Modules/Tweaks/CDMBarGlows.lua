@@ -28,7 +28,7 @@ local M = XUI:NewModule("EUICDMBarGlows", {
 local active = false
 local wrapped = false
 local lit = setmetatable({}, { __mode = "k" }) -- overlay -> icon our glow sits on
-local stats = { asked = 0, ours = 0 } -- glow requests EllesmereUI made, for /xui debug
+local stats = { asked = 0, ours = 0, other = 0 } -- glow requests EllesmereUI made, for /xui debug
 local barOn = {} -- bar key -> whether it had its own glow when last refreshed
 
 local function CDM()
@@ -68,9 +68,12 @@ local origStopAll, ourStopAll
 local function IconOf(overlay)
 	local ns = CDM()
 	local fc = ns and ns._ecmeFC
-	if not (fc and overlay and overlay.GetParent) then return nil end
+	if not (overlay and overlay.GetParent) then return nil end
 	local ok, parent = pcall(overlay.GetParent, overlay)
-	if ok and parent and fc[parent] then return parent end
+	if not (ok and parent) then return nil end
+	-- hooked Blizzard icons are in the frame-cache; custom bars' own icons are
+	-- found through the bar map instead
+	if (fc and fc[parent]) or XUI.CDMBarKey(overlay) then return parent end
 	return nil
 end
 
@@ -87,7 +90,9 @@ local function Wrap()
 			ours[name] = function(overlay, ...)
 				if active and overlay then
 					local icon = IconOf(overlay)
-					if icon then
+					if not icon then
+						stats.other = stats.other + 1
+					else
 						stats.asked = stats.asked + 1
 						local block = ChoiceFor(overlay)
 						if block then
@@ -205,7 +210,7 @@ function M:DebugInfo()
 	local n = 0
 	for _ in pairs(lit) do n = n + 1 end
 	lines[#lines + 1] = "icons lit by us right now: " .. n
-	lines[#lines + 1] = ("EllesmereUI started %d Cooldown Manager glows, %d drawn by us"):format(stats.asked, stats.ours)
+	lines[#lines + 1] = ("EllesmereUI started %d Cooldown Manager glows, %d drawn by us, %d other glows ignored"):format(stats.asked, stats.ours, stats.other)
 	if XUI.glowError then lines[#lines + 1] = "last glow error: " .. tostring(XUI.glowError) end
 	local ns = CDM()
 	if ns and type(ns.barDataByKey) == "table" then
