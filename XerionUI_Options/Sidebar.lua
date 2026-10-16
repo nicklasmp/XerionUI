@@ -341,41 +341,32 @@ function O:RefreshSidebar()
 		local flag = cat.key .. "Folded"
 		local folded = panel[flag] and S.searchText == ""
 		if cat.key == "class" then
-			-- every class, whatever you play, each with its modules below it; the
-			-- whole group folds from its heading (a search unfolds it)
+			-- Classes > class > specialization; a search unfolds everything
 			local classMods = {}
-			for _, c in ipairs(O.CLASSES) do
-				for _, m in ipairs(O:ClassModules(c.token)) do classMods[#classMods + 1] = m end
+			for _, ce in ipairs(O.classEntries) do
+				for _, m in ipairs(O:ClassModules(ce.class.token)) do classMods[#classMods + 1] = m end
 			end
-			for _, m in ipairs(O:ClassModules(O.ANY_CLASS.token)) do classMods[#classMods + 1] = m end
 			AddHead(cat.name, { folded = folded, toggle = function()
 				panel[flag] = not panel[flag]
 				O:RefreshSidebar()
 			end }, classMods)
-			local order = {}
-			if not folded then
-				for _, c in ipairs(O.CLASSES) do order[#order + 1] = c end
-				order[#order + 1] = O.ANY_CLASS
-			end
-			for _, c in ipairs(order) do
-				local mods, matching = {}, {}
-				for _, m in ipairs(O:ClassModules(c.token)) do
-					if Keep(m) then mods[#mods + 1] = m end
+			for _, ce in ipairs(folded and {} or O.classEntries) do
+				local c = ce.class
+				local cname = c.name:lower()
+				local classMatches = Matches(cname)
+				local rows = {}
+				for _, s in ipairs(ce.specs) do
+					if Keep(s.entry) and (S.searchText == "" or classMatches or ModuleMatches(s.entry, cname .. " " .. s.name:lower())) then
+						rows[#rows + 1] = s
+					end
 				end
-				table.sort(mods, ByStateThenName)
-				for _, m in ipairs(mods) do
-					if ModuleMatches(m, c.name:lower()) then matching[#matching + 1] = m end
-				end
-				local classMatches = Matches(c.name:lower())
-				-- a class nothing has been made for yet stays out of the list
-				if #mods > 0 and (S.searchText == "" or classMatches or #matching > 0) then
+				local wide = #ce.entry.members > 0 and Keep(ce.entry)
+				if (#rows > 0 or wide) and (S.searchText == "" or classMatches or #rows > 0 or ModuleMatches(ce.entry, cname)) then
 					-- the class you play starts unfolded
 					if S.expandedClass[c.token] == nil then S.expandedClass[c.token] = (c.token == XUI.playerClass) end
-					AddItem("class:" .. c.token, c.name, nil, "group", STEP, c.token)
+					AddItem(ce.entry.key, c.name, nil, "group", STEP, c.token)
 					if S.searchText ~= "" or S.expandedClass[c.token] then
-						for _, m in ipairs(S.searchText ~= "" and not classMatches and matching or mods) do
-							AddItem(m.key, m.name, m, "module", STEP)
-						end
+						for _, s in ipairs(rows) do AddItem(s.entry.key, s.name, s.entry, "module", STEP) end
 					end
 				end
 			end

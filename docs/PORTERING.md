@@ -77,8 +77,8 @@ Alle porteret (untested-markeringen er fjernet igen 14. okt 2026). De delte bygg
 | The Blood is Life | K | Death Knight (San'layn) | BloodIsLife | ✅ |
 | Blood Beast-skade | K | Death Knight (San'layn) | BloodBeast | ✅ |
 | Reaper's Mark | K | Death Knight (Deathbringer) | ReapersMark | ✅ |
-| Blightfall-kæde | K | Death Knight (Unholy) | Blightfall | ✅ |
-| Putrefy / Forbidden Sacrifice | K | Death Knight (Unholy) | ForbiddenSacrifice | ✅ |
+| Blightfall-kæde | K | Death Knight (Unholy) | Blightfall | ✖ fjernet (kun Blood/Guardian for nu) |
+| Putrefy / Forbidden Sacrifice | K | Death Knight (Unholy) | ForbiddenSacrifice | ✖ fjernet (kun Blood/Guardian for nu) |
 | Control Undead | K | Death Knight | ControlUndead | ✅ |
 | Runeforge Alert | I | Death Knight | RuneforgeAlert | ✅ |
 | Well-Honed Instincts-lyd | K | Druid | WellHoned | ✅ |

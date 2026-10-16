@@ -3,7 +3,9 @@
 -- Modules that belong together share one sidebar entry and one page. Every
 -- member keeps its own module, switch and saved settings; the group only
 -- decides how they are listed. The page shows one section per member: its
--- switch first, then its own cards.
+-- switch first, then its own cards. Classes and specializations work the same
+-- way: "class:TOKEN" and "spec:TOKEN:ID" are entries with their modules as
+-- members.
 --------------------------------------------------------------------------------
 local XUI = _G.XerionUI
 local O = XUI and XUI.Options
@@ -63,11 +65,11 @@ local function MakeEntry(def)
 			labels[m.key] = pair[2]
 		end
 	end
-	if #members == 0 then return nil end
+	if #members == 0 and not def.allowEmpty then return nil end
 	local entry = {
 		isGroup = true, key = def.key, name = def.name, desc = def.desc,
 		category = def.category, dungeon = def.dungeon, untested = false,
-		members = members, labels = labels,
+		members = members, labels = labels, texture = def.texture, empty = def.empty,
 	}
 	entry.db = setmetatable({}, { __index = function(_, k)
 		if k == "enabled" then
@@ -82,11 +84,48 @@ local function MakeEntry(def)
 	return entry
 end
 
-for _, def in ipairs(O.MODULE_GROUPS) do
+local function Register(def, ownsMembers)
 	local entry = MakeEntry(def)
 	if entry then
 		O.groupByKey[entry.key] = entry
-		for _, m in ipairs(entry.members) do O.groupOf[m.key] = entry end
+		if ownsMembers then
+			for _, m in ipairs(entry.members) do
+				-- a module made for several specializations opens the first one
+				if not O.groupOf[m.key] then O.groupOf[m.key] = entry end
+			end
+		end
+	end
+	return entry
+end
+
+for _, def in ipairs(O.MODULE_GROUPS) do Register(def, true) end
+
+local function Members(modules)
+	local out = {}
+	for _, m in ipairs(modules) do out[#out + 1] = { m.key, m.name } end
+	return out
+end
+
+-- Classes and their specializations. O.classEntries lists, per class, the class
+-- entry and the entries of the specializations that have modules.
+O.classEntries = {} -- { { class, entry, specs = { { id, name, entry }... } }... }
+for _, c in ipairs(O.CLASSES) do
+	local specs = {}
+	for _, s in ipairs(c.specs) do
+		local entry = Register({
+			key = ("spec:%s:%d"):format(c.token, s[1]), name = s[2], category = "class", texture = c.icon,
+			desc = ("%s modules for %s."):format(s[2], c.name), members = Members(O:SpecModules(c.token, s[1])),
+		}, true)
+		if entry then specs[#specs + 1] = { id = s[1], name = s[2], entry = entry } end
+	end
+	local classWide = Register({
+		key = "class:" .. c.token, name = c.name, category = "class", texture = c.icon, allowEmpty = true,
+		desc = "Modules that work for every " .. c.name .. " specialization.",
+		empty = "Nothing here works for every specialization yet. Pick a specialization in the sidebar.",
+		members = Members(O:ClassWideModules(c.token)),
+	}, true)
+	if classWide and (#classWide.members > 0 or #specs > 0) then
+		O.classEntries[#O.classEntries + 1] = { class = c, entry = classWide, specs = specs }
 	end
 end
 
@@ -107,7 +146,7 @@ end
 
 -- The texture shown for a group: its first member's.
 function O.GroupIcon(g)
-	return XUI.ModuleIcon(g.members[1])
+	return g.texture or XUI.ModuleIcon(g.members[1])
 end
 
 --------------------------------------------------------------------------------
@@ -122,6 +161,9 @@ function O:GroupPageSpec(key)
 		ctx = O:NewContext(function() return {} end, nil, { group = g }),
 		build = function()
 			local cards = {}
+			if #g.members == 0 then
+				cards[#cards + 1] = O.Card(nil, { { type = "description", text = g.empty or "Nothing here yet." } })
+			end
 			for _, m in ipairs(g.members) do
 				local mctx = O.ModuleContext(m)
 				local items = {

@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.19.2
+## Version: 2.20.0
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -62,12 +62,10 @@ Modules\Class\DeathKnight\BoilingPoint.lua
 Modules\Class\DeathKnight\BloodIsLife.lua
 Modules\Class\DeathKnight\BloodBeast.lua
 Modules\Class\DeathKnight\ControlUndead.lua
-Modules\Class\DeathKnight\Blightfall.lua
 Modules\Class\Druid\WellHoned.lua
 Modules\Class\Druid\BearForm.lua
 Modules\Class\Druid\Ironfur.lua
 Modules\Class\DeathKnight\ReapersMark.lua
-Modules\Class\DeathKnight\ForbiddenSacrifice.lua
 Modules\Class\DeathKnight\RuneforgeAlert.lua
 Modules\Tweaks\Nameplates.lua
 Modules\Tweaks\FocusCastbar.lua

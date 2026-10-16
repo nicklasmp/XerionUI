@@ -51,15 +51,11 @@ end
 
 function O:GetPageIfBuilt(key) return S.pages[key] end
 
-function O.ClassKey(key) return type(key) == "string" and key:match("^class:(.+)$") end
-
 local function GetPage(key)
 	if S.pages[key] then return S.pages[key] end
 	local m = XUI:GetModule(key)
 	local spec
-	if O.ClassKey(key) then
-		spec = O:ClassPageSpec(O.ClassKey(key))
-	elseif O.groupByKey[key] then
+	if O.groupByKey[key] then
 		spec = O:GroupPageSpec(key)
 	elseif m then
 		local build = O.moduleBuilders[key]
@@ -299,7 +295,7 @@ function O:Open(key)
 	key = key or S.currentKey or (O.systemPages[1] and O.systemPages[1].key)
 	-- a module that sits in a group opens the group's page
 	if O.groupOf[key] then key = O.groupOf[key].key end
-	if XUI:GetModule(key) == nil and not O.groupByKey[key] and not (O.ClassKey(key) and O.classByToken[O.ClassKey(key)]) then
+	if XUI:GetModule(key) == nil and not O.groupByKey[key] then
 		local found = false
 		for _, s in ipairs(O.systemPages) do if s.key == key then found = true end end
 		if not found then key = O.systemPages[1].key end

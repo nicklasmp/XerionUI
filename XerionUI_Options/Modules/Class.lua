@@ -93,33 +93,6 @@ O:RegisterModuleOptions("ControlUndead", function(ctx, m, G)
 	})
 end)
 
-O:RegisterModuleOptions("Blightfall", function(ctx, m, G)
-	return {
-		Card("Timings", {
-			{ type = "slider", label = "Dark Transformation to Soul Reaper (s)", path = "delaySR", min = 0, max = 30, step = 0.5 },
-			{ type = "slider", label = "Soul Reaper to Blightfall (s)", path = "delayBF", min = 0, max = 30, step = 0.5 },
-			{ type = "dropdown", label = "Decimals", path = "decimals", values = { { value = 1, text = "One" }, { value = 0, text = "None" } } },
-		}),
-		Card("Voice", {
-			{ type = "toggle", label = "Count out loud", path = "voice",
-				tip = "Says the spell five seconds out, then 3, 2, 1 and Now, with the game's text-to-speech voice." },
-			{ type = "button", text = "Test", onClick = function() m:TestVoice() end },
-			{ type = "description", text = "An extra alert can play when the countdown reaches Now." },
-		}),
-		Card("Alert at Now", G.Alert("alert")),
-		Card("Grow", {
-			{ type = "toggle", label = "Grow the icon as the countdown ends", path = "growPulse" },
-			{ type = "slider", label = "Start growing at (s)", path = "growStart", min = 1, max = 10, step = 0.5 },
-			{ type = "slider", label = "Largest scale", path = "growMax", min = 1, max = 3, step = 0.1 },
-		}, { previewState = "now" }),
-		Card("Icon", G.Icon("icon", { square = true })),
-		Card("Border", G.Border("border")),
-		Card("Glow in the last seconds", G.Glow("glow"), { previewState = "now" }),
-		Card("Timer text", G.Font("timerText", { toggle = "Show timer", anchor = true }), { previewState = "sr" }),
-		Card("Position", G.Position("position")),
-	}
-end)
-
 O:RegisterModuleOptions("WellHoned", function(ctx, m, G)
 	return {
 		Card("Sounds", {
@@ -155,21 +128,6 @@ O:RegisterModuleOptions("ReapersMark", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer", anchor = true })),
 		Card("Stacks", G.Font("stackText", { toggle = "Show stacks", anchor = true, color = true })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("ForbiddenSacrifice", function(ctx, m, G)
-	return {
-		Card("Bars", {
-			{ type = "dropdown", label = "Grow", path = "grow", values = m.GROW },
-			{ type = "slider", label = "Spacing", path = "spacing", min = 0, max = 20, step = 1 },
-			{ type = "toggle", label = "Show icon", path = "showIcon" },
-		}),
-		Card("Bar", G.Bar("bar", { color = true })),
-		Card("Border", G.Border("border")),
-		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
-		Card("Stack text", G.Font("stackText", { toggle = "Show stacks" })),
 		Card("Position", G.Position("position")),
 	}
 end)

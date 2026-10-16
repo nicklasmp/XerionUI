@@ -208,14 +208,6 @@ function O:RefreshPageHead()
 		f.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
 		f.title:SetText(g.name)
 		f.desc:SetText(g.desc or "")
-	elseif O.ClassKey(S.currentKey) then
-		local c = O.classByToken[O.ClassKey(S.currentKey)]
-		f.icon:SetTexture(c and c.icon or 134400)
-		f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-		f.icon:SetVertexColor(1, 1, 1)
-		f.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
-		f.title:SetText(c and c.name or "")
-		f.desc:SetText(c and c.token ~= "ANY" and "Pick a specialization to see its modules." or "Modules that work for every class.")
 	else
 		local s
 		for _, sp in ipairs(O.systemPages) do if sp.key == S.currentKey then s = sp end end

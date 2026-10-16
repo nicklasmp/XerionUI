@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.20.0 - 2026-10-16
+- Classes: sidebar is now Classes > class > specialization with a page per level; only Blood Death Knight and Guardian Druid kept for now (Blightfall and Forbidden Sacrifice removed)
+
 ## 2.19.2 - 2026-10-16
 - Remove the Stoneform Bleed Alert; Reminders moves under Combat and takes the Melee Indicator
 
