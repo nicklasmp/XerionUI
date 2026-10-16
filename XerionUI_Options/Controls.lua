@@ -71,18 +71,21 @@ end
 --------------------------------------------------------------------------------
 -- Toggle: [switch] Label
 --------------------------------------------------------------------------------
-local function Switch(parent)
+-- w/h default to 30x16; pass whole, even pixel sizes (never SetScale it, that
+-- blurs the round ends)
+local function Switch(parent, w, h)
+	w, h = w or 30, h or 16
 	local s = CreateFrame("Frame", nil, parent)
-	s:SetSize(30, 16)
-	local l = O:Icon(s, "circle", 16, nil, "BACKGROUND")
+	s:SetSize(w, h)
+	local l = O:Icon(s, "circle", h, nil, "BACKGROUND")
 	l:SetPoint("LEFT")
-	local r = O:Icon(s, "circle", 16, nil, "BACKGROUND")
+	local r = O:Icon(s, "circle", h, nil, "BACKGROUND")
 	r:SetPoint("RIGHT")
 	local mid = O:Rect(s, nil, "BACKGROUND")
-	mid:SetPoint("TOPLEFT", 8, 0)
-	mid:SetPoint("BOTTOMRIGHT", -8, 0)
+	mid:SetPoint("TOPLEFT", h / 2, 0)
+	mid:SetPoint("BOTTOMRIGHT", -h / 2, 0)
 	s.parts = { l, r, mid }
-	s.knob = O:Icon(s, "circle", 12, nil, "ARTWORK")
+	s.knob = O:Icon(s, "circle", h - 4, nil, "ARTWORK")
 	function s:SetState(on, disabled)
 		local cr, cg, cb = O:Color("track")
 		if on then cr, cg, cb = O:Accent() end

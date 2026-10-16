@@ -14,6 +14,30 @@ local ITEM_H = O.LAYOUT.ITEM_H
 --------------------------------------------------------------------------------
 local itemPool, headPool = {}, {}
 
+-- Fold toggle: a 14px chevron in a 26px rounded-feel hit area that lights up on
+-- hover, so it is easy to aim at. Forwards rotation/colour to its icon.
+local function FoldButton(parent, onClick)
+	local f = CreateFrame("Button", nil, parent)
+	f:SetSize(26, 26)
+	f.bg = O:Rect(f, "control", "BACKGROUND")
+	f.bg:SetAllPoints()
+	f.bg:Hide()
+	f.glyph = O:Icon(f, "chevron", 14, "muted", "OVERLAY")
+	f.glyph:SetPoint("CENTER")
+	function f:SetRotation(r) self.glyph:SetRotation(r) end
+	function f:SetVertexColor(...) self.glyph:SetVertexColor(...) end
+	f:SetScript("OnEnter", function(self)
+		self.bg:Show()
+		self.glyph:SetVertexColor(O:Color("text"))
+	end)
+	f:SetScript("OnLeave", function(self)
+		self.bg:Hide()
+		self.glyph:SetVertexColor(O:Color("muted"))
+	end)
+	f:SetScript("OnClick", onClick)
+	return f
+end
+
 local function SidebarItem(i)
 	local b = itemPool[i]
 	if b then return b end
@@ -28,8 +52,12 @@ local function SidebarItem(i)
 	b.icon = b:CreateTexture(nil, "ARTWORK")
 	b.icon:SetSize(16, 16)
 	b.icon:SetPoint("LEFT", 16, 0)
-	b.arrow = O:Icon(b, "chevron", 10, "muted", "OVERLAY")
-	b.arrow:SetPoint("RIGHT", -14, 0)
+	b.arrow = FoldButton(b, function()
+		if not b.classToken then return end
+		S.expandedClass[b.classToken] = not S.expandedClass[b.classToken]
+		O:RefreshSidebar()
+	end)
+	b.arrow:SetPoint("RIGHT", -8, 0)
 	b.text = O:Text(b, O.SIZE.text, "label")
 	b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
 	b.text:SetPoint("RIGHT", -26, 0)
@@ -40,9 +68,8 @@ local function SidebarItem(i)
 	b.sw = CreateFrame("Button", nil, b)
 	b.sw:SetSize(40, ITEM_H)
 	b.sw:SetPoint("RIGHT", -8, 0)
-	b.sw.switch = O.Switch(b.sw)
-	b.sw.switch:SetScale(0.85)
-	b.sw.switch:SetPoint("CENTER")
+	b.sw.switch = O.Switch(b.sw, 26, 14)
+	b.sw.switch:SetPoint("RIGHT", -6, 0)
 	b.sw:SetScript("OnClick", function()
 		local m = b.module
 		if not m then return end
@@ -82,8 +109,8 @@ local function SidebarHead(i)
 	h:SetHeight(30)
 	h.text = O:Text(h, O.SIZE.small, "faint")
 	h.text:SetPoint("BOTTOMLEFT", 16, 6)
-	h.arrow = O:Icon(h, "chevron", 10, "muted", "OVERLAY")
-	h.arrow:SetPoint("BOTTOMRIGHT", -14, 8)
+	h.arrow = FoldButton(h, function() if h.onClick then h.onClick() end end)
+	h.arrow:SetPoint("BOTTOMRIGHT", -8, 2)
 	-- "3/8": how many of the modules below are switched on
 	h.count = O:Text(h, O.SIZE.small, "faint")
 	h:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
@@ -170,9 +197,19 @@ local function ModuleMatches(m, extra)
 	return Matches(ModuleWords(m) .. " " .. extra)
 end
 
--- The "Active" chip hides modules that are switched off.
+-- The filter chips: "on" keeps modules that are switched on, "off" the rest.
 local function Keep(m)
-	return not XUI.DB.global.panel.onlyActive or m.db.enabled
+	local filter = XUI.DB.global.panel.filter
+	if filter == "on" then return m.db.enabled end
+	if filter == "off" then return not m.db.enabled end
+	return true
+end
+
+-- Sidebar order: modules that are switched on first, then the ones off, each
+-- part alphabetical.
+local function ByStateThenName(a, b)
+	if a.db.enabled ~= b.db.enabled then return a.db.enabled end
+	return a.name:lower() < b.name:lower()
 end
 
 function O:RefreshSidebar()
@@ -190,7 +227,7 @@ function O:RefreshSidebar()
 		b.arrow:SetShown(classToken ~= nil)
 		b.text:ClearAllPoints()
 		b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
-		b.text:SetPoint("RIGHT", m and -62 or -26, 0)
+		b.text:SetPoint("RIGHT", m and -62 or (classToken and -38 or -26), 0)
 		if classToken then
 			b.arrow:SetRotation(S.expandedClass[classToken] and 0 or math.rad(90))
 		end
@@ -220,7 +257,7 @@ function O:RefreshSidebar()
 			local on = 0
 			for _, m in ipairs(mods) do if m.db.enabled then on = on + 1 end end
 			h.count:ClearAllPoints()
-			h.count:SetPoint("BOTTOMRIGHT", fold and -30 or -14, 6)
+			h.count:SetPoint("BOTTOMRIGHT", fold and -38 or -14, 6)
 			h.count:SetText(on .. "/" .. #mods)
 			if on > 0 then h.count:SetTextColor(O:Accent()) else h.count:SetTextColor(O:Color("faint")) end
 			h.count:Show()
@@ -266,6 +303,7 @@ function O:RefreshSidebar()
 				for _, m in ipairs(O:ClassModules(c.token)) do
 					if Keep(m) then mods[#mods + 1] = m end
 				end
+				table.sort(mods, ByStateThenName)
 				for _, m in ipairs(mods) do
 					if ModuleMatches(m, c.name:lower()) then matching[#matching + 1] = m end
 				end
@@ -290,6 +328,7 @@ function O:RefreshSidebar()
 				if Keep(m) then list[#list + 1] = m end
 			end
 		end
+		table.sort(list, ByStateThenName)
 		end
 		if #list > 0 then
 			if cat.key == "group" or cat.key == "dungeon" or cat.key == "tweaks" then

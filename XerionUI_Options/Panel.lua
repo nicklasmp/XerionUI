@@ -212,12 +212,12 @@ local function CreateWindow()
 		if S.entries[1] then O:Open(S.entries[1]) end
 	end)
 
-	-- filter chips: all modules, or only the ones switched on
+	-- filter chips: all modules, only the ones switched on, or only the ones off
+	if XUI.DB.global.panel.onlyActive then XUI.DB.global.panel.filter, XUI.DB.global.panel.onlyActive = "on", nil end
 	local chips = {}
 	local function PaintChips()
-		local only = XUI.DB.global.panel.onlyActive and true or false
 		for _, c in ipairs(chips) do
-			if c.active == only then
+			if c.filter == XUI.DB.global.panel.filter then
 				O:SetSkinColor(c, "selected")
 				c.text:SetTextColor(O:Accent())
 				O:SetBorderColor(c, O:Accent())
@@ -228,17 +228,19 @@ local function CreateWindow()
 			end
 		end
 	end
-	for i, def in ipairs({ { "All", false }, { "Active", true } }) do
+	local x = 12
+	for i, def in ipairs({ { "All", nil, 40 }, { "Active", "on", 56 }, { "Inactive", "off", 64 } }) do
 		local c = CreateFrame("Button", nil, side)
-		c:SetSize(i == 1 and 40 or 56, 20)
-		c:SetPoint("TOPLEFT", i == 1 and 12 or 58, -46)
+		c:SetSize(def[3], 20)
+		c:SetPoint("TOPLEFT", x, -46)
+		x = x + def[3] + 6
 		O:Skin(c, "control", "controlLine")
 		c.text = O:Text(c, O.SIZE.small, "muted")
 		c.text:SetPoint("CENTER")
 		c.text:SetText(def[1])
-		c.active = def[2]
+		c.filter = def[2]
 		c:SetScript("OnClick", function(self)
-			XUI.DB.global.panel.onlyActive = self.active or nil
+			XUI.DB.global.panel.filter = self.filter
 			PaintChips()
 			O:RefreshSidebar()
 		end)
@@ -275,13 +277,13 @@ local function CreateWindow()
 		O:RefreshPageHead()
 	end)
 	XUI:On("ModuleStateChanged", owner, function()
-		if S.frame:IsShown() then O:RefreshSidebar() O:RefreshPageHead() O:RefreshOverview() end
+		if S.frame:IsShown() then O:RefreshSidebar() O:RefreshPageHead() end
 	end)
 	XUI:On("PreviewChanged", owner, function()
-		if S.frame:IsShown() then O:RefreshPageHead() S.UpdateDockSoon() O:RefreshOverview() end
+		if S.frame:IsShown() then O:RefreshPageHead() S.UpdateDockSoon() end
 	end)
 	XUI:On("ModuleError", owner, function()
-		if S.frame:IsShown() then O:RefreshPageHead() O:RefreshSidebar() O:RefreshOverview() end
+		if S.frame:IsShown() then O:RefreshPageHead() O:RefreshSidebar() end
 	end)
 end
 

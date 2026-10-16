@@ -74,7 +74,7 @@ local function Exercise(control)
 	control:Refresh()
 end
 
-local pageKeys = { "overview", "style", "general", "profiles" }
+local pageKeys = { "style", "general", "profiles" }
 for _, m in ipairs(XUI.modules) do pageKeys[#pageKeys + 1] = m.key end
 for _, c in ipairs(XUI.Options.CLASSES) do pageKeys[#pageKeys + 1] = "class:" .. c.token end
 pageKeys[#pageKeys + 1] = "class:ANY"
