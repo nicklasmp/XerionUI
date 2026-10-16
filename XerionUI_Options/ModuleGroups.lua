@@ -23,8 +23,8 @@ O.MODULE_GROUPS = {
 	},
 	{
 		key = "grp:tank", name = "Tank", category = "group",
-		desc = "Everything about the tanks of your group.",
-		members = { { "CoTank", "Co-Tank" }, { "AggroCheck", "Aggro check" }, { "AutoMarkTank", "Auto mark tank" } },
+		desc = "Co-tank tracking and marking the tank of your group.",
+		members = { { "CoTank", "Co-Tank" }, { "AutoMarkTank", "Auto mark tank" } },
 	},
 	{
 		key = "grp:party", name = "Party Tracking", category = "group",
@@ -35,14 +35,14 @@ O.MODULE_GROUPS = {
 		key = "grp:utility", name = "Group Utility", category = "group",
 		desc = "Small helpers for dungeons and groups.",
 		members = {
-			{ "Bloodlust", "Bloodlust ready" }, { "Shroud", "Shroud / Mass Invis" }, { "MeterReset", "Meter reset" },
-			{ "InstanceKeys", "Who has the key" }, { "BonusRollConfirm", "Bonus roll confirm" }, { "AutoGossip", "Auto NPC dialog" },
+			{ "Shroud", "Shroud / Mass Invis" }, { "InstanceKeys", "Who has the key" },
+			{ "BonusRollConfirm", "Bonus roll confirm" }, { "AutoGossip", "Auto NPC dialog" },
 		},
 	},
 	{
-		key = "grp:murderrow", name = "Encounter Tools", category = "dungeon", dungeon = "Murder Row",
-		desc = "Counters and alerts for the Murder Row encounters.",
-		members = { { "ChaosBarrage", "Chaos Barrage counter" }, { "DamageAmp", "Boss damage amp" } },
+		key = "grp:reminders", name = "Reminders", category = "group",
+		desc = "Warnings and prompts that tell you when something needs your attention.",
+		members = { { "AggroCheck", "Aggro check" }, { "Bloodlust", "Bloodlust ready" }, { "MeterReset", "Meter reset" } },
 	},
 }
 
