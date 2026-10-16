@@ -60,6 +60,8 @@ local function SidebarHead(i)
 	h.text:SetPoint("BOTTOMLEFT", 16, 6)
 	h.arrow = O:Icon(h, "chevron", 10, "muted", "OVERLAY")
 	h.arrow:SetPoint("BOTTOMRIGHT", -14, 8)
+	-- "3/8": how many of the modules below are switched on
+	h.count = O:Text(h, O.SIZE.small, "faint")
 	h:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
 	h:SetScript("OnEnter", function(self) if self.onClick then self.text:SetTextColor(O:Color("text")) end end)
 	h:SetScript("OnLeave", function(self) self.text:SetTextColor(O:Color("faint")) end)
@@ -77,7 +79,10 @@ function O:PaintItem(b)
 	local m = b.module
 	if m then
 		b.icon:SetDesaturated(not m.db.enabled)
-		b.icon:SetAlpha(m.db.enabled and 1 or 0.55)
+		b.icon:SetAlpha(m.db.enabled and 1 or 0.3)
+		-- off modules read as dimmed, on modules stay bright with a bigger lit dot
+		if not selected and not m.db.enabled then b.text:SetTextColor(O:Color("faint")) end
+		b.dot:SetSize(m.db.enabled and 8 or 6, m.db.enabled and 8 or 6)
 		b.dot:Show()
 		if m.db.enabled then
 			local ok = m:CanRun()
@@ -175,10 +180,21 @@ function O:RefreshSidebar()
 		y = y + ITEM_H
 	end
 	-- fold: nil for a plain heading, else { folded = bool, toggle = function }
-	local function AddHead(text, fold)
+	local function AddHead(text, fold, mods)
 		nh = nh + 1
 		local h = SidebarHead(nh)
 		h.text:SetText(text:upper())
+		if mods and #mods > 0 then
+			local on = 0
+			for _, m in ipairs(mods) do if m.db.enabled then on = on + 1 end end
+			h.count:ClearAllPoints()
+			h.count:SetPoint("BOTTOMRIGHT", fold and -30 or -14, 6)
+			h.count:SetText(on .. "/" .. #mods)
+			if on > 0 then h.count:SetTextColor(O:Accent()) else h.count:SetTextColor(O:Color("faint")) end
+			h.count:Show()
+		else
+			h.count:Hide()
+		end
 		h.onClick = fold and fold.toggle or nil
 		h.arrow:SetShown(fold ~= nil)
 		if fold then h.arrow:SetRotation(fold.folded and math.rad(90) or 0) end
@@ -201,10 +217,15 @@ function O:RefreshSidebar()
 			-- every class, whatever you play, each with its modules below it; the
 			-- whole group folds from its heading (a search unfolds it)
 			local folded = XUI.DB.global.panel.classFolded and S.searchText == ""
+			local classMods = {}
+			for _, c in ipairs(O.CLASSES) do
+				for _, m in ipairs(O:ClassModules(c.token)) do classMods[#classMods + 1] = m end
+			end
+			for _, m in ipairs(O:ClassModules(O.ANY_CLASS.token)) do classMods[#classMods + 1] = m end
 			AddHead(cat.name, { folded = folded, toggle = function()
 				XUI.DB.global.panel.classFolded = not XUI.DB.global.panel.classFolded
 				O:RefreshSidebar()
-			end })
+			end }, classMods)
 			local order = {}
 			for _, c in ipairs(O.CLASSES) do order[#order + 1] = c end
 			order[#order + 1] = O.ANY_CLASS
@@ -242,7 +263,7 @@ function O:RefreshSidebar()
 				AddHead(cat.name, { folded = folded, toggle = function()
 					XUI.DB.global.panel[flag] = not XUI.DB.global.panel[flag]
 					O:RefreshSidebar()
-				end })
+				end }, list)
 				if not folded then
 					if cat.key == "dungeon" then
 						-- one sub-heading per dungeon (alphabetical), its modules indented below
@@ -271,7 +292,7 @@ function O:RefreshSidebar()
 					end
 				end
 			else
-				AddHead(cat.name)
+				AddHead(cat.name, nil, list)
 				for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
 			end
 		end
