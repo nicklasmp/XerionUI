@@ -174,7 +174,7 @@ O:RegisterModuleOptions("EUICDMBarGlows", function(ctx, m, G)
 			item.disabled = function(c) return off() or (was and was(c)) or false end
 			items[#items + 1] = item
 		end
-		cards[#cards + 1] = Card(tostring(bar.name), items)
+		cards[#cards + 1] = Card(tostring(bar.name), items, { bar = bar.key })
 	end
 	if #cards == 0 then
 		cards[1] = Card("Bars", {
@@ -196,7 +196,7 @@ O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
 				get = function() return XUI.GetPath(m.db, face) or "GothamNarrowBlack" end,
 				disabled = function() return XUI.GetPath(m.db, on) ~= true end,
 				tip = "Cooldown numbers, keybinds and counts on this bar. Size, outline and color stay as set in EllesmereUI." },
-		})
+		}, { bar = bar.key })
 	end
 	if #cards == 0 then
 		cards[1] = Card("Bars", {
@@ -205,3 +205,85 @@ O:RegisterModuleOptions("EUICDMBarFonts", function(ctx, m, G)
 	end
 	return cards
 end)
+
+--------------------------------------------------------------------------------
+-- Cooldown Manager page: the three modules on one short page. Which bar and
+-- which part (font or glow) is picked with tabs, so a single card shows at a
+-- time instead of one card per bar and module.
+--------------------------------------------------------------------------------
+O.groupPages["grp:cdm"] = function(g)
+	local fonts = XUI:GetModule("EUICDMBarFonts")
+	local stack = XUI:GetModule("EUICDMStackFont")
+	local glows = XUI:GetModule("EUICDMBarGlows")
+	local state = { bar = nil, part = "font" }
+
+	local function Feature(m, label)
+		return {
+			type = "toggle", label = label,
+			get = function() return m.db.enabled end,
+			set = function(_, on)
+				m:SetEnabled(on)
+				O:RefreshSidebar()
+				O:RefreshPageHead()
+			end,
+		}
+	end
+
+	return {
+		ctx = O:NewContext(function() return state end, nil, { group = g }),
+		build = function()
+			local bars = fonts.BarList()
+			if not state.bar and bars[1] then state.bar = bars[1].key end
+			local barTabs = {}
+			for _, bar in ipairs(bars) do barTabs[#barTabs + 1] = { value = bar.key, text = tostring(bar.name) } end
+
+			local cards = {
+				O.Card("Features", {
+					Feature(fonts, "Font per bar"),
+					Feature(stack, "Stack and charge font"),
+					Feature(glows, "Glow per bar"),
+					{ type = "description", color = "danger",
+						hidden = function()
+							for _, m in ipairs(g.members) do if #XUI.Health.Issues(m) > 0 then return false end end
+							return true
+						end,
+						text = function()
+							local lines = {}
+							for _, m in ipairs(g.members) do
+								for _, issue in ipairs(XUI.Health.Issues(m)) do lines[#lines + 1] = "- " .. issue end
+							end
+							return table.concat(lines, "\n")
+						end },
+				}),
+				O.Card("Stack and charge font", {
+					{ type = "dropdown", label = "Font", path = "face", media = "font",
+						tip = "Used for stack and charge counts on every bar. Size, outline and color stay as set in EllesmereUI." },
+				}, { ctx = O.ModuleContext(stack) }),
+			}
+			if #barTabs == 0 then
+				cards[#cards + 1] = O.Card("Bars", {
+					{ type = "description", text = "No Cooldown Manager bars found yet. Open this page again once EllesmereUI's Cooldown Manager has loaded." },
+				})
+				return cards
+			end
+			cards[#cards + 1] = O.Card("Bar", {
+				{ type = "tabs", values = barTabs,
+					get = function() return state.bar end, set = function(_, v) state.bar = v end },
+				{ type = "tabs", values = { { value = "font", text = "Font" }, { value = "glow", text = "Glow" } },
+					get = function() return state.part end, set = function(_, v) state.part = v end },
+			})
+			local function Part(m, part)
+				local ctx = O.ModuleContext(m)
+				for _, card in ipairs(O.moduleBuilders[m.key](ctx, m, O.Groups)) do
+					card.ctx = ctx
+					card.title = part == "font" and "Font" or "Glow"
+					card.hidden = function() return state.bar ~= card.bar or state.part ~= part end
+					cards[#cards + 1] = card
+				end
+			end
+			Part(fonts, "font")
+			Part(glows, "glow")
+			return cards
+		end,
+	}
+end

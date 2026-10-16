@@ -4,6 +4,16 @@ MOCK.Fire("PLAYER_LOGIN")
 MOCK.Advance(0.5)
 local XUI = _G.XerionUI
 for _, m in ipairs(XUI.modules) do m:SetEnabled(true) end
+-- three Cooldown Manager bars, so the Cooldown Manager page has something to show
+if XUI.EUI then
+	local realModule = XUI.EUI.Module
+	XUI.EUI.Module = function(name)
+		if name == "EllesmereUICooldownManager" then
+			return { barDataByKey = { cd = { name = "Cooldowns" }, ut = { name = "Utility" }, bf = { name = "Buffs" } } }
+		end
+		return realModule(name)
+	end
+end
 -- a few dialogs for the Auto NPC Dialog page
 XUI.DB.global.gossipSeen = {
 	[555001] = { text = "We're ready. Open the gate.", npc = "Kaelen Dawnward", zone = "Ara-Kara", kind = "Dungeon" },

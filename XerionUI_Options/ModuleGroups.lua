@@ -52,6 +52,7 @@ O.MODULE_GROUPS = {
 }
 
 O.groupByKey = {}   -- [group key] = entry
+O.groupPages = {}   -- [group key] = function(entry) -> page spec, for a page of its own design
 O.groupOf = {}      -- [member module key] = entry
 
 -- The entry the sidebar lists for a group. It looks like a module to the
@@ -157,6 +158,7 @@ local function HasIssues(m) return #XUI.Health.Issues(m) > 0 end
 function O:GroupPageSpec(key)
 	local g = O.groupByKey[key]
 	if not g then return nil end
+	if O.groupPages[key] then return O.groupPages[key](g) end
 	return {
 		ctx = O:NewContext(function() return {} end, nil, { group = g }),
 		build = function()
