@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.20.1 - 2026-10-16
+- Classes: Well-Honed Instincts moves under Guardian; Reaper's Mark, Control Undead and Runeforge Alert removed
+
 ## 2.20.0 - 2026-10-16
 - Classes: sidebar is now Classes > class > specialization with a page per level; only Blood Death Knight and Guardian Druid kept for now (Blightfall and Forbidden Sacrifice removed)
 

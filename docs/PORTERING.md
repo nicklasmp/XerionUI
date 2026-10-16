@@ -76,11 +76,11 @@ Alle porteret (untested-markeringen er fjernet igen 14. okt 2026). De delte bygg
 | Boiling Point | K | Death Knight (Blood) | BoilingPoint | ✅ |
 | The Blood is Life | K | Death Knight (San'layn) | BloodIsLife | ✅ |
 | Blood Beast-skade | K | Death Knight (San'layn) | BloodBeast | ✅ |
-| Reaper's Mark | K | Death Knight (Deathbringer) | ReapersMark | ✅ |
+| Reaper's Mark | K | Death Knight (Deathbringer) | ReapersMark | ✖ fjernet |
 | Blightfall-kæde | K | Death Knight (Unholy) | Blightfall | ✖ fjernet (kun Blood/Guardian for nu) |
 | Putrefy / Forbidden Sacrifice | K | Death Knight (Unholy) | ForbiddenSacrifice | ✖ fjernet (kun Blood/Guardian for nu) |
-| Control Undead | K | Death Knight | ControlUndead | ✅ |
-| Runeforge Alert | I | Death Knight | RuneforgeAlert | ✅ |
+| Control Undead | K | Death Knight | ControlUndead | ✖ fjernet |
+| Runeforge Alert | I | Death Knight | RuneforgeAlert | ✖ fjernet |
 | Well-Honed Instincts-lyd | K | Druid | WellHoned | ✅ |
 | Bear Form-påmindelse | K | Druid (Guardian) | BearForm | ✅ |
 | Defensive Indicator, Self Dispel Alert, Movement Alert | I | alle | – | ✖ porteret, men fjernet igen efter ønske (oktober 2026) |

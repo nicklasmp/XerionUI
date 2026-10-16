@@ -22,6 +22,7 @@ local M = XUI:NewModule("WellHoned", {
 	icon = [[Interface\Icons\Spell_Nature_Regeneration]],
 	order = 30,
 	classes = { "DRUID" },
+	specs = { 104 },
 	defaults = {
 		sound = "Xerion: External",
 		endSound = "None",

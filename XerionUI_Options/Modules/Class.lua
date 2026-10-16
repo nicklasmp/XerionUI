@@ -83,16 +83,6 @@ O:RegisterModuleOptions("BloodBeast", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("ControlUndead", function(ctx, m, G)
-	return TimedIconCards(G, {
-		Card("When", {
-			{ type = "toggle", label = "Hide when the minion is gone", path = "hideOnPetLost" },
-			{ type = "slider", label = "Warn color with seconds left", path = "warnAt", min = 0, max = 120, step = 5 },
-			{ type = "color", label = "Warn color", path = "warnColor" },
-		}),
-	})
-end)
-
 O:RegisterModuleOptions("WellHoned", function(ctx, m, G)
 	return {
 		Card("Sounds", {
@@ -118,47 +108,6 @@ O:RegisterModuleOptions("BearForm", function(ctx, m, G)
 		Card("Position", G.Position("position")),
 		Card("Alert", G.Alert("alert", { fallbackText = "Bear form" })),
 	}
-end)
-
-O:RegisterModuleOptions("ReapersMark", function(ctx, m, G)
-	return {
-		Card("Icon", Join(G.Icon("icon", { square = true }), {
-			{ type = "toggle", label = "Cooldown swipe", path = "showSwipe" },
-		})),
-		Card("Border", G.Border("border")),
-		Card("Timer text", G.Font("timerText", { toggle = "Show timer", anchor = true })),
-		Card("Stacks", G.Font("stackText", { toggle = "Show stacks", anchor = true, color = true })),
-		Card("Position", G.Position("position")),
-	}
-end)
-
-O:RegisterModuleOptions("RuneforgeAlert", function(ctx, m, G)
-	local cards = {
-		Card("Text", Join({
-			{ type = "input", label = "Text", path = "text" },
-			{ type = "color", label = "Color", path = "color" },
-		}, G.Font("font"))),
-	}
-	-- one card per build of the current specialization: which runes are fine on each weapon
-	for _, setup in ipairs(m.SETUPS) do
-		local items = {}
-		for _, slot in ipairs(setup.slots) do
-			items[#items + 1] = { type = "description", text = slot.label .. ": accepted runes" }
-			for _, rune in ipairs(m.RUNES) do
-				items[#items + 1] = {
-					type = "toggle", label = rune.name,
-					get = function()
-						local runes = m:Accepted(setup.key, slot.key)
-						return runes and runes[rune.enchantId] == true or false
-					end,
-					set = function(_, on) m:SetAccepted(setup.key, slot.key, rune.enchantId, on) end,
-				}
-			end
-		end
-		cards[#cards + 1] = Card(setup.label, items, { hidden = function() return setup.spec ~= XUI.GetSpecID() end })
-	end
-	cards[#cards + 1] = Card("Position", G.Position("position"))
-	return cards
 end)
 
 

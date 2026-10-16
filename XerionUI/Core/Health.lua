@@ -95,7 +95,6 @@ Health.CHECKS = {
 		end
 	end,
 	Shroud = NeedAuraContainers,
-	ReapersMark = NeedAuraContainers,
 	WellHoned = NeedAuraSounds,
 	BoneShield = NeedCooldownManager,
 	DRWSound = NeedCooldownManager,
