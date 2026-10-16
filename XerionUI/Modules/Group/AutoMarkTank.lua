@@ -8,7 +8,8 @@
 --
 -- The button is a secure button; its macro is only rewritten out of combat and
 -- it only shows and hides out of combat, so nothing is ever blocked. A tank
--- that already carries a marker is left alone unless asked to replace it. In a
+-- that already carries a marker is left alone unless asked to replace it. The
+-- small x on the button dismisses it until the situation changes. In a
 -- raid it needs lead or assist; in a party anyone may mark.
 --------------------------------------------------------------------------------
 local XUI = select(2, ...).XUI
@@ -83,7 +84,8 @@ local function Wanted()
 	return out
 end
 
-local button, label, icon
+local button, label, icon, close
+local dismissed -- macro text the user closed; the button stays away until it changes
 local function Button()
 	if button then return button end
 	button = CreateFrame("Button", "XUI_MarkTankButton", UIParent, "SecureActionButtonTemplate")
@@ -103,8 +105,24 @@ local function Button()
 	icon:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
 	label = button:CreateFontString(nil, "OVERLAY")
 	label:SetPoint("LEFT", icon, "RIGHT", 6, 0)
-	label:SetPoint("RIGHT", button, "RIGHT", -6, 0)
 	label:SetJustifyH("LEFT")
+	label:SetPoint("RIGHT", button, "RIGHT", -24, 0)
+	-- close: not marking this time
+	close = CreateFrame("Button", nil, button)
+	close:SetSize(18, 18)
+	close:SetPoint("RIGHT", button, "RIGHT", -4, 0)
+	close:SetFrameLevel(button:GetFrameLevel() + 5)
+	local x = close:CreateFontString(nil, "OVERLAY")
+	x:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
+	x:SetPoint("CENTER")
+	x:SetText("x")
+	close:SetScript("OnEnter", function() x:SetTextColor(1, 0.3, 0.3) end)
+	close:SetScript("OnLeave", function() x:SetTextColor(1, 1, 1) end)
+	close:SetScript("OnClick", function()
+		dismissed = button:GetAttribute("macrotext") or ""
+		-- a secure frame cannot be hidden in combat; Check hides it afterwards
+		if not InCombatLockdown() then button:Hide() end
+	end)
 	XUI.Movers:Register(button, M, "position")
 	-- one click done: look again, so the button leaves once the tank is marked
 	button:HookScript("PostClick", function() M:After(0.4, M.Check) end)
