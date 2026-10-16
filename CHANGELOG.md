@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.16.1 - 2026-10-16
+- Auto Mark Tank: slimmer card with the close button integrated as an edge strip
+
 ## 2.16.0 - 2026-10-16
 - Options: rounded cards, fields and buttons (9-slice), pink default accent, brighter labels
 
