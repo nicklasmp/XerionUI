@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.15.1 - 2026-10-16
+- Options: flatter window and page headers, larger module icon and enable switch
+
 ## 2.15.0 - 2026-10-16
 - Options redesign: flat row-based pages (label left, control right) with titled cards, underline filter tabs, bigger type
 - Options font defaults to GothamNarrowBlack (SharedMedia_MyMedia), falling back to Arial Narrow

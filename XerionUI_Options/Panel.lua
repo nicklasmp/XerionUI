@@ -10,8 +10,8 @@ if not O then return end
 
 local W, H = 980, 680
 local SIDEBAR_W = 228
-local HEADER_H = 50
-local PAGEHEAD_H = 78
+local HEADER_H = 46
+local PAGEHEAD_H = 88
 local ITEM_H = 30
 O.LAYOUT = { SIDEBAR_W = SIDEBAR_W, HEADER_H = HEADER_H, PAGEHEAD_H = PAGEHEAD_H, ITEM_H = ITEM_H }
 
@@ -140,7 +140,7 @@ local function CreateWindow()
 	header:SetPoint("TOPLEFT")
 	header:SetPoint("TOPRIGHT")
 	header:SetHeight(HEADER_H)
-	header.bg = O:Rect(header, "header", "BACKGROUND")
+	header.bg = O:Rect(header, "sidebar", "BACKGROUND")
 	header.bg:SetAllPoints()
 	header.line = O:Rect(header, "line", "ARTWORK")
 	header.line:SetHeight(1)
@@ -156,9 +156,9 @@ local function CreateWindow()
 
 	local logo = header:CreateTexture(nil, "ARTWORK")
 	logo:SetTexture(O.MEDIA .. "addon-icon")
-	logo:SetSize(28, 28)
+	logo:SetSize(24, 24)
 	logo:SetPoint("LEFT", 14, 0)
-	local title = O:Text(header, 17, "text")
+	local title = O:Text(header, 18, "text")
 	title:SetPoint("LEFT", logo, "RIGHT", 10, 0)
 	title:SetText("XerionUI")
 	local version = O:Text(header, O.SIZE.small, "faint")
