@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.18.0 - 2026-10-16
+- New module Cooldown Manager Bar Glows: choose a glow type (Pixel, Pulse, Autocast shine, Action button, Proc) with its own color, speed and size per EllesmereUI Cooldown Manager bar
+
 ## 2.17.0 - 2026-10-16
 - Options sidebar: text-only accordion with foldable groups, guide line, status dot that turns into a switch on hover
 
