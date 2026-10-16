@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.26.0 - 2026-10-16
+- Style cards (Font, Border, Glow, Icon, Bar, Background) get a Reset to default button that puts that card back to the module's or the Global Style default
+
 ## 2.25.1 - 2026-10-16
 - Autocast shine: default particles 16 (EllesmereUI's default of four layers of four sparks); speed and scale already match
 

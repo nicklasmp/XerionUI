@@ -102,6 +102,27 @@ Step("touch every control", function()
 	MOCK.autoAccept = false
 end)
 
+Step("style cards: Reset to default restores the block", function()
+	local G = XUI.Options.Groups
+	-- global style page
+	local ctx = XUI.Options:NewContext(function() return XUI.DB.style end, function() XUI.Style:Invalidate() end)
+	local items = G.Glow("glow", { global = true })
+	local reset = items[#items]
+	assert(reset.type == "button" and reset.text == "Reset to default", "a glow group should end with the reset button")
+	XUI.DB.style.glow.particles, XUI.DB.style.glow.type = 9, "PULSE"
+	reset.onClick(ctx)
+	assert(XUI.DB.style.glow.particles == 16 and XUI.DB.style.glow.type == XUI.DB.STYLE_DEFAULTS.glow.type, "global glow should be back to its defaults")
+	-- a module's own block
+	local m = XUI:GetModule("MeleeIndicator")
+	local mctx = XUI.Options.ModuleContext(m)
+	local font = G.Font("font", { color = true })
+	local mreset = font[#font]
+	assert(not mreset.hidden(mctx), "a module font with a shipped default should offer the reset")
+	m.db.font.size = 77
+	mreset.onClick(mctx)
+	assert(m.db.font.size == XUI.DB.moduleDefaults[m.key].font.size, "the module font should be back to its default size")
+end)
+
 Step("modules: enable all", function()
 	XUI.Options:Open("style")
 	for _, m in ipairs(XUI.modules) do m:SetEnabled(true) end

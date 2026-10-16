@@ -86,6 +86,33 @@ end
 
 local function Hidden(fn) return fn end
 
+-- "Reset to default" at the end of a style group: puts the block back to what
+-- the module (or, on the Global Style page, the addon) ships with. Hidden for a
+-- block that has no shipped default.
+local function DefaultBlock(ctx, path, opts)
+	if opts.global then return GetPath(XUI.DB.STYLE_DEFAULTS, path) end
+	local m = ctx.module
+	local defaults = m and XUI.DB.moduleDefaults[m.key]
+	return defaults and GetPath(defaults, path)
+end
+
+local function WithReset(items, kind, path, opts)
+	items[#items + 1] = {
+		type = "button", text = "Reset to default",
+		tip = "Puts every setting in this card back to its default.",
+		hidden = function(ctx) return type(DefaultBlock(ctx, path, opts)) ~= "table" end,
+		onClick = function(ctx)
+			local default = DefaultBlock(ctx, path, opts)
+			if type(default) ~= "table" then return end
+			local b = Block(ctx, path)
+			wipe(b)
+			for k, v in pairs(default) do b[k] = XUI.CopyTable(v) end
+			ctx:Changed(path)
+		end,
+	}
+	return items
+end
+
 --------------------------------------------------------------------------------
 -- Font
 -- opts: color (bool), toggle ("label" to add a show switch on path.enabled),
@@ -152,7 +179,7 @@ function G.Font(path, opts)
 			end
 		end
 	end
-	return items
+	return WithReset(items, "font", path, opts)
 end
 
 --------------------------------------------------------------------------------
@@ -177,7 +204,7 @@ function G.Border(path, opts)
 		type = "color", label = "Color",
 		disabled = isNone,
 	})
-	return items
+	return WithReset(items, "border", path, opts)
 end
 
 --------------------------------------------------------------------------------
@@ -254,7 +281,7 @@ function G.Glow(path, opts)
 			return was and was(ctx) or false
 		end
 	end
-	return items
+	return WithReset(items, "glow", path, opts)
 end
 
 --------------------------------------------------------------------------------
@@ -283,7 +310,7 @@ function G.Icon(path, opts)
 		type = "slider", label = "Crop (%)", min = 0, max = 30, step = 1,
 		tip = "How much of each edge of the icon art is trimmed off.",
 	})
-	return items
+	return WithReset(items, "icon", path, opts)
 end
 
 --------------------------------------------------------------------------------
@@ -319,7 +346,7 @@ function G.Bar(path, opts)
 			end,
 		}
 	end
-	return items
+	return WithReset(items, "bar", path, opts)
 end
 
 --------------------------------------------------------------------------------
@@ -350,7 +377,7 @@ function G.Background(path, opts)
 		end
 		items[#items + 1] = d
 	end
-	return items
+	return WithReset(items, "background", path, opts)
 end
 
 --------------------------------------------------------------------------------
