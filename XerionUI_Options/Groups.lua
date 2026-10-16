@@ -81,7 +81,6 @@ local function UseGlobalToggle(kind, path, label)
 				end
 			end
 		end,
-		width = "full",
 	}
 end
 
@@ -103,7 +102,6 @@ function G.Font(path, opts)
 		items[#items + 1] = {
 			type = "toggle", label = opts.toggle, path = path .. ".enabled",
 			get = function(ctx) return Block(ctx, path).enabled ~= false end,
-			width = "full",
 		}
 	end
 	if not opts.global and not opts.noSize then
@@ -210,7 +208,6 @@ function G.Glow(path, opts)
 			get = function(ctx) return Block(ctx, path).enabled ~= false end,
 		}
 		local t = UseGlobalToggle("glow", path)
-		t.width = nil
 		t.disabled = off
 		items[#items + 1] = t
 	end
@@ -340,7 +337,6 @@ function G.Background(path, opts)
 			get = function(ctx) return Block(ctx, path).enabled ~= false end,
 		}
 		local t = UseGlobalToggle("background", path)
-		t.width = nil
 		t.disabled = off
 		items[#items + 1] = t
 	end

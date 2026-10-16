@@ -35,9 +35,9 @@ O:RegisterSystemPage({
 					tip = "Applies the next time you log in or /reload.",
 				},
 				{ type = "dropdown", label = "Spacing", path = "panel.density", values = O.DENSITIES },
-				{ type = "toggle", label = "Preview the module whose page is open", path = "panel.autoPreview", width = "full",
+				{ type = "toggle", label = "Preview the module whose page is open", path = "panel.autoPreview",
 					tip = "Starts the preview when you open a module's page and ends it when you leave." },
-				{ type = "toggle", label = "Move the window away from what you preview", path = "panel.dock", width = "full",
+				{ type = "toggle", label = "Move the window away from what you preview", path = "panel.dock",
 					tip = "If the window would cover the preview, it slides to the side until the preview ends." },
 			}),
 			O.Card("Unlock mode", {
@@ -47,11 +47,11 @@ O:RegisterSystemPage({
 				{ type = "button", text = "Unlock frames", onClick = function() XUI:SetUnlocked(true) end },
 			}),
 			O.Card("Chat", {
-				{ type = "toggle", label = "Show a message when the addon loads", path = "loginMessage", width = "full" },
+				{ type = "toggle", label = "Show a message when the addon loads", path = "loginMessage" },
 			}),
 			O.Card("About", {
 				{
-					type = "description", width = "full", size = O.SIZE.text, color = "label",
+					type = "description", size = O.SIZE.text, color = "label",
 					text = function()
 						return ("%s %s\nA personal quality-of-life and tweak suite for World of Warcraft: Midnight.\n\n"
 							.. "Type |cffffffff/xui|r to open this window and |cffffffff/xui unlock|r to move frames."):format(XUI.TITLE, XUI.version)

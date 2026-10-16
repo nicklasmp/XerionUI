@@ -29,7 +29,8 @@ local M = XUI:NewModule("EUICDMBarGlows", {
 local active = false
 local wrapped = false
 local lit = setmetatable({}, { __mode = "k" }) -- overlay -> icon our glow sits on
-local origStart, origStop
+local origStart, origStop, ourStart, ourStop
+local barOn = {} -- bar key -> whether it had its own glow when last refreshed
 
 local function CDM()
 	return XUI.EUI and XUI.EUI.Module("EllesmereUICooldownManager")
@@ -60,7 +61,7 @@ local function Wrap()
 	wrapped = true
 	origStart, origStop = ns.StartNativeGlow, ns.StopNativeGlow
 
-	ns.StartNativeGlow = function(overlay, style, cr, cg, cb, opts)
+	ourStart = function(overlay, style, cr, cg, cb, opts)
 		if active and overlay then
 			local icon = (opts and opts.owner) or overlay:GetParent()
 			-- "show glows only in combat" keeps its say: let EllesmereUI suppress it
@@ -79,22 +80,30 @@ local function Wrap()
 		return origStart(overlay, style, cr, cg, cb, opts)
 	end
 
-	ns.StopNativeGlow = function(overlay)
+	ourStop = function(overlay)
 		if overlay and lit[overlay] then Release(overlay) end
 		return origStop(overlay)
 	end
+	ns.StartNativeGlow, ns.StopNativeGlow = ourStart, ourStop
 end
 
 local function Unwrap()
 	local ns = CDM()
 	if wrapped and ns then
-		ns.StartNativeGlow, ns.StopNativeGlow = origStart, origStop
+		-- leave a wrapper somebody else put on top of ours; ours passes straight
+		-- through while the module is off (and stays installed for a re-enable)
+		local startBack, stopBack = ns.StartNativeGlow == ourStart, ns.StopNativeGlow == ourStop
+		if startBack then ns.StartNativeGlow = origStart end
+		if stopBack then ns.StopNativeGlow = origStop end
+		if not (startBack and stopBack) then return end
 	end
 	wrapped = false
 end
 
 -- Redraw after a change: our glows are redrawn with the current block, the ones
--- that no longer apply are dropped and EllesmereUI's own light again on its next pass.
+-- that no longer apply are dropped and EllesmereUI's own light again on its next
+-- pass. A bar is only refreshed when it gains or loses its own glow, not on every
+-- slider step.
 local function Redraw()
 	for overlay, icon in pairs(lit) do
 		local block = ChoiceFor(overlay)
@@ -109,7 +118,12 @@ local function Redraw()
 	local ns = CDM()
 	if ns and type(ns.RefreshCDMIconAppearance) == "function" and type(ns.barDataByKey) == "table" then
 		for barKey in pairs(ns.barDataByKey) do
-			pcall(ns.RefreshCDMIconAppearance, barKey)
+			local c = M.db.bars[barKey]
+			local on = active and type(c) == "table" and c.on == true and type(c.glow) == "table"
+			if (barOn[barKey] or false) ~= on then
+				barOn[barKey] = on
+				pcall(ns.RefreshCDMIconAppearance, barKey)
+			end
 		end
 	end
 end
@@ -134,8 +148,10 @@ function M:OnDisable()
 	Redraw()
 end
 
+local RedrawSoon = XUI.Coalesce(function() if active then Redraw() end end)
+
 function M:OnRefresh()
-	if active then Redraw() end
+	RedrawSoon()
 end
 
 -- Makes sure a bar has a glow block to edit (own style, Autocast shine to start with).

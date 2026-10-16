@@ -63,7 +63,7 @@ O:RegisterSystemPage({
 	end,
 	build = function(ctx, G)
 		return {
-			O.Card("Sample", { { type = "custom", build = BuildSample, width = "full" } }),
+			O.Card("Sample", { { type = "custom", build = BuildSample } }),
 			O.Card("Font", G.Font("font", { global = true })),
 			O.Card("Border", G.Border("border", { global = true })),
 			O.Card("Glow", G.Glow("glow", { global = true })),

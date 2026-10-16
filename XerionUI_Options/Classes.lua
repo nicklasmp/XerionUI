@@ -72,16 +72,16 @@ function O:ClassPageSpec(token)
 			local cards = {}
 			if #class.specs > 0 then
 				cards[#cards + 1] = O.Card(nil, {
-					{ type = "tabs", values = tabs, width = "full",
+					{ type = "tabs", values = tabs,
 						get = function() return state.tab end, set = function(_, v) state.tab = v end },
 				})
 			end
 			cards[#cards + 1] = O.Card(nil, {
-				{ type = "description", width = "full", text = "Nothing for this specialization yet." },
+				{ type = "description", text = "Nothing for this specialization yet." },
 			}, { hidden = function() return Count() > 0 end })
 			for _, m in ipairs(mods) do
 				local items = {
-					{ type = "description", width = "full", text = function()
+					{ type = "description", text = function()
 						local text = m.desc or ""
 						if m.classes and not m:IsAvailable() then
 							text = text .. "\n|cff888888Runs on " .. class.name .. " only. You can set it up from here.|r"

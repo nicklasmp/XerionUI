@@ -67,14 +67,14 @@ local function GetPage(key)
 				local cards = {
 					-- a module that is off says so, and can be switched on right here
 					O.Card(nil, {
-						{ type = "description", width = "full", color = "label",
+						{ type = "description", color = "label",
 							text = "This module is switched off. The preview shows it, but it does nothing in the game until you enable it." },
 						{ type = "button", text = "Enable", primary = true,
 							onClick = function() m:SetEnabled(true) O:RefreshPageHead() O:RefreshSidebar() if ctx.page then ctx.page:Refresh() end end },
 					}, { hidden = function() return m.db.enabled end }),
 					-- what the self-check found outside this addon
 					O.Card("Needs attention", {
-						{ type = "description", width = "full", color = "danger", text = function()
+						{ type = "description", color = "danger", text = function()
 							local lines = {}
 							for _, issue in ipairs(XUI.Health.Issues(m)) do lines[#lines + 1] = "- " .. issue end
 							return table.concat(lines, "\n")
@@ -85,7 +85,7 @@ local function GetPage(key)
 				if build then
 					own = build(ctx, m, O.Groups)
 				else
-					own = { O.Card(nil, { { type = "description", text = "This module has no settings yet.", width = "full" } }) }
+					own = { O.Card(nil, { { type = "description", text = "This module has no settings yet." } }) }
 				end
 				for _, c in ipairs(own) do cards[#cards + 1] = c end
 				return cards
@@ -213,7 +213,6 @@ local function CreateWindow()
 	end)
 
 	-- filter chips: all modules, only the ones switched on, or only the ones off
-	if XUI.DB.global.panel.onlyActive then XUI.DB.global.panel.filter, XUI.DB.global.panel.onlyActive = "on", nil end
 	local chips = {}
 	-- underlined tabs: the open one gets the accent line
 	local tabsLine = O:Rect(side, "line", "ARTWORK")

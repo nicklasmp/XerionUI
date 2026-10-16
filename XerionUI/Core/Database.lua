@@ -46,8 +46,6 @@ DB.GLOBAL_DEFAULTS = {
 		dungeonFolded = false,
 		tweaksFolded = false,
 	},
-	-- named looks of the global style, shared by every profile
-	themes = {},
 	-- gossip options seen inside instances, [optionID] = { text, npc, zone, ... }
 	-- (Modules/Group/AutoGossip.lua)
 	gossipSeen = {},
@@ -161,13 +159,6 @@ local function Strip(dst, defaults)
 	end
 end
 DB.Strip = Strip
-
--- A copy of the style with every default value removed.
-local function StrippedStyle(style)
-	local copy = CopyTable(style)
-	Strip(copy, DB.STYLE_DEFAULTS)
-	return copy
-end
 
 -- A copy of `profile` with every default value removed.
 local function StrippedCopy(profile)
@@ -410,31 +401,3 @@ function DB:ImportProfile(str, name)
 	return true, name
 end
 
---------------------------------------------------------------------------------
--- Style themes: the global style saved under a name, usable from any profile
---------------------------------------------------------------------------------
-function DB:ListThemes()
-	local out = {}
-	for name in pairs(self.global.themes) do out[#out + 1] = name end
-	table.sort(out, function(a, b) return a:lower() < b:lower() end)
-	return out
-end
-
-function DB:SaveTheme(name)
-	if not name or name == "" then return false end
-	self.global.themes[name] = StrippedStyle(self.style)
-	return true
-end
-
-function DB:ApplyTheme(name)
-	local theme = self.global.themes[name]
-	if type(theme) ~= "table" then return false end
-	wipe(self.style)
-	for k, v in pairs(CopyTable(theme)) do self.style[k] = v end
-	Inflate(self.style, self.STYLE_DEFAULTS)
-	return true
-end
-
-function DB:DeleteTheme(name)
-	self.global.themes[name] = nil
-end

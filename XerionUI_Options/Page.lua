@@ -6,7 +6,6 @@
 -- Pages are described with plain tables and built the first time they are
 -- shown:
 --     { O.Card("Text", { control, control, ... }), ... }
--- (width / span / columns from the old grid are accepted and ignored.)
 -- hidden(ctx) / disabled(ctx) are re-evaluated after every change, so
 -- dependent options appear and grey out as you click.
 --------------------------------------------------------------------------------

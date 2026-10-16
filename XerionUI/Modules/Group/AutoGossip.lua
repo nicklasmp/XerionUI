@@ -24,6 +24,8 @@ local BUILTIN = {
 	{ id = 131502 },
 	{ id = 48126, confirm = true }, -- Sethraliss
 }
+-- (text, NPC and dungeon are not listed here; the list shows them once the
+-- dialog has been seen in game)
 local BUILTIN_BY_ID = {}
 for _, d in ipairs(BUILTIN) do BUILTIN_BY_ID[d.id] = d end
 
@@ -186,7 +188,7 @@ function M:Record(opts)
 	local where = InstanceInfo()
 	if not where or type(opts) ~= "table" then return end
 	local npc, npcID = NPCInfo()
-	local seen, now, changed = Seen(), time(), false
+	local seen, changed = Seen(), false
 	pcall(function()
 		for _, o in ipairs(opts) do
 			local id, text = o.gossipOptionID, Clean(o.name)
@@ -194,13 +196,13 @@ function M:Record(opts)
 				local e = seen[id] or {}
 				e.text, e.npc, e.npcID = text, npc or e.npc, npcID or e.npcID
 				e.zone, e.zoneID, e.kind = where.zone or e.zone, where.zoneID or e.zoneID, where.kind
-				e.difficulty, e.time = where.difficulty, now
+				e.difficulty = where.difficulty
 				if not seen[id] then changed = true end
 				seen[id] = e
 			end
 		end
 	end)
-	XUI:Fire("GossipSeen", changed)
+	if changed then XUI:Fire("GossipSeen", true) end
 end
 
 -- The "are you sure?" text says what the option costs or starts.
@@ -209,7 +211,6 @@ function M:RecordConfirm(id, text)
 	text = Clean(text)
 	if e and text then
 		e.confirmText = text
-		XUI:Fire("GossipSeen", false)
 	end
 end
 
@@ -238,18 +239,18 @@ function M:Catalogue()
 		id = tonumber(id)
 		if not id or have[id] then return end
 		have[id] = true
-		local e, b = seen[id] or {}, BUILTIN_BY_ID[id]
+		local e = seen[id] or {}
 		out[#out + 1] = {
 			id = id,
-			text = e.text or (b and b.text) or legacyNames[id],
-			npc = e.npc or (b and b.npc),
+			text = e.text or legacyNames[id],
+			npc = e.npc,
 			npcID = e.npcID,
-			zone = e.zone or (b and b.zone),
+			zone = e.zone,
 			zoneID = e.zoneID,
 			kind = e.kind,
 			difficulty = e.difficulty,
 			confirmText = e.confirmText,
-			builtin = b ~= nil,
+			builtin = BUILTIN_BY_ID[id] ~= nil,
 			picked = self:IsPicked(id),
 			confirm = self:IsConfirm(id),
 		}

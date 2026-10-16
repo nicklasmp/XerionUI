@@ -102,16 +102,16 @@ O:RegisterSystemPage({
 			}),
 			O.Card("Export", {
 				{
-					type = "description", width = "full",
+					type = "description",
 					text = "Copy this string (Ctrl+A, Ctrl+C) to share the current profile or keep a backup.",
 				},
 				{
-					type = "input", width = "full", multiline = 90, readOnly = true, selectAll = true,
+					type = "input", multiline = 90, readOnly = true, selectAll = true,
 					get = function() return DB:ExportProfile() or "" end,
 				},
 			}),
 			O.Card("Import", {
-				{ type = "input", label = "Profile string", width = "full", multiline = 90, path = "importText" },
+				{ type = "input", label = "Profile string", multiline = 90, path = "importText" },
 				{ type = "input", label = "Name for the new profile", path = "importName" },
 				{
 					type = "button", text = "Import", primary = true,

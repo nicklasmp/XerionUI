@@ -23,7 +23,7 @@ O:RegisterModuleOptions("Externals", function(ctx, m, G)
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer", anchor = true })),
 		Card("Alert", Join(
 			{ {
-				type = "description", width = "full",
+				type = "description",
 				text = function()
 					if IS121() then return "On this client the sound is played by the game itself for the spells below; text to speech is not available here." end
 					return "Plays when a new external lands on you."
@@ -32,7 +32,7 @@ O:RegisterModuleOptions("Externals", function(ctx, m, G)
 			G.Alert("alert", { test = function() m:TestAlert() end })
 		)),
 		Card("Sound for these spells", {
-			{ type = "spellList", path = "soundSpells", width = "full" },
+			{ type = "spellList", path = "soundSpells" },
 		}, { hidden = function() return not IS121() end }),
 		Card("Position", G.Position("position")),
 	}
@@ -63,7 +63,7 @@ O:RegisterModuleOptions("Interrupts", function(ctx, m, G)
 		Card("Icons on party frames", Join(G.Icon("icon", { square = true }), {
 			{ type = "dropdown", label = "Side", path = "partySide", values = m.SIDES },
 			{ type = "slider", label = "Gap", path = "partyGap", min = 0, max = 20, step = 1 },
-			{ type = "description", width = "full", text = "Placed beside each member's EllesmereUI party frame; without EllesmereUI they stack at the position below." },
+			{ type = "description", text = "Placed beside each member's EllesmereUI party frame; without EllesmereUI they stack at the position below." },
 		}), { hidden = iconMode }),
 		Card("Border", G.Border("border")),
 		Card("Cooldown flash", Join(G.Glow("flash", { toggle = "Flash when a member's interrupt goes on cooldown" }), {
@@ -218,11 +218,11 @@ O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
 		Card("Who", {
 			{ type = "toggle", label = "Show your own row", path = "showSelf" },
 			{ type = "toggle", label = "Only while in a group", path = "groupOnly" },
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Five-player groups only: in a raid the rows are hidden. Your own row follows your casts; the others follow their buffs, which the game still lets this read inside a key." },
 		}),
 		Card("Placement", {
-			{ type = "toggle", label = "Beside EllesmereUI's party frames", path = "attach", disabled = noEui, width = "full",
+			{ type = "toggle", label = "Beside EllesmereUI's party frames", path = "attach", disabled = noEui,
 				tip = "Off, or without EllesmereUI's party frames, the rows form one block you place yourself." },
 			{ type = "dropdown", label = "Side", path = "side", values = m.SIDES, disabled = loose },
 			{ type = "slider", label = "Distance", path = "offX", min = -40, max = 40, step = 1, disabled = loose },
@@ -236,13 +236,13 @@ O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Glow while the effect is up", G.Glow("glow", { toggle = "Glow while the buff is up" })),
 		Card("Timer text", Join({
-			{ type = "toggle", label = "Show the countdown", path = "showTimer", width = "full" },
+			{ type = "toggle", label = "Show the countdown", path = "showTimer" },
 		}, G.Font("timerText", { color = true }))),
 		Card("Name text", Join({
-			{ type = "toggle", label = "Show names (block mode)", path = "showName", width = "full" },
+			{ type = "toggle", label = "Show names (block mode)", path = "showName" },
 		}, G.Font("nameText"))),
 		Card("Spells", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "What each class and spec shows, in this order. Switch a spell off, change its cooldown length (seconds), or move it." },
 			{ type = "dropdown", label = "Class", values = classValues,
 				get = function() return state.class end,
@@ -250,10 +250,10 @@ O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
 					state.class = v
 					state.spec = v == "RACE" and "race" or ClassEntry(v).specs[1]
 				end },
-			{ type = "tabs", width = "full", values = specValues,
+			{ type = "tabs", values = specValues,
 				get = function() return state.spec end,
 				set = function(_, v) state.spec = v end },
-			{ type = "custom", width = "full", build = function(parent, c) return PartyCDRows(parent, c, m, state) end },
+			{ type = "custom", build = function(parent, c) return PartyCDRows(parent, c, m, state) end },
 		}),
 		Card("Position", G.Position("position")),
 	}
@@ -264,7 +264,7 @@ O:RegisterModuleOptions("CoTank", function(ctx, m, G)
 	local function noDebuffs() return not m.db.debuffs.enabled end
 	return {
 		Card("Who", {
-			{ type = "toggle", label = "Only while you are tank-specced", path = "tankOnly", width = "full" },
+			{ type = "toggle", label = "Only while you are tank-specced", path = "tankOnly" },
 			{ type = "input", label = "Always show this player", path = "pinName",
 				tip = "Leave empty to find the other tank automatically." },
 			{
@@ -307,7 +307,7 @@ O:RegisterModuleOptions("Shroud", function(ctx, m, G)
 			{ type = "color", label = "Color", path = "miColor" },
 			{ type = "toggle", label = "Shroud of Concealment", path = "showShroud" },
 			{ type = "color", label = "Color", path = "color" },
-			{ type = "toggle", label = "Your own Shroud when you are the rogue", path = "selfBar", width = "full" },
+			{ type = "toggle", label = "Your own Shroud when you are the rogue", path = "selfBar" },
 		}),
 		Card("Bar", Join(G.Bar("bar"), {
 			{ type = "toggle", label = "Show icon", path = "showIcon" },
@@ -516,7 +516,8 @@ local function GossipList(parent, ctx, m)
 	end
 
 	-- a dialog seen while the window is open shows up straight away
-	XUI:On("GossipSeen", f, function() if ctx.page then ctx.page:RefreshSoon() end end)
+	-- keyed by ctx, so a rebuilt page replaces its listener instead of piling up
+	XUI:On("GossipSeen", ctx, function() if ctx.page then ctx.page:RefreshSoon() end end)
 	return f
 end
 
@@ -529,23 +530,23 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 			{ type = "toggle", label = "Say what it picked", path = "announce" },
 		}),
 		Card("Dialogs", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically." },
-			{ type = "tabs", width = "full",
+			{ type = "tabs",
 				values = { { value = "all", text = "All" }, { value = "picked", text = "Picked" } },
 				get = function(c) return c.gossipFilter or "all" end,
 				set = function(c, v) c.gossipFilter = v end },
-			{ type = "custom", width = "full", build = function(parent, c) return GossipList(parent, c, m) end },
+			{ type = "custom", build = function(parent, c) return GossipList(parent, c, m) end },
 			{ type = "button", text = "Forget unpicked", tip = "Removes every listed dialog that is not switched on.",
 				onClick = function() m:ForgetUnpicked() ctx:Changed("options") end },
-		}, { columns = 1 }),
+		}),
 		Card("Manual IDs", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Gossip option IDs typed by hand, comma separated. The switches above edit these lists too. Talk to the NPC and press the button to print the IDs on offer." },
-			{ type = "input", label = "Pick automatically", width = "full",
+			{ type = "input", label = "Pick automatically",
 				get = function() return m.ListText(m.db.options) end,
 				set = function(_, v) m.db.options = m.ParseList(v) end },
-			{ type = "input", label = "Also answer \"are you sure?\" for", width = "full",
+			{ type = "input", label = "Also answer \"are you sure?\" for",
 				get = function() return m.ListText(m.db.confirm) end,
 				set = function(_, v) m.db.confirm = m.ParseList(v) end },
 			{ type = "button", text = "Print the open options", onClick = function() m:PrintOptions() end },
@@ -586,7 +587,7 @@ end)
 O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
 	return {
 		Card("Bar", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Murder Row, Kystia Manaheart: when one boss finishes its timed cast the other takes extra damage for 20 seconds. The bar counts the window down and shows that boss's health. Use the Test button to play it." },
 			{ type = "input", label = "Label", path = "text" },
 			{ type = "toggle", label = "Show health percent", path = "showPercent" },
@@ -606,7 +607,7 @@ end)
 O:RegisterModuleOptions("ChaosBarrage", function(ctx, m, G)
 	return {
 		Card("Counter", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Murder Row, Kystia Manaheart: boxes count the bolts left in a group and a bar times the current bolt. Use the Test button to play it." },
 			{ type = "toggle", label = "Show for tanks", path = "roles.TANK" },
 			{ type = "toggle", label = "Show for healers", path = "roles.HEALER" },
@@ -632,12 +633,12 @@ end)
 O:RegisterModuleOptions("InstanceKeys", function(ctx, m, G)
 	return {
 		Card("Show", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "Shown when you enter a Mythic dungeon: the group members whose keystone is for it. It goes away when you leave, when a boss fight or the key starts. Members are only listed if they run an addon that shares keystones (BigWigs, EllesmereUI or XerionUI)." },
 			{ type = "toggle", label = "Title", path = "showTitle" },
 			{ type = "toggle", label = "Hide in combat", path = "hideInCombat",
 				tip = "Hidden while you fight, back ten seconds after (three fights at most)." },
-			{ type = "toggle", label = "Show every player's key", path = "showAll", width = "full",
+			{ type = "toggle", label = "Show every player's key", path = "showAll",
 				tip = "Also lists keys that belong to other dungeons, dimmed and with the dungeon's name." },
 			{ type = "dropdown", label = "Align", path = "align", values = XUI.Style.JUSTIFY },
 			{ type = "color", label = "Other dungeon color", path = "otherColor", hasAlpha = false,
@@ -659,7 +660,7 @@ end)
 O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 	return {
 		Card("Marker", {
-			{ type = "description", width = "full",
+			{ type = "description",
 				text = "The game only lets a click place a marker, so a small button appears when your tank has none. Click it once to mark the tank. Drag it in unlock mode." },
 			{ type = "dropdown", label = "Marker", path = "marker", values = m.MARKERS },
 			{ type = "toggle", label = "Replace a marker the tank already has", path = "replace",

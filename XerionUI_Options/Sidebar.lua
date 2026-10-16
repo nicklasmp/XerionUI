@@ -112,8 +112,17 @@ local function SidebarHead(i)
 	return h
 end
 
+-- The dot's state is only read when the list is rebuilt (full); hovering just
+-- repaints from the cached state, so it does no health checks.
+local function DotState(m)
+	if not m.db.enabled then return "off" end
+	if not m:CanRun() or (m.errorCount or 0) > 0 then return "bad" end
+	if #XUI.Health.Issues(m) > 0 then return "warn" end
+	return "on"
+end
+
 -- Paints one row from its state: open page, hover, on/off, health.
-function O:PaintItem(b)
+function O:PaintItem(b, full)
 	local selected = b.key == S.currentKey
 	local hot = IsHot(b)
 	local m = b.module
@@ -129,13 +138,13 @@ function O:PaintItem(b)
 		-- dot colour: accent = running, amber/red = problem, ring = off
 		b.sw.hole:Hide()
 		local showSwitch = hot or selected
+		if full or not b.dot then b.dot = DotState(m) end
 		b.sw.switch:SetShown(showSwitch)
 		b.sw.ring:SetShown(not showSwitch)
-		if m.db.enabled then
+		if b.dot ~= "off" then
 			b.sw.switch:SetState(true)
-			local ok = m:CanRun()
-			if not ok or (m.errorCount or 0) > 0 then b.sw.ring:SetVertexColor(O:Color("danger"))
-			elseif #XUI.Health.Issues(m) > 0 then b.sw.ring:SetVertexColor(1, 0.8, 0.2)
+			if b.dot == "bad" then b.sw.ring:SetVertexColor(O:Color("danger"))
+			elseif b.dot == "warn" then b.sw.ring:SetVertexColor(1, 0.8, 0.2)
 			else b.sw.ring:SetVertexColor(ar, ag, ab) end
 		else
 			b.sw.switch:SetState(false)
@@ -210,6 +219,8 @@ function O:RefreshSidebar()
 	local child = S.sidebar.child
 	local y, ni, nh = 4, 0, 0
 	wipe(S.entries)
+	-- a new search starts from a fresh index, so option labels that changed show up
+	if S.searchText == "" then wipe(searchIndex) end
 
 	-- mode: "page" (top-level text), "module" (on a guide line) or "group" (a class)
 	local function AddItem(key, title, m, mode, indent, classToken)
@@ -217,6 +228,7 @@ function O:RefreshSidebar()
 		indent = indent or 0
 		local b = SidebarItem(ni)
 		b.key, b.module, b.classToken, b.mode = key, m, classToken, mode
+		b.dot = nil
 		b:ClearAllPoints()
 		b:SetPoint("TOPLEFT", child, "TOPLEFT", 0, -y)
 		b:SetPoint("TOPRIGHT", child, "TOPRIGHT", 0, -y)
@@ -236,16 +248,17 @@ function O:RefreshSidebar()
 			b.guide:SetPoint("TOPLEFT", gx, 0)
 			b.guide:SetPoint("BOTTOMLEFT", gx, 0)
 			b.guide:Show()
-			for _, r in ipairs({ b.hl, b.sel }) do
-				r:SetPoint("TOPLEFT", gx, 0)
-				r:SetPoint("BOTTOMRIGHT")
-			end
+			b.hl:SetPoint("TOPLEFT", gx, 0)
+			b.hl:SetPoint("BOTTOMRIGHT")
+			b.sel:SetPoint("TOPLEFT", gx, 0)
+			b.sel:SetPoint("BOTTOMRIGHT")
 			b.bar:SetPoint("TOPLEFT", gx - 1, 0)
 			b.bar:SetPoint("BOTTOMLEFT", gx - 1, 0)
 			b.text:SetPoint("LEFT", gx + 18, 0)
 			b.text:SetPoint("RIGHT", -42, 0)
 		else
-			for _, r in ipairs({ b.hl, b.sel }) do r:SetAllPoints() end
+			b.hl:SetAllPoints()
+			b.sel:SetAllPoints()
 			b.bar:SetPoint("TOPLEFT")
 			b.bar:SetPoint("BOTTOMLEFT")
 			if mode == "group" then
@@ -260,7 +273,7 @@ function O:RefreshSidebar()
 		end
 		b.text:SetText(m and m.untested and (title .. "  |cff777777untested|r") or title)
 		b:Show()
-		O:PaintItem(b)
+		O:PaintItem(b, true)
 		S.entries[#S.entries + 1] = key
 		y = y + (mode == "group" and HEAD_H or ITEM_H)
 	end
@@ -321,9 +334,11 @@ function O:RefreshSidebar()
 				O:RefreshSidebar()
 			end }, classMods)
 			local order = {}
-			for _, c in ipairs(O.CLASSES) do order[#order + 1] = c end
-			order[#order + 1] = O.ANY_CLASS
-			for _, c in ipairs(folded and {} or order) do
+			if not folded then
+				for _, c in ipairs(O.CLASSES) do order[#order + 1] = c end
+				order[#order + 1] = O.ANY_CLASS
+			end
+			for _, c in ipairs(order) do
 				local mods, matching = {}, {}
 				for _, m in ipairs(O:ClassModules(c.token)) do
 					if Keep(m) then mods[#mods + 1] = m end

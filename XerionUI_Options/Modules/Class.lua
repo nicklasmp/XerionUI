@@ -33,7 +33,7 @@ O:RegisterModuleOptions("DRWSound", function(ctx, m, G)
 		Card("When", {
 			{ type = "toggle", label = "When it is extended", path = "onRefresh" },
 			{ type = "toggle", label = "When it starts", path = "onGain" },
-			{ type = "description", width = "full", text = "Dancing Rune Weapon must be on a Cooldown Manager bar." },
+			{ type = "description", text = "Dancing Rune Weapon must be on a Cooldown Manager bar." },
 		}),
 		Card("Alert", G.Alert("alert", { test = function() m:TestAlert() end })),
 	}
@@ -101,14 +101,14 @@ O:RegisterModuleOptions("Blightfall", function(ctx, m, G)
 			{ type = "dropdown", label = "Decimals", path = "decimals", values = { { value = 1, text = "One" }, { value = 0, text = "None" } } },
 		}),
 		Card("Voice", {
-			{ type = "toggle", label = "Count out loud", path = "voice", width = "full",
+			{ type = "toggle", label = "Count out loud", path = "voice",
 				tip = "Says the spell five seconds out, then 3, 2, 1 and Now, with the game's text-to-speech voice." },
 			{ type = "button", text = "Test", onClick = function() m:TestVoice() end },
-			{ type = "description", width = "full", text = "An extra alert can play when the countdown reaches Now." },
+			{ type = "description", text = "An extra alert can play when the countdown reaches Now." },
 		}),
 		Card("Alert at Now", G.Alert("alert")),
 		Card("Grow", {
-			{ type = "toggle", label = "Grow the icon as the countdown ends", path = "growPulse", width = "full" },
+			{ type = "toggle", label = "Grow the icon as the countdown ends", path = "growPulse" },
 			{ type = "slider", label = "Start growing at (s)", path = "growStart", min = 1, max = 10, step = 0.5 },
 			{ type = "slider", label = "Largest scale", path = "growMax", min = 1, max = 3, step = 0.1 },
 		}, { previewState = "now" }),
@@ -128,7 +128,7 @@ O:RegisterModuleOptions("WellHoned", function(ctx, m, G)
 			{ type = "dropdown", label = "When it ends", path = "endSound", media = "sound", filesOnly = true },
 			{ type = "button", text = "Test", onClick = function() m:Test("endSound") end },
 			{ type = "dropdown", label = "Channel", path = "channel", values = XUI.Audio.CHANNELS },
-			{ type = "description", width = "full", text = "Played by the game itself, so it works in keys and raid encounters. A new sound is registered when the fight or the encounter ends." },
+			{ type = "description", text = "Played by the game itself, so it works in keys and raid encounters. A new sound is registered when the fight or the encounter ends." },
 		}),
 	}
 end)
@@ -185,7 +185,7 @@ O:RegisterModuleOptions("RuneforgeAlert", function(ctx, m, G)
 	for _, setup in ipairs(m.SETUPS) do
 		local items = {}
 		for _, slot in ipairs(setup.slots) do
-			items[#items + 1] = { type = "description", width = "full", text = slot.label .. ": accepted runes" }
+			items[#items + 1] = { type = "description", text = slot.label .. ": accepted runes" }
 			for _, rune in ipairs(m.RUNES) do
 				items[#items + 1] = {
 					type = "toggle", label = rune.name,
@@ -212,12 +212,12 @@ O:RegisterModuleOptions("Ironfur", function(ctx, m, G)
 			{ type = "toggle", label = "Only in combat", path = "soundInCombatOnly" },
 			{ type = "slider", label = "Seconds one Ironfur lasts (fallback)", path = "duration", min = 4, max = 15, step = 1,
 				tip = "Used where the game hides the aura (in keys); the real time takes over when it is readable." },
-			{ type = "description", width = "full", text = "Put Ironfur on a Cooldown Manager buff bar to get the glow there; or switch on the icon below." },
+			{ type = "description", text = "Put Ironfur on a Cooldown Manager buff bar to get the glow there; or switch on the icon below." },
 		}, { previewState = true }),
 		Card("Glow", G.Glow("glow")),
 		Card("Alert", G.Alert("alert", { fallbackText = "Ironfur" })),
 		Card("Icon of its own", Join({
-			{ type = "toggle", label = "Show an icon with the seconds left", path = "showIcon", width = "full" },
+			{ type = "toggle", label = "Show an icon with the seconds left", path = "showIcon" },
 		}, G.Icon("icon", { square = true }))),
 		Card("Border", G.Border("border")),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
