@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.12.0 - 2026-10-16
+- Options sidebar: on/off switch per module and an All/Active filter
+
 ## 2.11.5 - 2026-10-16
 - Options sidebar: disabled modules dimmed, enabled ones lit, on/total count per section
 

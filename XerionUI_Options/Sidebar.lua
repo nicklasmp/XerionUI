@@ -33,8 +33,32 @@ local function SidebarItem(i)
 	b.text = O:Text(b, O.SIZE.text, "label")
 	b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
 	b.text:SetPoint("RIGHT", -26, 0)
+	-- health dot: only lit when the module has a problem
 	b.dot = O:Icon(b, "circle", 6, nil, "OVERLAY")
-	b.dot:SetPoint("RIGHT", -14, 0)
+	b.dot:SetPoint("RIGHT", -56, 0)
+	-- on/off switch; a click here never opens the page
+	b.sw = CreateFrame("Button", nil, b)
+	b.sw:SetSize(40, ITEM_H)
+	b.sw:SetPoint("RIGHT", -8, 0)
+	b.sw.switch = O.Switch(b.sw)
+	b.sw.switch:SetScale(0.85)
+	b.sw.switch:SetPoint("CENTER")
+	b.sw:SetScript("OnClick", function()
+		local m = b.module
+		if not m then return end
+		m:SetEnabled(not m.db.enabled)
+		O:RefreshSidebar()
+		O:RefreshPageHead()
+		if S.pages[m.key] then S.pages[m.key]:Refresh() end
+	end)
+	b.sw:SetScript("OnEnter", function(self)
+		if b.module then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetText(b.module.db.enabled and "Switch off" or "Switch on")
+			GameTooltip:Show()
+		end
+	end)
+	b.sw:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	b:SetScript("OnEnter", function(self)
 		if self.key ~= S.currentKey then self.text:SetTextColor(O:Color("text")) end
 	end)
@@ -82,22 +106,22 @@ function O:PaintItem(b)
 		b.icon:SetAlpha(m.db.enabled and 1 or 0.3)
 		-- off modules read as dimmed, on modules stay bright with a bigger lit dot
 		if not selected and not m.db.enabled then b.text:SetTextColor(O:Color("faint")) end
-		b.dot:SetSize(m.db.enabled and 8 or 6, m.db.enabled and 8 or 6)
-		b.dot:Show()
+		b.sw:Show()
+		b.sw.switch:SetState(m.db.enabled)
+		b.dot:Hide()
 		if m.db.enabled then
 			local ok = m:CanRun()
 			if not ok or (m.errorCount or 0) > 0 then
 				b.dot:SetVertexColor(O:Color("danger"))
+				b.dot:Show()
 			elseif #XUI.Health.Issues(m) > 0 then
 				b.dot:SetVertexColor(1, 0.8, 0.2)
-			else
-				b.dot:SetVertexColor(ar, ag, ab)
+				b.dot:Show()
 			end
-		else
-			b.dot:SetVertexColor(O:Color("faint"))
 		end
 	else
 		b.dot:Hide()
+		b.sw:Hide()
 		b.icon:SetDesaturated(false)
 		b.icon:SetAlpha(1)
 		if b.classToken then
@@ -146,6 +170,11 @@ local function ModuleMatches(m, extra)
 	return Matches(ModuleWords(m) .. " " .. extra)
 end
 
+-- The "Active" chip hides modules that are switched off.
+local function Keep(m)
+	return not XUI.DB.global.panel.onlyActive or m.db.enabled
+end
+
 function O:RefreshSidebar()
 	if not S.sidebar then return end
 	local child = S.sidebar.child
@@ -159,6 +188,9 @@ function O:RefreshSidebar()
 		b.icon:ClearAllPoints()
 		b.icon:SetPoint("LEFT", 16 + (indent or 0), 0)
 		b.arrow:SetShown(classToken ~= nil)
+		b.text:ClearAllPoints()
+		b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
+		b.text:SetPoint("RIGHT", m and -62 or -26, 0)
 		if classToken then
 			b.arrow:SetRotation(S.expandedClass[classToken] and 0 or math.rad(90))
 		end
@@ -212,7 +244,7 @@ function O:RefreshSidebar()
 		end
 	end
 	for _, cat in ipairs(XUI.CATEGORIES) do
-		local list = {}
+		local list, all = {}, {}
 		if cat.key == "class" then
 			-- every class, whatever you play, each with its modules below it; the
 			-- whole group folds from its heading (a search unfolds it)
@@ -230,7 +262,10 @@ function O:RefreshSidebar()
 			for _, c in ipairs(O.CLASSES) do order[#order + 1] = c end
 			order[#order + 1] = O.ANY_CLASS
 			for _, c in ipairs(folded and {} or order) do
-				local mods, matching = O:ClassModules(c.token), {}
+				local mods, matching = {}, {}
+				for _, m in ipairs(O:ClassModules(c.token)) do
+					if Keep(m) then mods[#mods + 1] = m end
+				end
 				for _, m in ipairs(mods) do
 					if ModuleMatches(m, c.name:lower()) then matching[#matching + 1] = m end
 				end
@@ -251,7 +286,8 @@ function O:RefreshSidebar()
 		else
 		for _, m in ipairs(XUI:SortedModules(cat.key)) do
 			if m:IsAvailable() and ModuleMatches(m, cat.name:lower() .. " " .. (m.dungeon or ""):lower()) then
-				list[#list + 1] = m
+				all[#all + 1] = m
+				if Keep(m) then list[#list + 1] = m end
 			end
 		end
 		end
@@ -263,7 +299,7 @@ function O:RefreshSidebar()
 				AddHead(cat.name, { folded = folded, toggle = function()
 					XUI.DB.global.panel[flag] = not XUI.DB.global.panel[flag]
 					O:RefreshSidebar()
-				end }, list)
+				end }, all)
 				if not folded then
 					if cat.key == "dungeon" then
 						-- one sub-heading per dungeon (alphabetical), its modules indented below
@@ -292,7 +328,7 @@ function O:RefreshSidebar()
 					end
 				end
 			else
-				AddHead(cat.name, nil, list)
+				AddHead(cat.name, nil, all)
 				for _, m in ipairs(list) do AddItem(m.key, m.name, XUI.ModuleIcon(m), m) end
 			end
 		end

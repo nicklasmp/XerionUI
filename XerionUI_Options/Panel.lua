@@ -212,8 +212,42 @@ local function CreateWindow()
 		if S.entries[1] then O:Open(S.entries[1]) end
 	end)
 
+	-- filter chips: all modules, or only the ones switched on
+	local chips = {}
+	local function PaintChips()
+		local only = XUI.DB.global.panel.onlyActive and true or false
+		for _, c in ipairs(chips) do
+			if c.active == only then
+				O:SetSkinColor(c, "selected")
+				c.text:SetTextColor(O:Accent())
+				O:SetBorderColor(c, O:Accent())
+			else
+				O:SetSkinColor(c, "control")
+				c.text:SetTextColor(O:Color("muted"))
+				O:SetBorderColor(c, O:Color("controlLine"))
+			end
+		end
+	end
+	for i, def in ipairs({ { "All", false }, { "Active", true } }) do
+		local c = CreateFrame("Button", nil, side)
+		c:SetSize(i == 1 and 40 or 56, 20)
+		c:SetPoint("TOPLEFT", i == 1 and 12 or 58, -46)
+		O:Skin(c, "control", "controlLine")
+		c.text = O:Text(c, O.SIZE.small, "muted")
+		c.text:SetPoint("CENTER")
+		c.text:SetText(def[1])
+		c.active = def[2]
+		c:SetScript("OnClick", function(self)
+			XUI.DB.global.panel.onlyActive = self.active or nil
+			PaintChips()
+			O:RefreshSidebar()
+		end)
+		chips[i] = c
+	end
+	PaintChips()
+
 	local list = CreateFrame("Frame", nil, side)
-	list:SetPoint("TOPLEFT", 0, -50)
+	list:SetPoint("TOPLEFT", 0, -74)
 	list:SetPoint("BOTTOMRIGHT", -1, 8)
 	S.sidebar = O:CreateScroll(list)
 	S.sidebar:SetAllPoints(list)
