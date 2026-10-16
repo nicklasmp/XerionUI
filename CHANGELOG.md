@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.20.2 - 2026-10-16
+- Melee Indicator: remove the alert sound
+
 ## 2.20.1 - 2026-10-16
 - Classes: Well-Honed Instincts moves under Guardian; Reaper's Mark, Control Undead and Runeforge Alert removed
 
