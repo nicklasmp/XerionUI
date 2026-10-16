@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.14.1 - 2026-10-16
+- Options sidebar: replace the on/off pill with a crisp status dot (ring = off), health badge moved to the icon
+
 ## 2.14.0 - 2026-10-16
 - Options: remove the Modules overview page (the sidebar switches replace it); add an Inactive filter chip; sidebar lists switched-on modules first, then switched-off, each alphabetical; crisper sidebar switch
 

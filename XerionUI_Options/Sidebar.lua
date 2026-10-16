@@ -61,15 +61,33 @@ local function SidebarItem(i)
 	b.text = O:Text(b, O.SIZE.text, "label")
 	b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
 	b.text:SetPoint("RIGHT", -26, 0)
-	-- health dot: only lit when the module has a problem
-	b.dot = O:Icon(b, "circle", 6, nil, "OVERLAY")
-	b.dot:SetPoint("RIGHT", -56, 0)
-	-- on/off switch; a click here never opens the page
+	-- health badge on the icon's corner: only lit when the module has a problem
+	b.dot = O:Icon(b, "circle", 7, nil, "OVERLAY")
+	b.dot:SetPoint("CENTER", b.icon, "BOTTOMRIGHT", -1, 1)
+	-- on/off status dot (solid = on, ring = off); a hit area lights up on
+	-- hover. A click here never opens the page.
 	b.sw = CreateFrame("Button", nil, b)
-	b.sw:SetSize(40, ITEM_H)
+	b.sw:SetSize(26, 26)
 	b.sw:SetPoint("RIGHT", -8, 0)
-	b.sw.switch = O.Switch(b.sw, 26, 14)
-	b.sw.switch:SetPoint("RIGHT", -6, 0)
+	b.sw.bg = O:Rect(b.sw, "control", "BACKGROUND")
+	b.sw.bg:SetAllPoints()
+	b.sw.bg:Hide()
+	b.sw.ring = O:Icon(b.sw, "circle", 8, nil, "ARTWORK")
+	b.sw.ring:SetPoint("CENTER")
+	b.sw.hole = O:Icon(b.sw, "circle", 4, nil, "OVERLAY")
+	b.sw.hole:SetPoint("CENTER")
+	b.sw.switch = {
+		SetState = function(_, on)
+			if on then
+				b.sw.ring:SetVertexColor(O:Accent())
+				b.sw.hole:Hide()
+			else
+				b.sw.ring:SetVertexColor(O:Color("muted"))
+				b.sw.hole:SetVertexColor(O:Color(b.sw.hover and "control" or "sidebar"))
+				b.sw.hole:Show()
+			end
+		end,
+	}
 	b.sw:SetScript("OnClick", function()
 		local m = b.module
 		if not m then return end
@@ -79,13 +97,21 @@ local function SidebarItem(i)
 		if S.pages[m.key] then S.pages[m.key]:Refresh() end
 	end)
 	b.sw:SetScript("OnEnter", function(self)
+		self.hover = true
+		self.bg:Show()
 		if b.module then
+			self.switch:SetState(b.module.db.enabled)
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 			GameTooltip:SetText(b.module.db.enabled and "Switch off" or "Switch on")
 			GameTooltip:Show()
 		end
 	end)
-	b.sw:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	b.sw:SetScript("OnLeave", function(self)
+		self.hover = false
+		self.bg:Hide()
+		if b.module then self.switch:SetState(b.module.db.enabled) end
+		GameTooltip:Hide()
+	end)
 	b:SetScript("OnEnter", function(self)
 		if self.key ~= S.currentKey then self.text:SetTextColor(O:Color("text")) end
 	end)
@@ -227,7 +253,7 @@ function O:RefreshSidebar()
 		b.arrow:SetShown(classToken ~= nil)
 		b.text:ClearAllPoints()
 		b.text:SetPoint("LEFT", b.icon, "RIGHT", 10, 0)
-		b.text:SetPoint("RIGHT", m and -62 or (classToken and -38 or -26), 0)
+		b.text:SetPoint("RIGHT", m and -38 or (classToken and -38 or -26), 0)
 		if classToken then
 			b.arrow:SetRotation(S.expandedClass[classToken] and 0 or math.rad(90))
 		end
