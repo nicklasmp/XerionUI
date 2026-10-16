@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.23.2", date = "2026-10-16", notes = {
+		"Patch notes: back to the list view (no tabs)",
+	} },
 	{ version = "2.23.1", date = "2026-10-16", notes = {
 		"Removed the Cooldown Manager Glow Probe diagnostics module",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.20.0", date = "2026-10-16", notes = {
 		"Classes: sidebar is now Classes > class > specialization with a page per level; only Blood Death Knight and Guardian Druid kept for now (Blightfall and Forbidden Sacrifice removed)",
-	} },
-	{ version = "2.19.2", date = "2026-10-16", notes = {
-		"Remove the Stoneform Bleed Alert; Reminders moves under Combat and takes the Melee Indicator",
 	} },
 }

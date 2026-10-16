@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.23.2 - 2026-10-16
+- Patch notes: back to the list view (no tabs)
+
 ## 2.23.1 - 2026-10-16
 - Removed the Cooldown Manager Glow Probe diagnostics module
 

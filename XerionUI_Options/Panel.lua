@@ -93,6 +93,7 @@ local function GetPage(key)
 		for _, s in ipairs(O.systemPages) do
 			if s.key == key then
 				spec = {
+					tabbed = s.list, -- a page that is meant to be a list is not split into tabs
 					ctx = O:NewContext(s.root, s.onChange, { system = s }),
 					build = function(ctx) return s.build(ctx, O.Groups) end,
 				}

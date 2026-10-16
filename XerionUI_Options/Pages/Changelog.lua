@@ -37,6 +37,7 @@ end
 O:RegisterSystemPage({
 	key = "changelog",
 	title = "Patch notes",
+	list = true, -- one card per version in a list, not tabs
 	hidden = true, -- no sidebar entry: opened from the header button or the version number
 	icon = "notes",
 	desc = "What changed in the latest versions.",
