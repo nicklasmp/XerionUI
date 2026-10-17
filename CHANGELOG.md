@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.0 - 2026-10-17
+- Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)
+
 ## 2.33.2 - 2026-10-17
 - Give XerionUI Options the addon list icon
 

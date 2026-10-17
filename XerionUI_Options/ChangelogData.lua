@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.0", date = "2026-10-17", notes = {
+		"Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)",
+	} },
 	{ version = "2.33.2", date = "2026-10-17", notes = {
 		"Give XerionUI Options the addon list icon",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.5", date = "2026-10-17", notes = {
 		"Move Meter Reset into a new Damage Meter group under Group",
-	} },
-	{ version = "2.30.4", date = "2026-10-17", notes = {
-		"Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group",
 	} },
 }

@@ -14,41 +14,9 @@ if not O then return end
 -- members: { module key, section label }
 -- A group page shows one member at a time, picked with tabs, instead of every
 -- member's cards in one long list (tabs = false keeps the list).
-O.MODULE_GROUPS = {
-	{
-		key = "grp:cdm", name = "Cooldown Manager", category = "tweaks",
-		desc = "Fonts and stack counts for the EllesmereUI Cooldown Manager bars.",
-		members = { { "EUICDMBarFonts", "Bar fonts" }, { "EUICDMStackFont", "Stack font" } },
-	},
-	{
-		key = "grp:cast", name = "Cast Bars", category = "tweaks",
-		desc = "The focus cast bar and the bars that show who is being targeted by a cast.",
-		members = { { "EUIFocusCastbar", "Focus cast bar" }, { "EUITargetedSpellBars", "Targeted spell bars" } },
-	},
-	{
-		key = "grp:party", name = "Party Tracking", category = "group",
-		desc = "Interrupts and cooldowns of your party members.",
-		members = { { "Interrupts", "Interrupts" }, { "PartyCDs", "Party cooldowns" } },
-	},
-	{
-		key = "grp:externals", name = "Externals", category = "group",
-		desc = "Externals your party members use on each other.",
-		members = { { "Externals", "Externals" } },
-	},
-	{
-		key = "grp:reminders", name = "Reminders", category = "combat",
-		desc = "Warnings and prompts that tell you when something needs your attention.",
-		members = {
-			{ "MeleeIndicator", "Melee indicator" }, { "AggroCheck", "Aggro check" },
-			{ "Bloodlust", "Bloodlust ready" },
-		},
-	},
-	{
-		key = "grp:meter", name = "Damage Meter", category = "group",
-		desc = "Prompts and helpers for your damage meter.",
-		members = { { "MeterReset", "Meter reset" } },
-	},
-}
+-- Empty on purpose: every module has its own sidebar entry. Add a def here to
+-- group modules again.
+O.MODULE_GROUPS = {}
 
 O.groupByKey = {}   -- [group key] = entry
 O.groupPages = {}   -- [group key] = function(entry) -> page spec, for a page of its own design
