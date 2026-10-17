@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.28.1", date = "2026-10-17", notes = {
+		"Stronger corner glow in the options panel backdrop",
+	} },
 	{ version = "2.28.0", date = "2026-10-17", notes = {
 		"New World Markers module: bindable keys that place world markers one after another and clear them all (Key Bindings -> AddOns -> XerionUI)",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.22.3", date = "2026-10-16", notes = {
 		"Removed the Cooldown Manager Bar Glows module: glow types per bar are set in EllesmereUI itself",
-	} },
-	{ version = "2.22.2", date = "2026-10-16", notes = {
-		"Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows",
 	} },
 }

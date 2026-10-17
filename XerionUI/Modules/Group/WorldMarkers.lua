@@ -133,13 +133,19 @@ function M.BoundKeys(binding)
 	return t
 end
 
+-- Opens Blizzard's Key Bindings page (Settings.KEYBINDINGS_CATEGORY_ID).
 function M:OpenBindings()
-	if InCombatLockdown() then return end
-	if _G.Settings and Settings.OpenToCategory and _G.SETTINGS_KEYBINDINGS_CATEGORY_ID then
-		Settings.OpenToCategory(SETTINGS_KEYBINDINGS_CATEGORY_ID)
-	elseif _G.Settings and Settings.OpenToCategory then
-		pcall(Settings.OpenToCategory, "Key Bindings")
+	if InCombatLockdown() then
+		self:Print("can't open the key bindings in combat.")
+		return
 	end
+	local id = _G.Settings and Settings.KEYBINDINGS_CATEGORY_ID
+	if id and Settings.OpenToCategory and pcall(Settings.OpenToCategory, id) then return end
+	if _G.KeyBindingFrame and _G.ShowUIPanel then
+		ShowUIPanel(KeyBindingFrame)
+		return
+	end
+	self:Print("open Options -> Key Bindings -> AddOns -> XerionUI.")
 end
 
 -- Test: place the first marker through the same macro the button uses.
