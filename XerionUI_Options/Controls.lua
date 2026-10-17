@@ -641,6 +641,90 @@ function Controls.spacer(parent, desc, ctx)
 end
 
 --------------------------------------------------------------------------------
+-- Keybind: Label ........... [key] [Unbind]
+-- desc.binding is a binding name ("CLICK Button:LeftButton"). Click the key
+-- box, press a key (Escape cancels). Saved straight to the game's bindings.
+--------------------------------------------------------------------------------
+local MODIFIER_KEYS = {
+	LSHIFT = true, RSHIFT = true, LCTRL = true, RCTRL = true,
+	LALT = true, RALT = true, LMETA = true, RMETA = true,
+}
+
+local function KeyText(binding)
+	local k1, k2 = GetBindingKey(binding)
+	if not k1 then return "Not bound" end
+	local t = GetBindingText(k1)
+	if k2 then t = t .. ", " .. GetBindingText(k2) end
+	return t
+end
+
+local function SaveKeys()
+	if SaveBindings and GetCurrentBindingSet then SaveBindings(GetCurrentBindingSet()) end
+end
+
+function Controls.keybind(parent, desc, ctx)
+	local f = Base(parent, desc, ctx, 28)
+	f.label = O:Text(f, O.SIZE.text, "label")
+	f.label:SetPoint("LEFT")
+	f.label:SetText(Resolve(desc.label, ctx) or "")
+
+	f.clear = O:Button(f, "Unbind", 64, function()
+		if InCombatLockdown() then return end
+		local keys = { GetBindingKey(desc.binding) }
+		for _, k in ipairs(keys) do SetBinding(k) end
+		SaveKeys()
+	end)
+	f.clear:SetPoint("RIGHT")
+	f.btn = O:Button(f, "", FIELD_W - 72, function() end)
+	f.btn:SetPoint("RIGHT", f.clear, "LEFT", -8, 0)
+	f.label:SetPoint("RIGHT", f.btn, "LEFT", -12, 0)
+
+	local function Stop()
+		f.capturing = false
+		f.btn:EnableKeyboard(false)
+		f.btn:SetScript("OnKeyDown", nil)
+		f:Refresh()
+	end
+	local function OnKey(_, key)
+		if MODIFIER_KEYS[key] then return end
+		if key == "ESCAPE" then return Stop() end
+		if InCombatLockdown() then return Stop() end
+		local combo = key
+		if IsShiftKeyDown() then combo = "SHIFT-" .. combo end
+		if IsControlKeyDown() then combo = "CTRL-" .. combo end
+		if IsAltKeyDown() then combo = "ALT-" .. combo end
+		local old = GetBindingAction(combo, true)
+		if old and old ~= "" and old ~= desc.binding then
+			local name = _G["BINDING_NAME_" .. old] or old
+			XUI:Print(("%s was bound to %s; replaced."):format(GetBindingText(combo), name))
+		end
+		for _, k in ipairs({ GetBindingKey(desc.binding) }) do SetBinding(k) end
+		SetBinding(combo, desc.binding)
+		SaveKeys()
+		Stop()
+	end
+	f.btn:SetScript("OnClick", function()
+		if InCombatLockdown() then return end
+		f.capturing = true
+		f.btn.text:SetText("Press a key...")
+		f.btn:EnableKeyboard(true)
+		f.btn:SetPropagateKeyboardInput(false)
+		f.btn:SetScript("OnKeyDown", OnKey)
+	end)
+	f.btn:SetScript("OnHide", function() if f.capturing then Stop() end end)
+	AddTooltip(f.btn, desc)
+
+	function f:Refresh()
+		self.disabled = IsDisabled(desc, ctx)
+		self.label:SetTextColor(O:Color(self.disabled and "faint" or "label"))
+		if not self.capturing then self.btn.text:SetText(KeyText(desc.binding)) end
+		self.btn:SetDisabled(self.disabled)
+		self.clear:SetDisabled(self.disabled or not GetBindingKey(desc.binding))
+	end
+	return f
+end
+
+--------------------------------------------------------------------------------
 -- Custom: desc.build(parent, ctx) returns a frame with .height and Refresh.
 --------------------------------------------------------------------------------
 function Controls.custom(parent, desc, ctx)

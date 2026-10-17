@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.29.0", date = "2026-10-17", notes = {
+		"World Markers: set the place/clear keys directly in the options with a new key bind control",
+	} },
 	{ version = "2.28.2", date = "2026-10-17", notes = {
 		"World Markers: Open key bindings button now opens the Key Bindings page",
 	} },
@@ -46,9 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.23.1", date = "2026-10-16", notes = {
 		"Removed the Cooldown Manager Glow Probe diagnostics module",
-	} },
-	{ version = "2.23.0", date = "2026-10-16", notes = {
-		"Options: groups show one member at a time with tabs, and long pages split into tabs by card title instead of one long list",
-		"New module Cooldown Manager Glow Probe: diagnostics for why custom spell IDs get no active glow in EllesmereUI",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.29.0 - 2026-10-17
+- World Markers: set the place/clear keys directly in the options with a new key bind control
+
 ## 2.28.2 - 2026-10-17
 - World Markers: Open key bindings button now opens the Key Bindings page
 
