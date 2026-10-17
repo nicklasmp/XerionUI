@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.8", date = "2026-10-17", notes = {
+		"Meter Reset now lives in a Damager Meter group under Group",
+	} },
 	{ version = "2.30.7", date = "2026-10-17", notes = {
 		"Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.27.0", date = "2026-10-17", notes = {
 		"Options panel gets a soft corner-glow backdrop tinted from the accent color",
-	} },
-	{ version = "2.26.3", date = "2026-10-16", notes = {
-		"Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret",
 	} },
 }

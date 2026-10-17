@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.8 - 2026-10-17
+- Meter Reset now lives in a Damager Meter group under Group
+
 ## 2.30.7 - 2026-10-17
 - Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable
 

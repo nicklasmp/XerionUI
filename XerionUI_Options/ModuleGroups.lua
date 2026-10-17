@@ -40,8 +40,13 @@ O.MODULE_GROUPS = {
 		desc = "Warnings and prompts that tell you when something needs your attention.",
 		members = {
 			{ "MeleeIndicator", "Melee indicator" }, { "AggroCheck", "Aggro check" },
-			{ "Bloodlust", "Bloodlust ready" }, { "MeterReset", "Meter reset" },
+			{ "Bloodlust", "Bloodlust ready" },
 		},
+	},
+	{
+		key = "grp:meter", name = "Damager Meter", category = "group",
+		desc = "Prompts and helpers for your damage meter.",
+		members = { { "MeterReset", "Meter reset" } },
 	},
 }
 
