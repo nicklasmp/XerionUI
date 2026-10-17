@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.6", date = "2026-10-17", notes = {
+		"Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group",
+	} },
 	{ version = "2.30.5", date = "2026-10-17", notes = {
 		"Move Meter Reset into a new Damager Meter group under Group",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.26.2", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup shows the tank name in the action row",
-	} },
-	{ version = "2.26.1", date = "2026-10-16", notes = {
-		"Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row",
 	} },
 }
