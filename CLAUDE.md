@@ -15,5 +15,8 @@ Read `docs/ARCHITECTURE.md` before changing code; `docs/PORTERING.md` tracks whi
 ## Versioning (every push)
 Before each push: `node tools/bump.js <patch|minor|major> "change" ...` (updates both TOC `## Version` lines and prepends to `CHANGELOG.md`), commit, push, then `git tag vX.Y.Z && git push origin vX.Y.Z` (the release workflow publishes it for WowUp). patch = fixes/small tweaks, minor = new module/feature, major = breaking/rebuild.
 
+## Parallel features
+Work on separate features in separate sessions, each in its own worktree and branch (`feature/<name>`); never two sessions in the same folder. Feature branches do NOT bump the version, touch `CHANGELOG.md` or tag. Bump + tag happens only when a feature is merged to `master`, one merge at a time, so versions land in merge order. Never push to `master` with a version that another branch could also claim; check `git tag --sort=-creatordate | head` first and tag the version that is actually in the TOC.
+
 ## Verify
 `cd tools && npm test` must print `ALL OK`; `npm run shots` renders the options pages to `tools/harness/out/` for a visual check. In-game testing with BugSack is still required — the harness is a mock.
