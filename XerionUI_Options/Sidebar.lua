@@ -1,10 +1,10 @@
 --------------------------------------------------------------------------------
 -- XerionUI_Options - Sidebar.lua
 -- (split out of Panel.lua; the window state lives in O.S)
--- An accordion: pages on top, then one foldable group per category (a chevron
--- and a count), its modules below on a thin guide line, each with its icon. The
--- open page gets an accent bar on that line. A module that is switched off is
--- dimmed, its icon grey, and carries an "off" tag; a problem shows as an amber
+-- A text-only accordion: pages on top, then one foldable group per category (a
+-- chevron and a count), its modules below on a thin guide line. The open page
+-- gets an accent bar on that line. A module that is switched off is dimmed and
+-- carries an "off" tag; a problem shows as an amber
 -- or red dot. Switching a module on or off is done in the page header.
 --------------------------------------------------------------------------------
 local XUI = _G.XerionUI
@@ -21,25 +21,6 @@ local itemPool, headPool = {}, {}
 
 local function IsHot(b)
 	return (b.IsMouseOver and b:IsMouseOver()) and true or false
-end
-
--- The icon a row shows: a module's own art, a group's, a page's glyph or a
--- class crest. Second result: true for the one-colour glyphs (tinted by state).
-local function RowIcon(b, m, mode, key, classToken)
-	if m then
-		if m.isGroup then
-			return m.texture or (m.members[1] and XUI.ModuleIcon(m.members[1]))
-		end
-		return XUI.ModuleIcon(m)
-	elseif mode == "page" then
-		for _, sp in ipairs(O.systemPages) do
-			if sp.key == key then return O.MEDIA .. (sp.icon or "sliders"), true end
-		end
-	elseif classToken then
-		for _, ce in ipairs(O.classEntries) do
-			if ce.class.token == classToken then return ce.class.icon end
-		end
-	end
 end
 
 -- Fold chevron: points down when open, right when folded.
@@ -69,14 +50,6 @@ local function SidebarItem(i)
 	b.text = O:Text(b, O.SIZE.text, "label")
 	b.count = O:Text(b, O.SIZE.small, "faint")
 	b.count:SetPoint("RIGHT", -16, 0)
-
-	-- icon with a thin dark frame, like the page header's
-	b.iconFrame = CreateFrame("Frame", nil, b)
-	b.iconFrame:SetSize(20, 20)
-	b.icon = b.iconFrame:CreateTexture(nil, "ARTWORK")
-	b.icon:SetPoint("TOPLEFT", 1, -1)
-	b.icon:SetPoint("BOTTOMRIGHT", -1, 1)
-	b.iconBorder = XUI.Style:Border(b.iconFrame, 1)
 
 	-- right edge: "off" for a module that is switched off, a dot for a problem
 	b.state = O:Text(b, O.SIZE.small, "faint")
@@ -184,9 +157,7 @@ function O:PaintItem(b, full)
 		if not on and not selected then color = (hot or cursor) and "label" or "faint" end
 		b.text:SetTextColor(O:Color(color))
 		if full or not b.dot then b.dot = DotState(m) end
-		-- off: grey, dimmed icon and an "off" tag; a problem: amber / red dot
-		b.icon:SetDesaturated(not on)
-		b.iconFrame:SetAlpha(on and 1 or 0.4)
+		-- off: dimmed text and an "off" tag; a problem: amber / red dot
 		b.state:SetShown(not on and not m.isGroup)
 		b.flag:SetShown(on and (b.dot == "warn" or b.dot == "bad"))
 		if b.dot == "bad" then b.flag:SetVertexColor(O:Color("danger")) else b.flag:SetVertexColor(1, 0.8, 0.2) end
@@ -194,11 +165,6 @@ function O:PaintItem(b, full)
 		b.text:SetTextColor(O:Color(color))
 		b.state:Hide()
 		b.flag:Hide()
-		b.icon:SetDesaturated(false)
-		b.iconFrame:SetAlpha(1)
-		if b.mono then
-			if selected then b.icon:SetVertexColor(ar, ag, ab) else b.icon:SetVertexColor(O:Color(hot and "label" or "muted")) end
-		end
 		if b.classToken then b.chev:SetFolded(not S.expandedClass[b.classToken], S.expandedClass[b.classToken]) end
 	end
 end
@@ -395,22 +361,6 @@ function O:RefreshSidebar()
 		b.guide:ClearAllPoints()
 		b.guide:Hide()
 		b.chev:Hide()
-		local tex, mono = RowIcon(b, m, mode, key, classToken)
-		b.mono = mono
-		b.iconFrame:ClearAllPoints()
-		b.iconFrame:SetShown(tex ~= nil and mode ~= "setting")
-		if tex and mode ~= "setting" then
-			b.icon:SetTexture(tex)
-			if mono then
-				b.icon:SetTexCoord(0, 1, 0, 1)
-				b.iconBorder:Apply({ useGlobal = false, style = "NONE" })
-			else
-				b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-				b.icon:SetVertexColor(1, 1, 1)
-				b.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
-			end
-		end
-		local hasIcon = tex ~= nil
 		b.count:SetText("")
 		if mode == "module" or mode == "setting" then
 			local gx = GUIDE_X + indent
@@ -423,8 +373,7 @@ function O:RefreshSidebar()
 			b.sel:SetPoint("BOTTOMRIGHT")
 			b.bar:SetPoint("TOPLEFT", gx - 1, 0)
 			b.bar:SetPoint("BOTTOMLEFT", gx - 1, 0)
-			b.iconFrame:SetPoint("LEFT", gx + 10, 0)
-			b.text:SetPoint("LEFT", gx + (mode == "setting" and 30 or (hasIcon and 38 or 18)), 0)
+			b.text:SetPoint("LEFT", gx + (mode == "setting" and 30 or 18), 0)
 			b.text:SetPoint("RIGHT", mode == "setting" and -10 or -42, 0)
 		else
 			b.hl:SetAllPoints()
@@ -434,12 +383,10 @@ function O:RefreshSidebar()
 			if mode == "group" then
 				b.chev:SetPoint("LEFT", 16 + indent, 0)
 				b.chev:Show()
-				b.iconFrame:SetPoint("LEFT", 34 + indent, 0)
-				b.text:SetPoint("LEFT", (hasIcon and 60 or 36) + indent, 0)
+				b.text:SetPoint("LEFT", 36 + indent, 0)
 				b.chev:SetFolded(not S.expandedClass[classToken], S.expandedClass[classToken])
 			else
-				b.iconFrame:SetPoint("LEFT", 16, 0)
-				b.text:SetPoint("LEFT", hasIcon and 42 or 18, 0)
+				b.text:SetPoint("LEFT", 18, 0)
 			end
 			b.text:SetPoint("RIGHT", -16, 0)
 		end

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.33.1 - 2026-10-17
+- Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag
+
 ## 2.33.0 - 2026-10-17
 - Sidebar rows have icons again; the on/off toggle in the sidebar is gone (use the switch in the page header)
 - Modules that are off are dimmed with a grey icon and an off tag; amber or red dot marks a problem; hover tooltip explains the state

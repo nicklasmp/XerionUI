@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.33.1", date = "2026-10-17", notes = {
+		"Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag",
+	} },
 	{ version = "2.33.0", date = "2026-10-17", notes = {
 		"Sidebar rows have icons again; the on/off toggle in the sidebar is gone (use the switch in the page header)",
 		"Modules that are off are dimmed with a grey icon and an off tag; amber or red dot marks a problem; hover tooltip explains the state",
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.3", date = "2026-10-17", notes = {
 		"World Markers options: removed the meaningless Preview button",
-	} },
-	{ version = "2.30.2", date = "2026-10-17", notes = {
-		"World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed",
 	} },
 }
