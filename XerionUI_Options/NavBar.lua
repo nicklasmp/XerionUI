@@ -89,7 +89,7 @@ function O:RefreshNavBar(page)
 	end
 	f.hint:SetShown(text == "" and (f.box:GetText() or "") == "")
 	local nav = page and page.nav
-	local values = nav and nav.values or {}
+	local values = nav and (nav.list and nav.list() or nav.values) or {}
 	local current = nav and nav.get and nav.get()
 	local room = (f:GetWidth() > 1 and f:GetWidth() or 700) - FILTER_W - 48
 	local x = 12

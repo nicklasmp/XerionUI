@@ -118,44 +118,20 @@ local function SavePosition()
 	XUI.DB.global.panel.point = { point, relPoint, math.floor(x + 0.5), math.floor(y + 0.5) }
 end
 
--- Soft colored glows in the window corners, tinted from the accent by turning its
--- hue, so the panel has a look of its own and still follows the accent color.
+-- Soft glows in the window corners, all in the accent color itself.
 local GLOWS = {
-	{ point = "TOPLEFT",     x = 0.0,  y = 0.0, size = 620, hue = -0.33, a = 0.28 },
-	{ point = "TOPRIGHT",    x = 0.0,  y = 0.0, size = 700, hue =  0.00, a = 0.34 },
-	{ point = "BOTTOMLEFT",  x = 0.0,  y = 0.0, size = 660, hue =  0.33, a = 0.26 },
-	{ point = "BOTTOMRIGHT", x = 0.0,  y = 0.0, size = 620, hue =  0.62, a = 0.30 },
+	{ point = "TOPLEFT",     x = 0.0, y = 0.0, size = 620, a = 0.28 },
+	{ point = "TOPRIGHT",    x = 0.0, y = 0.0, size = 700, a = 0.34 },
+	{ point = "BOTTOMLEFT",  x = 0.0, y = 0.0, size = 660, a = 0.26 },
+	{ point = "BOTTOMRIGHT", x = 0.0, y = 0.0, size = 620, a = 0.30 },
 }
-
-local function ShiftHue(r, g, b, shift)
-	local max, min = math.max(r, g, b), math.min(r, g, b)
-	local d, h = max - min, 0
-	if d > 0 then
-		if max == r then h = ((g - b) / d) % 6
-		elseif max == g then h = (b - r) / d + 2
-		else h = (r - g) / d + 4 end
-		h = h / 6
-	end
-	local s, v = (max == 0) and 0 or d / max, max
-	h = (h + shift) % 1
-	-- keep the glow vivid even when the accent is pale
-	s = math.max(s, 0.55) v = math.max(v, 0.8)
-	local i = math.floor(h * 6)
-	local f = h * 6 - i
-	local p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
-	i = i % 6
-	if i == 0 then return v, t, p elseif i == 1 then return q, v, p
-	elseif i == 2 then return p, v, t elseif i == 3 then return p, q, v
-	elseif i == 4 then return t, p, v else return v, p, q end
-end
 
 function O:RefreshBackdrop()
 	local bd = S.backdrop
 	if not bd then return end
 	local r, g, b = O:Accent()
 	for _, glow in ipairs(bd.glows) do
-		local cr, cg, cb = ShiftHue(r, g, b, glow.def.hue)
-		glow:SetVertexColor(cr, cg, cb, glow.def.a)
+		glow:SetVertexColor(r, g, b, glow.def.a)
 	end
 end
 

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.31.2", date = "2026-10-17", notes = {
+		"A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty",
+	} },
 	{ version = "2.31.1", date = "2026-10-17", notes = {
 		"Preview now only appears on modules that draw a sample; the rest have Test only",
 		"Preview and Test live only in the page header, no duplicate buttons inside the pages",
@@ -51,8 +54,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.28.2", date = "2026-10-17", notes = {
 		"World Markers: Open key bindings button now opens the Key Bindings page",
-	} },
-	{ version = "2.28.1", date = "2026-10-17", notes = {
-		"Stronger corner glow in the options panel backdrop",
 	} },
 }

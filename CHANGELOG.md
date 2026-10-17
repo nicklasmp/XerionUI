@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.31.2 - 2026-10-17
+- A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty
+
 ## 2.31.1 - 2026-10-17
 - Preview now only appears on modules that draw a sample; the rest have Test only
 - Preview and Test live only in the page header, no duplicate buttons inside the pages

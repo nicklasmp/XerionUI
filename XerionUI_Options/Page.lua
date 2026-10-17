@@ -220,19 +220,46 @@ local function BuildNav(page, specs)
 	end
 	if #order < AUTO_TABS_FROM then return end
 	local state = { tab = order[1].value }
+	-- a card that hides itself (its own condition) takes its chip with it, so a
+	-- tab is never empty; the open tab falls back to the first one left
+	local own = {}
 	for _, s in ipairs(specs) do
-		local title, own = s.title, s.hidden
+		if s.title and not s.nonav and own[s.title] == nil then own[s.title] = s.hidden or false end
+	end
+	local function IsHidden(s)
+		local h = own[s.title]
+		if type(h) == "function" then return h(s.ctx or page.ctx) and true or false end
+		return h and true or false
+	end
+	local function Visible()
+		local list = {}
+		for _, v in ipairs(order) do
+			local gone = true
+			for _, s in ipairs(specs) do
+				if s.title == v.value and not IsHidden(s) then gone = false break end
+			end
+			if not gone then list[#list + 1] = v end
+		end
+		return list
+	end
+	local function Current()
+		local list = Visible()
+		for _, v in ipairs(list) do if v.value == state.tab then return state.tab end end
+		return list[1] and list[1].value or state.tab
+	end
+	for _, s in ipairs(specs) do
+		local title, hidden = s.title, s.hidden
 		if title and not s.nonav then
 			s.hidden = function(ctx)
-				if state.tab ~= title and not (ctx.page and ctx.page.filter ~= "") then return true end
-				if type(own) == "function" then return own(ctx) and true or false end
-				return own and true or false
+				if Current() ~= title and not (ctx.page and ctx.page.filter ~= "") then return true end
+				if type(hidden) == "function" then return hidden(ctx) and true or false end
+				return hidden and true or false
 			end
 		end
 	end
 	page.nav = {
-		mode = "tab", values = order,
-		get = function() return state.tab end,
+		mode = "tab", values = order, list = Visible,
+		get = Current,
 		set = function(v) state.tab = v page:Refresh() end,
 	}
 end
