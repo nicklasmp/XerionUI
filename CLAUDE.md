@@ -12,8 +12,8 @@ Read `docs/ARCHITECTURE.md` before changing code; `docs/PORTERING.md` tracks whi
 - Legacy code under `legacy/` derived from KiraUI-Plugin is All Rights Reserved (personal use only); ItruliaQoL is MIT (credit it); never copy EllesmereUI code.
 - Code, comments and commits in English; talk to Nicklas in Danish.
 
-## Versioning (every push)
-Before each push: `node tools/bump.js <patch|minor|major> "change" ...` (updates both TOC `## Version` lines and prepends to `CHANGELOG.md`), commit, push, then `git tag vX.Y.Z && git push origin vX.Y.Z` (the release workflow publishes it for WowUp). patch = fixes/small tweaks, minor = new module/feature, major = breaking/rebuild.
+## Versioning (every push to `master`)
+Applies only to pushes to `master`; feature branches never bump, touch `CHANGELOG.md` or tag (see Parallel features). Before each push to `master`: `node tools/bump.js <patch|minor|major> "change" ...` (updates both TOC `## Version` lines and prepends to `CHANGELOG.md`), commit, push, then `git tag vX.Y.Z && git push origin vX.Y.Z` (the release workflow publishes it for WowUp). patch = fixes/small tweaks, minor = new module/feature, major = breaking/rebuild.
 
 ## Parallel features
 Work on separate features in separate sessions, each in its own worktree and branch (`feature/<name>`); never two sessions in the same folder. Feature branches do NOT bump the version, touch `CHANGELOG.md` or tag. Bump + tag happens only when a feature is merged to `master`, one merge at a time, so versions land in merge order. Never push to `master` with a version that another branch could also claim; check `git tag --sort=-creatordate | head` first and tag the version that is actually in the TOC.
