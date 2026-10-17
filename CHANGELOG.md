@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.32.1 - 2026-10-17
+- Fix typo: "Damager Meter" is now "Damage Meter"
+
 ## 2.32.0 - 2026-10-17
 - Breadcrumb above the page title shows where a page sits and reveals it in the sidebar
 - Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search
@@ -30,7 +33,7 @@ Newest first. Add an entry with `node tools/bump.js` before every push.
 - Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default
 
 ## 2.30.8 - 2026-10-17
-- Meter Reset now lives in a Damager Meter group under Group
+- Meter Reset now lives in a Damage Meter group under Group
 
 ## 2.30.7 - 2026-10-17
 - Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable
@@ -39,7 +42,7 @@ Newest first. Add an entry with `node tools/bump.js` before every push.
 - Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group
 
 ## 2.30.5 - 2026-10-17
-- Move Meter Reset into a new Damager Meter group under Group
+- Move Meter Reset into a new Damage Meter group under Group
 
 ## 2.30.4 - 2026-10-17
 - Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group

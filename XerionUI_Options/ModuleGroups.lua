@@ -44,7 +44,7 @@ O.MODULE_GROUPS = {
 		},
 	},
 	{
-		key = "grp:meter", name = "Damager Meter", category = "group",
+		key = "grp:meter", name = "Damage Meter", category = "group",
 		desc = "Prompts and helpers for your damage meter.",
 		members = { { "MeterReset", "Meter reset" } },
 	},

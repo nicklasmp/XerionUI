@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.32.1", date = "2026-10-17", notes = {
+		"Fix typo: \"Damager Meter\" is now \"Damage Meter\"",
+	} },
 	{ version = "2.32.0", date = "2026-10-17", notes = {
 		"Breadcrumb above the page title shows where a page sits and reveals it in the sidebar",
 		"Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search",
@@ -32,7 +35,7 @@ O.CHANGELOG = {
 		"Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default",
 	} },
 	{ version = "2.30.8", date = "2026-10-17", notes = {
-		"Meter Reset now lives in a Damager Meter group under Group",
+		"Meter Reset now lives in a Damage Meter group under Group",
 	} },
 	{ version = "2.30.7", date = "2026-10-17", notes = {
 		"Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable",
@@ -41,7 +44,7 @@ O.CHANGELOG = {
 		"Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group",
 	} },
 	{ version = "2.30.5", date = "2026-10-17", notes = {
-		"Move Meter Reset into a new Damager Meter group under Group",
+		"Move Meter Reset into a new Damage Meter group under Group",
 	} },
 	{ version = "2.30.4", date = "2026-10-17", notes = {
 		"Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group",
@@ -54,11 +57,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.1", date = "2026-10-17", notes = {
 		"Global glow now defaults to EllesmereUI's Auto-Cast Shine: four layers of sparks (sizes 7/6/5/4), layer k laps k times slower; saved profiles move onto it once (colour kept)",
-	} },
-	{ version = "2.30.0", date = "2026-10-17", notes = {
-		"Options window: resizable (corner grip, Reset window size in General)",
-		"Options: filter box and card chips above every page; the sidebar search lists matching settings and jumps to them",
-		"Options: Undo button in the header, a more menu for Diagnostics",
-		"Options: clearer value fields (dropdowns, number and text boxes) and tooltips on the shared style rows",
 	} },
 }
