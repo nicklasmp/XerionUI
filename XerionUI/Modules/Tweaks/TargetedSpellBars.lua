@@ -226,6 +226,7 @@ local function IsBar(f)
 	return type(f) == "table" and not sparks[f] and type(f.sb) == "table" and f.sb.GetStatusBarTexture ~= nil
 end
 
+local scanKids = {}
 local function Scan()
 	if not (M.running and M.db.spark and TSBEnabled()) then return end
 	local c = Container()
@@ -233,7 +234,7 @@ local function Scan()
 	local n = c:GetNumChildren()
 	if n == knownChildren then return end
 	knownChildren = n
-	for _, kid in ipairs({ c:GetChildren() }) do
+	for _, kid in ipairs(XUI.Children(c, scanKids)) do
 		if IsBar(kid) then Decorate(kid) end
 	end
 end

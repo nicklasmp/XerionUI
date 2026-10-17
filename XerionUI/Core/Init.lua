@@ -251,6 +251,22 @@ function XUI.Coalesce(fn)
 end
 
 --------------------------------------------------------------------------------
+-- Children: frame:GetChildren() into a table the caller owns and reuses, so a
+-- periodic scan does not build a new table per frame it looks at. Give every
+-- call site its own scratch table (a nested scan must not share it).
+--------------------------------------------------------------------------------
+local function FillChildren(out, ...)
+	local n = select("#", ...)
+	for i = 1, n do out[i] = (select(i, ...)) end
+	for i = #out, n + 1, -1 do out[i] = nil end
+	return out
+end
+
+function XUI.Children(frame, out)
+	return FillChildren(out, frame:GetChildren())
+end
+
+--------------------------------------------------------------------------------
 -- Internal message bus
 -- Core systems announce changes here; modules and the options panel listen.
 --   ProfileChanged      the active profile was switched, copied, reset or imported

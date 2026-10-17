@@ -92,12 +92,13 @@ local function Hook(f)
 	if type(f.TriggerAuraRemovedAlert) == "function" then hooksecurefunc(f, "TriggerAuraRemovedAlert", OnRemoved) end
 end
 
+local kids = {}
 local function Scan()
 	if not M.running then return end
 	for _, name in ipairs(XUI.CDM_ALL_VIEWERS) do
 		local viewer = _G[name]
 		if viewer and viewer.GetChildren then
-			for _, f in ipairs({ viewer:GetChildren() }) do Hook(f) end
+			for _, f in ipairs(XUI.Children(viewer, kids)) do Hook(f) end
 		end
 	end
 end
@@ -120,7 +121,8 @@ function M:OnEnable()
 		Scan()
 	end
 	pass()
-	self:NewTicker(5, pass)
+	-- RefreshData hooks keep it current; this only catches late-built viewers
+	self:NewTicker(5, pass, 24)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", function(self)
 		quietUntil = GetTime() + SETTLE
 		self:After(2, pass)
