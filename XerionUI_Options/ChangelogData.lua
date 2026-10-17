@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.3", date = "2026-10-17", notes = {
+		"World Markers options: removed the meaningless Preview button",
+	} },
 	{ version = "2.30.2", date = "2026-10-17", notes = {
 		"World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed",
 	} },
@@ -48,9 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.25.1", date = "2026-10-16", notes = {
 		"Autocast shine: default particles 16 (EllesmereUI's default of four layers of four sparks); speed and scale already match",
-	} },
-	{ version = "2.25.0", date = "2026-10-16", notes = {
-		"Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)",
-		"Externals gets its own group under Group instead of sitting in Party Tracking",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.3 - 2026-10-17
+- World Markers options: removed the meaningless Preview button
+
 ## 2.30.2 - 2026-10-17
 - World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed
 

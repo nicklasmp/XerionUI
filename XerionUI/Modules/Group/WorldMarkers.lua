@@ -17,6 +17,7 @@ local M = XUI:NewModule("WorldMarkers", {
 	category = "group",
 	icon = [[Interface\Icons\inv_misc_map_01]],
 	order = 66,
+	noPreview = true,
 	defaults = {
 		-- Which markers the cycle uses; the order is the list below.
 		use = { true, true, true, true, true, true, true, true },

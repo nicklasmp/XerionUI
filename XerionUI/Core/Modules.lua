@@ -70,6 +70,8 @@ function XUI:NewModule(key, info)
 	m.requires = info.requires
 	-- ported but never run in game by the author; the options say so
 	m.untested = info.untested and true or false
+	-- nothing to draw, so the options show no Preview button
+	m.noPreview = info.noPreview and true or false
 	m.defaults = info.defaults or {}
 	if m.defaults.enabled == nil then m.defaults.enabled = false end
 	m.running = false

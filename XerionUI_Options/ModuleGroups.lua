@@ -242,9 +242,11 @@ function O:GroupPageSpec(key)
 							for _, issue in ipairs(XUI.Health.Issues(m)) do lines[#lines + 1] = "- " .. issue end
 							return table.concat(lines, "\n")
 						end },
-					{ type = "button", text = "Preview",
-						onClick = function() m:SetPreview(not m.preview) end },
 				}
+					if not m.noPreview then
+						items[#items + 1] = { type = "button", text = "Preview",
+							onClick = function() m:SetPreview(not m.preview) end }
+					end
 				if m.Test then
 					items[#items + 1] = { type = "button", text = "Test",
 						onClick = function() XUI.SafeCallFor(m, m.Test, m) end }

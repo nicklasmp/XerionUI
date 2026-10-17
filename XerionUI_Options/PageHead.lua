@@ -152,7 +152,7 @@ function O:RefreshPageHead()
 	f.module = m
 	local showModule = m ~= nil
 	f.enable:SetShown(showModule)
-	f.preview:SetShown(showModule)
+	f.preview:SetShown(showModule and not m.noPreview)
 	f.test:SetShown(showModule and m.Test ~= nil)
 	local states = showModule and m.PREVIEW_STATES
 	f.state:SetShown(states and true or false)
