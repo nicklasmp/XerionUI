@@ -13,6 +13,7 @@ local S = O.S
 local NAV_H = O.LAYOUT.NAV_H
 local FILTER_W = 190
 local CHIP_GAP = 4
+local MORE_W = 34
 
 function O.CreateNavBar(parent)
 	local f = CreateFrame("Frame", nil, parent)
@@ -92,21 +93,52 @@ function O:RefreshNavBar(page)
 	local values = nav and (nav.list and nav.list() or nav.values) or {}
 	local current = nav and nav.get and nav.get()
 	local room = (f:GetWidth() > 1 and f:GetWidth() or 700) - FILTER_W - 48
-	local x = 12
 	local ar, ag, ab = O:Accent()
-	local shown = 0
+
+	-- measure every chip, then decide which fit; the rest go behind a "..." chip
+	-- whose menu lists them. The open tab always stays visible.
+	local widths, total, curIdx = {}, 12 - CHIP_GAP, nil
 	for i, v in ipairs(values) do
 		local c = Chip(f, i)
-		c.value = v.value
 		c.text:SetText(v.text)
-		local w = (c.text:GetStringWidth() or 40) + 22
-		if x + w > room then break end
-		c:SetWidth(w)
+		widths[i] = (c.text:GetStringWidth() or 40) + 22
+		total = total + widths[i] + CHIP_GAP
+		if current ~= nil and v.value == current then curIdx = i end
+	end
+	local layout, hidden = {}, {}
+	if total <= room then
+		for i = 1, #values do layout[i] = i end
+	else
+		local function Prefix(budget)
+			local x, n = 12, 0
+			for i = 1, #values do
+				if x + widths[i] > budget then break end
+				x = x + widths[i] + CHIP_GAP
+				n = n + 1
+			end
+			return n
+		end
+		local budget = room - MORE_W - CHIP_GAP
+		local n = Prefix(budget)
+		if curIdx and curIdx > n then n = Prefix(budget - widths[curIdx] - CHIP_GAP) end
+		for i = 1, n do layout[i] = i end
+		if curIdx and curIdx > n then layout[#layout + 1] = curIdx end
+		local shownSet = {}
+		for _, i in ipairs(layout) do shownSet[i] = true end
+		for i = 1, #values do if not shownSet[i] then hidden[#hidden + 1] = values[i] end end
+	end
+
+	local x = 12
+	local placed = {}
+	for _, i in ipairs(layout) do
+		local c, v = f.chips[i], values[i]
+		placed[i] = true
+		c.value = v.value
+		c:SetWidth(widths[i])
 		c:ClearAllPoints()
 		c:SetPoint("TOPLEFT", f, "TOPLEFT", x, 0)
-		x = x + w + CHIP_GAP
-		local active = current ~= nil and v.value == current
-		if active then
+		x = x + widths[i] + CHIP_GAP
+		if current ~= nil and v.value == current then
 			c.under:Show()
 			c.under:SetVertexColor(ar, ag, ab)
 			c.text:SetTextColor(O:Color("text"))
@@ -115,7 +147,34 @@ function O:RefreshNavBar(page)
 			c.text:SetTextColor(O:Color(c.hot and "label" or "muted"))
 		end
 		c:Show()
-		shown = i
 	end
-	for i = shown + 1, #f.chips do f.chips[i]:Hide() end
+	for i, c in ipairs(f.chips) do if not placed[i] then c:Hide() end end
+
+	local more = f.more
+	if not more then
+		more = Chip(f, "more")
+		more.text:SetText("...")
+		more:SetScript("OnClick", function(self)
+			local pg = S.pages[S.currentKey]
+			local items = {}
+			for _, v in ipairs(self.rest or {}) do
+				items[#items + 1] = { text = v.text, onClick = function()
+					if pg and pg.nav then pg.nav.set(v.value) O:RefreshNavBar(pg) end
+				end }
+			end
+			if #items > 0 then O:ShowMenu(self, items) end
+		end)
+		f.more = more
+	end
+	more.rest = hidden
+	if #hidden > 0 then
+		more:SetWidth(MORE_W)
+		more:ClearAllPoints()
+		more:SetPoint("TOPLEFT", f, "TOPLEFT", x, 0)
+		more.under:Hide()
+		more.text:SetTextColor(O:Color(more.hot and "text" or "muted"))
+		more:Show()
+	else
+		more:Hide()
+	end
 end

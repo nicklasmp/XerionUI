@@ -2,6 +2,11 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.31.4 - 2026-10-17
+- Opening a page from a link or search hit unfolds its group and scrolls it into view
+- Sidebar keeps its order while you switch modules; it settles when the pointer leaves
+- Tab chips that do not fit move into a ... menu; the open tab stays visible
+
 ## 2.31.3 - 2026-10-17
 - Options panel corner glows now use the accent color only
 - Nav chips hide with their empty cards

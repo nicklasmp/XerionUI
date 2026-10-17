@@ -283,6 +283,7 @@ local function CreateWindow()
 	hint:SetText("Search")
 	search:SetScript("OnTextChanged", function(self)
 		S.searchText = (self:GetText() or ""):lower()
+		S.resortSidebar = true
 		hint:SetShown(S.searchText == "")
 		O:RefreshSidebar()
 	end)
@@ -327,6 +328,7 @@ local function CreateWindow()
 		c:SetScript("OnClick", function(self)
 			XUI.DB.global.panel.filter = self.filter
 			PaintChips()
+			S.resortSidebar = true
 			O:RefreshSidebar()
 		end)
 		chips[i] = c
@@ -488,6 +490,24 @@ function O:ResetWindowSize()
 	end
 end
 
+-- Unfolds whatever hides a page's row in the sidebar (its category, dungeon or
+-- class), so a page opened from a link or a search hit is never out of sight.
+function O:Unfold(key)
+	local panel = XUI.DB.global.panel
+	local token = key:match("^class:(%u+)$") or key:match("^spec:(%u+):")
+	if token then
+		panel.classFolded = nil
+		S.expandedClass[token] = true
+		return
+	end
+	local e = XUI:GetModule(key) or O.groupByKey[key]
+	if not (e and e.category) then return end
+	panel[e.category .. "Folded"] = nil
+	if e.category == "dungeon" and panel.dungeonsFolded then
+		panel.dungeonsFolded[e.dungeon or "Other"] = nil
+	end
+end
+
 function O:Open(key, focus)
 	if not S.frame then CreateWindow() end
 	key = key or S.currentKey or (O.systemPages[1] and O.systemPages[1].key)
@@ -499,6 +519,7 @@ function O:Open(key, focus)
 		if not found then key = O.systemPages[1].key end
 	end
 	local changed = S.currentKey ~= key
+	if changed then O:Unfold(key) end
 	if S.currentKey and S.pages[S.currentKey] and S.currentKey ~= key then S.pages[S.currentKey]:Hide() end
 	S.currentKey = key
 	if key == "changelog" then
@@ -511,6 +532,7 @@ function O:Open(key, focus)
 	O.SyncAutoPreview(key)
 	S.UpdateDockSoon()
 	O:RefreshSidebar()
+	if changed then O:RevealSelected() end
 	O:RefreshPageHead()
 	local page = GetPage(key)
 	if page then

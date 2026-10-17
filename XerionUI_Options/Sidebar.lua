@@ -65,6 +65,7 @@ local function SidebarItem(i)
 		local m = b.module
 		if not m or m.isGroup then return end
 		m:SetEnabled(not m.db.enabled)
+		S.sidebarDirty = true
 		O:RefreshSidebar()
 		O:RefreshPageHead()
 		if S.pages[m.key] then S.pages[m.key]:Refresh() end
@@ -77,10 +78,10 @@ local function SidebarItem(i)
 			GameTooltip:Show()
 		end
 	end)
-	b.sw:SetScript("OnLeave", function() O:PaintItem(b) GameTooltip:Hide() end)
+	b.sw:SetScript("OnLeave", function() O:PaintItem(b) GameTooltip:Hide() O:SettleSidebar() end)
 
 	b:SetScript("OnEnter", function(self) O:PaintItem(self) end)
-	b:SetScript("OnLeave", function(self) O:PaintItem(self) end)
+	b:SetScript("OnLeave", function(self) O:PaintItem(self) O:SettleSidebar() end)
 	b:SetScript("OnClick", function(self)
 		if self.classToken then
 			-- a second click on the open class folds it
@@ -225,18 +226,40 @@ local function ModuleMatches(m, extra)
 	return Matches(ModuleWords(m) .. " " .. extra)
 end
 
+-- Sorting and the on/off filter read a snapshot of each module's state, taken
+-- when the mouse is not over the list. Switching a module while the pointer is in
+-- the list therefore never moves or removes the row under it; the list settles
+-- (O:SettleSidebar) when the pointer leaves.
+local sortOn = {}
+local function SortOn(m)
+	local v = sortOn[m.key]
+	if v == nil then
+		v = m.db.enabled and true or false
+		sortOn[m.key] = v
+	end
+	return v
+end
+
+function O:SettleSidebar()
+	if S.sidebarDirty and S.sidebar and not S.sidebar:IsMouseOver() then
+		S.sidebarDirty = nil
+		O:RefreshSidebar()
+	end
+end
+
 -- The filter chips: "on" keeps modules that are switched on, "off" the rest.
 local function Keep(m)
 	local filter = XUI.DB.global.panel.filter
-	if filter == "on" then return m.db.enabled end
-	if filter == "off" then return not m.db.enabled end
+	if filter == "on" then return SortOn(m) end
+	if filter == "off" then return not SortOn(m) end
 	return true
 end
 
 -- Sidebar order: modules that are switched on first, then the ones off, each
 -- part alphabetical.
 local function ByStateThenName(a, b)
-	if a.db.enabled ~= b.db.enabled then return a.db.enabled end
+	local sa, sb = SortOn(a), SortOn(b)
+	if sa ~= sb then return sa end
 	return a.name:lower() < b.name:lower()
 end
 
@@ -244,6 +267,10 @@ function O:RefreshSidebar()
 	if not S.sidebar then return end
 	local child = S.sidebar.child
 	local y, ni, nh = 4, 0, 0
+	if S.resortSidebar or not S.sidebar:IsMouseOver() then
+		wipe(sortOn)
+		S.resortSidebar = nil
+	end
 	wipe(S.entries)
 	-- a new search starts from a fresh index, so option labels that changed show up
 	if S.searchText == "" then wipe(searchIndex) wipe(settingsIndex) end
@@ -256,6 +283,7 @@ function O:RefreshSidebar()
 		b.key, b.module, b.classToken, b.mode = key, m, classToken, mode
 		b.focus = focus
 		b.dot = nil
+		b.top = y
 		b:ClearAllPoints()
 		b:SetPoint("TOPLEFT", child, "TOPLEFT", 0, -y)
 		b:SetPoint("TOPRIGHT", child, "TOPRIGHT", 0, -y)
@@ -465,4 +493,25 @@ function O:RefreshSidebar()
 	for i = nh + 1, #headPool do headPool[i]:Hide() end
 	child:SetHeight(y + 8)
 	S.sidebar:UpdateBar()
+end
+
+-- Scrolls the list so the open page's row is in view (after the next layout, so
+-- the scroll range already includes a group that was just unfolded).
+function O:RevealSelected()
+	C_Timer.After(0, function()
+		local sf = S.sidebar
+		if not sf then return end
+		for _, b in ipairs(itemPool) do
+			if b:IsShown() and b.key == S.currentKey and not b.focus and b.top then
+				local view, cur = sf:GetHeight(), sf:GetVerticalScroll()
+				local bottom = b.top + b:GetHeight()
+				local want = cur
+				if b.top < cur + 24 then want = b.top - 40
+				elseif bottom > cur + view - 24 then want = bottom - view + 40 end
+				sf:SetVerticalScroll(math.max(0, math.min(sf:GetVerticalScrollRange(), want)))
+				sf:UpdateBar()
+				return
+			end
+		end
+	end)
 end

@@ -4,6 +4,11 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.31.4", date = "2026-10-17", notes = {
+		"Opening a page from a link or search hit unfolds its group and scrolls it into view",
+		"Sidebar keeps its order while you switch modules; it settles when the pointer leaves",
+		"Tab chips that do not fit move into a ... menu; the open tab stays visible",
+	} },
 	{ version = "2.31.3", date = "2026-10-17", notes = {
 		"Options panel corner glows now use the accent color only",
 		"Nav chips hide with their empty cards",
@@ -52,8 +57,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.29.1", date = "2026-10-17", notes = {
 		"Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown",
-	} },
-	{ version = "2.29.0", date = "2026-10-17", notes = {
-		"World Markers: set the place/clear keys directly in the options with a new key bind control",
 	} },
 }
