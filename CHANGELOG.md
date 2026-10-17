@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.0 - 2026-10-17
+- Options window: resizable (corner grip, Reset window size in General)
+- Options: filter box and card chips above every page; the sidebar search lists matching settings and jumps to them
+- Options: Undo button in the header, a more menu for Diagnostics
+- Options: clearer value fields (dropdowns, number and text boxes) and tooltips on the shared style rows
+
 ## 2.29.1 - 2026-10-17
 - Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown
 

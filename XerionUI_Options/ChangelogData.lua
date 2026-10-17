@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.0", date = "2026-10-17", notes = {
+		"Options window: resizable (corner grip, Reset window size in General)",
+		"Options: filter box and card chips above every page; the sidebar search lists matching settings and jumps to them",
+		"Options: Undo button in the header, a more menu for Diagnostics",
+		"Options: clearer value fields (dropdowns, number and text boxes) and tooltips on the shared style rows",
+	} },
 	{ version = "2.29.1", date = "2026-10-17", notes = {
 		"Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown",
 	} },
@@ -46,8 +52,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.24.0", date = "2026-10-16", notes = {
 		"Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on",
-	} },
-	{ version = "2.23.2", date = "2026-10-16", notes = {
-		"Patch notes: back to the list view (no tabs)",
 	} },
 }
