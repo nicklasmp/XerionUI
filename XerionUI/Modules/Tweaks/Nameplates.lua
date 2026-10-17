@@ -74,7 +74,7 @@ local GLOW_KEYS = { "np:buffs", "np:buffs2" }
 local stats = { wraps = 0, buttons = 0, tinted = 0 }
 local boost = setmetatable({}, { __mode = "k" })
 local BORDER_ATLAS = "UI-CooldownManager-PandemicBorder"
-local BOOST_LAYERS = 3
+local BOOST_LAYERS = 4
 
 -- EllesmereUI's border is Blizzard's red pandemic art: a texture it keeps on
 -- the glow host as host._euiPanTex (EllesmereUI 9.6 and later; the host also

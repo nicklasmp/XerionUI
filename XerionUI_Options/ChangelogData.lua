@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.6", date = "2026-10-17", notes = {
+		"Nameplates: dispel border gets one more additive layer so the corners fill in",
+	} },
 	{ version = "2.34.5", date = "2026-10-17", notes = {
 		"Nameplates: fix the secret-boolean error in the dispel border tint (the style is read from EllesmereUI's setting instead of the texture's shown state)",
 	} },
@@ -52,11 +55,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.31.2", date = "2026-10-17", notes = {
 		"A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty",
-	} },
-	{ version = "2.31.1", date = "2026-10-17", notes = {
-		"Preview now only appears on modules that draw a sample; the rest have Test only",
-		"Preview and Test live only in the page header, no duplicate buttons inside the pages",
-		"Removed Preview from the Skyriding Bar",
-		"Pages with fewer than four cards no longer get tab chips, and Needs attention is never a tab",
 	} },
 }

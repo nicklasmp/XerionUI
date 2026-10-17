@@ -85,21 +85,39 @@ local function Switch(parent, w, h)
 	w, h = w or 30, h or 16
 	local s = CreateFrame("Frame", nil, parent)
 	s:SetSize(w, h)
-	-- two half-circle caps and a rect that only touch (never overlap), so the
-	-- anti-aliased edges are not blended twice
-	local l = O:Icon(s, "circle", h, nil, "BACKGROUND")
-	l:SetSize(h / 2, h)
-	l:SetTexCoord(0, 0.5, 0, 1)
-	l:SetPoint("LEFT")
-	local r = O:Icon(s, "circle", h, nil, "BACKGROUND")
-	r:SetSize(h / 2, h)
-	r:SetTexCoord(0.5, 1, 0, 1)
-	r:SetPoint("RIGHT")
-	local mid = O:Rect(s, nil, "BACKGROUND")
-	mid:SetPoint("TOPLEFT", h / 2, 0)
-	mid:SetPoint("BOTTOMRIGHT", -h / 2, 0)
-	s.parts = { l, r, mid }
-	s.knob = O:Icon(s, "circle", h - 4, nil, "ARTWORK")
+	-- Pixel-exact textures (tools/gen_switch.py) drawn 1:1 so nothing is resampled.
+	-- Only 34x18 and 30x16 exist; other sizes fall back to cap + rect.
+	local key = w .. "x" .. h
+	if key == "34x18" or key == "30x16" then
+		local t = O:Rect(s, nil, "BACKGROUND")
+		t:SetTexture(O.MEDIA .. "switch" .. key)
+		t:SetTexCoord(0, w / 64, 0, h / 32)
+		t:SetAllPoints()
+		t:SetTexelSnappingBias(0)
+		t:SetSnapToPixelGrid(false)
+		s.parts = { t }
+		s.knob = O:Rect(s, nil, "ARTWORK")
+		local kd = h - 4
+		s.knob:SetTexture(O.MEDIA .. "knob" .. kd)
+		s.knob:SetTexCoord(0, kd / 16, 0, kd / 16)
+		s.knob:SetSize(kd, kd)
+		s.knob:SetTexelSnappingBias(0)
+		s.knob:SetSnapToPixelGrid(false)
+	else
+		local l = O:Icon(s, "circle", h, nil, "BACKGROUND")
+		l:SetSize(h / 2, h)
+		l:SetTexCoord(0, 0.5, 0, 1)
+		l:SetPoint("LEFT")
+		local r = O:Icon(s, "circle", h, nil, "BACKGROUND")
+		r:SetSize(h / 2, h)
+		r:SetTexCoord(0.5, 1, 0, 1)
+		r:SetPoint("RIGHT")
+		local mid = O:Rect(s, nil, "BACKGROUND")
+		mid:SetPoint("TOPLEFT", h / 2, 0)
+		mid:SetPoint("BOTTOMRIGHT", -h / 2, 0)
+		s.parts = { l, r, mid }
+		s.knob = O:Icon(s, "circle", h - 4, nil, "ARTWORK")
+	end
 	function s:SetState(on, disabled)
 		local cr, cg, cb = O:Color("track")
 		if on then cr, cg, cb = O:Accent() end

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.6 - 2026-10-17
+- Nameplates: dispel border gets one more additive layer so the corners fill in
+
 ## 2.34.5 - 2026-10-17
 - Nameplates: fix the secret-boolean error in the dispel border tint (the style is read from EllesmereUI's setting instead of the texture's shown state)
 
