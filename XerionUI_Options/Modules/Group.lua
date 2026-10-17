@@ -459,7 +459,7 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		local filter = ctx.gossipFilter or "all"
 		local list = {}
 		for _, e in ipairs(m:Catalogue()) do
-			if (filter == "all" or e.picked) and (not zoneOnly or e.zone == zoneOnly) then list[#list + 1] = e end
+			if (filter == "all" or e.picked) and (not zoneOnly or (e.zone or O.DIALOG_NO_ZONE) == zoneOnly) then list[#list + 1] = e end
 		end
 		local y, nh, nr, i = 0, 0, 0, 1
 		while i <= #list do

@@ -144,14 +144,18 @@ end
 -- gets an "NPC dialogs" entry under it in the sidebar. The entry is a group of
 -- the one module; its page (O.DialogPage, Modules/Group.lua) shows that
 -- dungeon's dialogs.
+O.DIALOG_NO_ZONE = "Other"
+
 function O.DialogZones()
 	local m = XUI:GetModule("AutoGossip")
 	local out, have = {}, {}
 	if not m then return out end
 	for _, e in ipairs(m:Catalogue()) do
-		if e.zone and not have[e.zone] then
-			have[e.zone] = true
-			out[#out + 1] = e.zone
+		-- dialogs not seen in game yet (built-ins, typed IDs) have no dungeon: "Other"
+		local zone = e.zone or O.DIALOG_NO_ZONE
+		if not have[zone] then
+			have[zone] = true
+			out[#out + 1] = zone
 		end
 	end
 	return out
