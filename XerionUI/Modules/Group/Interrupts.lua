@@ -467,9 +467,10 @@ local function StackBefore(a, b)
 	return (a.order or 0) < (b.order or 0)
 end
 
+local visibleRows = {}
 local function ShowRows()
 	table.sort(shown, StackBefore)
-	local visible = {}
+	local visible = wipe(visibleRows)
 	for _, row in ipairs(shown) do
 		if row:IsShown() then visible[#visible + 1] = row end
 	end

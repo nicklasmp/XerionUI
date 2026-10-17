@@ -38,6 +38,12 @@ local M = XUI:NewModule("EUIChat", {
 })
 
 local STEP = 0.05
+-- global names built once: the tab poll runs every STEP and used to concatenate 40 strings per tick
+local FRAME_NAMES, EDIT_NAMES = {}, {}
+for i = 1, 20 do
+	FRAME_NAMES[i] = "ChatFrame" .. i
+	EDIT_NAMES[i] = "ChatFrame" .. i .. "EditBox"
+end
 local factor = 1          -- mouseover factor applied on top of EllesmereUI's alpha
 local target = 1
 local baseAlpha           -- the alpha EllesmereUI last asked for
@@ -74,9 +80,9 @@ local function WantTabs()
 	local ext = ns and ns._chatBgExt
 	if ext and ext:IsShown() and ext:IsMouseOver() then return true end
 	for i = 1, 20 do
-		local cf = _G["ChatFrame" .. i]
+		local cf = _G[FRAME_NAMES[i]]
 		if cf and cf:IsShown() and cf:IsMouseOver() then return true end
-		local eb = _G["ChatFrame" .. i .. "EditBox"]
+		local eb = _G[EDIT_NAMES[i]]
 		if eb and eb:IsShown() then return true end
 	end
 	local menus = _G.Menu and Menu.GetManager and Menu.GetManager()
@@ -112,7 +118,7 @@ end
 
 local function EachInput(fn)
 	for i = 1, 20 do
-		local eb = _G["ChatFrame" .. i .. "EditBox"]
+		local eb = _G[EDIT_NAMES[i]]
 		if eb then fn(eb) end
 	end
 end
@@ -154,8 +160,8 @@ local function PlaceAbove(m)
 		+ ((E.ExtendBgBehindTabs and E.ExtendBgBehindTabs(cfg)) and 0 or (cfg.tabPadding or 0))
 	local y = tabs + 4 + (m.db.inputOffsetY or 0)
 	for i = 1, 20 do
-		local cf = _G["ChatFrame" .. i]
-		local eb = _G["ChatFrame" .. i .. "EditBox"]
+		local cf = _G[FRAME_NAMES[i]]
+		local eb = _G[EDIT_NAMES[i]]
 		if cf and eb then
 			eb:ClearAllPoints()
 			eb:SetPoint("BOTTOMLEFT", cf, "TOPLEFT", -10, y)
