@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.7", date = "2026-10-17", notes = {
+		"Options: pixel-exact toggle switch textures",
+	} },
 	{ version = "2.34.6", date = "2026-10-17", notes = {
 		"Nameplates: dispel border gets one more additive layer so the corners fill in",
 	} },
@@ -52,8 +55,5 @@ O.CHANGELOG = {
 	{ version = "2.31.3", date = "2026-10-17", notes = {
 		"Options panel corner glows now use the accent color only",
 		"Nav chips hide with their empty cards",
-	} },
-	{ version = "2.31.2", date = "2026-10-17", notes = {
-		"A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty",
 	} },
 }

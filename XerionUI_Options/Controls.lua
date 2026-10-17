@@ -93,16 +93,12 @@ local function Switch(parent, w, h)
 		t:SetTexture(O.MEDIA .. "switch" .. key)
 		t:SetTexCoord(0, w / 64, 0, h / 32)
 		t:SetAllPoints()
-		t:SetTexelSnappingBias(0)
-		t:SetSnapToPixelGrid(false)
 		s.parts = { t }
 		s.knob = O:Rect(s, nil, "ARTWORK")
 		local kd = h - 4
 		s.knob:SetTexture(O.MEDIA .. "knob" .. kd)
 		s.knob:SetTexCoord(0, kd / 16, 0, kd / 16)
 		s.knob:SetSize(kd, kd)
-		s.knob:SetTexelSnappingBias(0)
-		s.knob:SetSnapToPixelGrid(false)
 	else
 		local l = O:Icon(s, "circle", h, nil, "BACKGROUND")
 		l:SetSize(h / 2, h)

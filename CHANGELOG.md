@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.7 - 2026-10-17
+- Options: pixel-exact toggle switch textures
+
 ## 2.34.6 - 2026-10-17
 - Nameplates: dispel border gets one more additive layer so the corners fill in
 
