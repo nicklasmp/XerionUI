@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.2", date = "2026-10-17", notes = {
+		"Sidebar: remove the Active filter tab (it hid disabled modules); a saved Active filter resets to All",
+	} },
 	{ version = "2.34.1", date = "2026-10-17", notes = {
 		"Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.7", date = "2026-10-17", notes = {
 		"Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable",
-	} },
-	{ version = "2.30.6", date = "2026-10-17", notes = {
-		"Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group",
 	} },
 }

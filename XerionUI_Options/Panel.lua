@@ -312,8 +312,10 @@ local function CreateWindow()
 	local foldAll = O:IconButton(side, "layers", 28, "Fold or unfold all groups", function() O:ToggleFoldAll() end)
 	foldAll:SetPoint("TOPRIGHT", -12, -12)
 
-	-- filter chips: all modules, only the ones switched on, or only the ones off
+	-- filter chips: all modules, or only the ones that are off
 	local chips = {}
+	-- the Active tab is gone: a saved "on" filter would hide every module that is off
+	if XUI.DB.global.panel.filter == "on" then XUI.DB.global.panel.filter = nil end
 	-- underlined tabs: the open one gets the accent line
 	local tabsLine = O:Rect(side, "line", "ARTWORK")
 	tabsLine:SetHeight(1)
@@ -331,7 +333,7 @@ local function CreateWindow()
 			end
 		end
 	end
-	for i, def in ipairs({ { "All", nil }, { "Active", "on" }, { "Inactive", "off" } }) do
+	for i, def in ipairs({ { "All", nil }, { "Inactive", "off" } }) do
 		local c = CreateFrame("Button", nil, side)
 		c:SetHeight(24)
 		c.under = O:Rect(c, nil, "OVERLAY")
@@ -352,9 +354,9 @@ local function CreateWindow()
 		chips[i] = c
 	end
 	S.filterChips = chips
-	-- the three tabs share the sidebar width
+	-- the tabs share the sidebar width
 	local function LayoutChips()
-		local tabW = (side:GetWidth() - 24) / 3
+		local tabW = (side:GetWidth() - 24) / #chips
 		for i, c in ipairs(chips) do
 			c:SetWidth(tabW)
 			c:ClearAllPoints()

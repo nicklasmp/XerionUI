@@ -243,10 +243,9 @@ function O:SettleSidebar()
 	end
 end
 
--- The filter chips: "on" keeps modules that are switched on, "off" the rest.
+-- The filter chips: "off" keeps only the modules that are switched off.
 local function Keep(m)
 	local filter = XUI.DB.global.panel.filter
-	if filter == "on" then return SortOn(m) end
 	if filter == "off" then return not SortOn(m) end
 	return true
 end
@@ -299,7 +298,7 @@ function O:MoveSearchCursor(delta)
 	O:RevealSelected(S.entries[S.cursor])
 end
 
--- Counts behind the All / Active / Inactive tabs.
+-- Counts behind the All / Inactive tabs.
 function O:RefreshFilterCounts()
 	local chips = S.filterChips
 	if not chips then return end
@@ -309,7 +308,7 @@ function O:RefreshFilterCounts()
 			if m.db.enabled then on = on + 1 else off = off + 1 end
 		end
 	end
-	local counts = { on + off, on, off }
+	local counts = { on + off, off }
 	local wide = (chips[1]:GetWidth() or 0) >= 70
 	for i, c in ipairs(chips) do
 		c.text:SetText(wide and ("%s |cff777777%d|r"):format(c.label, counts[i]) or c.label)
@@ -573,7 +572,6 @@ function O:RefreshSidebar()
 	if nm == 0 then
 		local filter = panel.filter
 		if S.searchText ~= "" then message = ('No modules match "%s".'):format(S.searchText)
-		elseif filter == "on" then message = "No modules are switched on."
 		elseif filter == "off" then message = "Every module is switched on." end
 	end
 	if message then

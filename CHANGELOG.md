@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.2 - 2026-10-17
+- Sidebar: remove the Active filter tab (it hid disabled modules); a saved Active filter resets to All
+
 ## 2.34.1 - 2026-10-17
 - Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)
 
