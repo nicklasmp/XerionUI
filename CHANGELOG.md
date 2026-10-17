@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.28.2 - 2026-10-17
+- World Markers: Open key bindings button now opens the Key Bindings page
+
 ## 2.28.1 - 2026-10-17
 - Stronger corner glow in the options panel backdrop
 
