@@ -4,7 +4,8 @@
 -- every press, the other clears them all.
 --
 -- Placing a world marker is a protected action, so the buttons are secure
--- macro buttons running /wm and /cwm. The cycling is done by a restricted
+-- macro buttons running /wm [@cursor] (drops the marker at the mouse cursor
+-- without a confirming click) and /cwm. The cycling is done by a restricted
 -- snippet wrapped around the button's click, which is why it also works in
 -- combat. Bind the keys in Key Bindings -> AddOns -> XerionUI.
 --------------------------------------------------------------------------------
@@ -74,7 +75,7 @@ local function Build()
 			if n == 0 then return end
 			local i = ((self:GetAttribute("idx") or 0) % n) + 1
 			self:SetAttribute("idx", i)
-			self:SetAttribute("macrotext", "/wm " .. self:GetAttribute("m" .. i))
+			self:SetAttribute("macrotext", "/wm [@cursor] " .. self:GetAttribute("m" .. i))
 		]])
 		-- Clearing starts the cycle over (when enabled).
 		header:WrapScript(clearBtn, "OnClick", [[
@@ -99,7 +100,7 @@ function M:Apply()
 	nextBtn:SetAttribute("count", #seq)
 	nextBtn:SetAttribute("idx", 0)
 	-- With no marker chosen the button does nothing instead of repeating.
-	nextBtn:SetAttribute("macrotext", seq[1] and ("/wm " .. seq[1]) or "")
+	nextBtn:SetAttribute("macrotext", seq[1] and ("/wm [@cursor] " .. seq[1]) or "")
 	header:SetAttribute("reset", self.db.resetOnClear and true or nil)
 end
 

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.2 - 2026-10-17
+- World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed
+
 ## 2.30.1 - 2026-10-17
 - Global glow now defaults to EllesmereUI's Auto-Cast Shine: four layers of sparks (sizes 7/6/5/4), layer k laps k times slower; saved profiles move onto it once (colour kept)
 

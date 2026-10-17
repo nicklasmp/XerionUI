@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.2", date = "2026-10-17", notes = {
+		"World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed",
+	} },
 	{ version = "2.30.1", date = "2026-10-17", notes = {
 		"Global glow now defaults to EllesmereUI's Auto-Cast Shine: four layers of sparks (sizes 7/6/5/4), layer k laps k times slower; saved profiles move onto it once (colour kept)",
 	} },
@@ -49,8 +52,5 @@ O.CHANGELOG = {
 	{ version = "2.25.0", date = "2026-10-16", notes = {
 		"Auto NPC Dialog moves under each dungeon: every dungeon with a seen dialog gets an NPC dialogs entry with its own dialogs (and a Settings tab)",
 		"Externals gets its own group under Group instead of sitting in Party Tracking",
-	} },
-	{ version = "2.24.1", date = "2026-10-16", notes = {
-		"Patch notes: remove the header button again; the version number opens the notes and carries the unread dot",
 	} },
 }
