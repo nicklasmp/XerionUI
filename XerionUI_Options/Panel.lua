@@ -385,9 +385,12 @@ local function CreateWindow()
 
 	-- Ctrl+F jumps to the sidebar search, Alt+Left / Alt+Right go back / forward;
 	-- every other key still reaches the game
+	-- SetPropagateKeyboardInput is protected in combat, so shortcuts do nothing
+	-- then and the frame is left passing every key on to the game
 	S.frame:EnableKeyboard(true)
-	S.frame:SetPropagateKeyboardInput(true)
+	if not InCombatLockdown() then S.frame:SetPropagateKeyboardInput(true) end
 	S.frame:SetScript("OnKeyDown", function(self, key)
+		if InCombatLockdown() then return end
 		if key == "F" and IsControlKeyDown() then
 			self:SetPropagateKeyboardInput(false)
 			S.searchBox:SetFocus()
@@ -399,6 +402,11 @@ local function CreateWindow()
 			self:SetPropagateKeyboardInput(true)
 		end
 	end)
+	-- a handled key stopped propagating; let keys through again once it is released
+	S.frame:SetScript("OnKeyUp", function(self)
+		if not InCombatLockdown() then self:SetPropagateKeyboardInput(true) end
+	end)
+
 
 	-- corner grip: drag to resize; the open page lays itself out again
 	local relayout = XUI.Coalesce(function()

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.3", date = "2026-10-17", notes = {
+		"Fix ADDON_ACTION_BLOCKED from the options window's keyboard shortcuts in combat",
+	} },
 	{ version = "2.34.2", date = "2026-10-17", notes = {
 		"Sidebar: remove the Active filter tab (it hid disabled modules); a saved Active filter resets to All",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.8", date = "2026-10-17", notes = {
 		"Meter Reset now lives in a Damage Meter group under Group",
-	} },
-	{ version = "2.30.7", date = "2026-10-17", notes = {
-		"Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable",
 	} },
 }

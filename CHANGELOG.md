@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.3 - 2026-10-17
+- Fix ADDON_ACTION_BLOCKED from the options window's keyboard shortcuts in combat
+
 ## 2.34.2 - 2026-10-17
 - Sidebar: remove the Active filter tab (it hid disabled modules); a saved Active filter resets to All
 

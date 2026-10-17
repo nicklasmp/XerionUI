@@ -722,7 +722,7 @@ function Controls.keybind(parent, desc, ctx)
 		f.capturing = true
 		f.btn.text:SetText("Press a key...")
 		f.btn:EnableKeyboard(true)
-		f.btn:SetPropagateKeyboardInput(false)
+		if not InCombatLockdown() then f.btn:SetPropagateKeyboardInput(false) end
 		f.btn:SetScript("OnKeyDown", OnKey)
 	end)
 	f.btn:SetScript("OnHide", function() if f.capturing then Stop() end end)
