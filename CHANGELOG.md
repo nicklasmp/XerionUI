@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.33.2 - 2026-10-17
+- Give XerionUI Options the addon list icon
+
 ## 2.33.1 - 2026-10-17
 - Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag
 

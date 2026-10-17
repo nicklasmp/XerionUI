@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.33.2", date = "2026-10-17", notes = {
+		"Give XerionUI Options the addon list icon",
+	} },
 	{ version = "2.33.1", date = "2026-10-17", notes = {
 		"Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.4", date = "2026-10-17", notes = {
 		"Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group",
-	} },
-	{ version = "2.30.3", date = "2026-10-17", notes = {
-		"World Markers options: removed the meaningless Preview button",
 	} },
 }

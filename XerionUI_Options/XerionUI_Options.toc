@@ -6,6 +6,7 @@
 ## Dependencies: XerionUI
 ## LoadOnDemand: 1
 ## Group: XerionUI
+## IconTexture: Interface\AddOns\XerionUI\Media\addon-icon
 
 # Keep ## Interface identical to XerionUI.toc: a load-on-demand addon that is
 # out of date refuses to load unless "Load out of date AddOns" is ticked.
