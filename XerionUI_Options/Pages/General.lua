@@ -40,6 +40,9 @@ O:RegisterSystemPage({
 					tip = "Starts the preview when you open a module's page and ends it when you leave." },
 				{ type = "toggle", label = "Move the window away from what you preview", path = "panel.dock",
 					tip = "If the window would cover the preview, it slides to the side until the preview ends." },
+				{ type = "button", text = "Reset window size",
+					tip = "Drag the corner of the window to resize it. This puts it back to the default size.",
+					onClick = function() O:ResetWindowSize() end },
 			}),
 			O.Card("Unlock mode", {
 				{ type = "toggle", label = "Show the grid", path = "unlock.showGrid", tip = "On by default; the Grid button in unlock mode switches it too." },

@@ -11,11 +11,11 @@ local Card, Join = O.Card, O.Join
 O:RegisterModuleOptions("BoneShield", function(ctx, m, G)
 	return {
 		Card("When", {
-			{ type = "slider", label = "Glow with seconds left", path = "glowThreshold", min = 1, max = 20, step = 1 },
+			{ type = "slider", label = "Glow with seconds left", path = "glowThreshold", min = 1, max = 20, step = 1, tip = "The icon glows when this many seconds or fewer are left." },
 			{ type = "toggle", label = "Warn under 5 stacks", path = "stackWarn",
 				tip = "In keys the stack count is hidden: put Ossuary on a Cooldown Manager buff bar for this to work there." },
-			{ type = "slider", label = "Sound with seconds left", path = "soundThreshold", min = 1, max = 20, step = 1 },
-			{ type = "toggle", label = "Sound only in combat", path = "soundInCombatOnly" },
+			{ type = "slider", label = "Sound with seconds left", path = "soundThreshold", min = 1, max = 20, step = 1, tip = "The alert plays when this many seconds or fewer are left." },
+			{ type = "toggle", label = "Sound only in combat", path = "soundInCombatOnly", tip = "No alert out of combat." },
 			{ type = "slider", label = "Bone Shield duration (fallback)", path = "duration", min = 10, max = 60, step = 1 },
 			{ type = "toggle", label = "Custom Bone Shield icon art", path = "customArt" },
 		}),
@@ -60,7 +60,7 @@ local function TimedIconCards(G, extra, glow)
 	local cards = {}
 	for _, c in ipairs(extra or {}) do cards[#cards + 1] = c end
 	cards[#cards + 1] = Card("Icon", Join(G.Icon("icon", { square = true }), {
-		{ type = "toggle", label = "Cooldown swipe", path = "showSwipe" },
+		{ type = "toggle", label = "Cooldown swipe", path = "showSwipe", tip = "The dark clock sweep over the icon while it counts down." },
 	}))
 	cards[#cards + 1] = Card("Border", G.Border("border"))
 	if glow then cards[#cards + 1] = Card("Glow", G.Glow("glow")) end
@@ -76,8 +76,8 @@ end)
 O:RegisterModuleOptions("BloodBeast", function(ctx, m, G)
 	return {
 		Card("Text", Join(G.Font("font"), {
-			{ type = "color", label = "Label color", path = "labelColor" },
-			{ type = "color", label = "Value color", path = "valueColor" },
+			{ type = "color", label = "Label color", path = "labelColor", tip = "The color of the label text." },
+			{ type = "color", label = "Value color", path = "valueColor", tip = "The color of the number." },
 		})),
 		Card("Position", G.Position("position")),
 	}
@@ -90,7 +90,7 @@ O:RegisterModuleOptions("WellHoned", function(ctx, m, G)
 			{ type = "button", text = "Test", onClick = function() m:Test("sound") end },
 			{ type = "dropdown", label = "When it ends", path = "endSound", media = "sound", filesOnly = true },
 			{ type = "button", text = "Test", onClick = function() m:Test("endSound") end },
-			{ type = "dropdown", label = "Channel", path = "channel", values = XUI.Audio.CHANNELS },
+			{ type = "dropdown", label = "Channel", path = "channel", values = XUI.Audio.CHANNELS, tip = "The game volume slider the sound follows. Master plays even if sound effects are turned down." },
 			{ type = "description", text = "Played by the game itself, so it works in keys and raid encounters. A new sound is registered when the fight or the encounter ends." },
 		}),
 	}
@@ -116,7 +116,7 @@ O:RegisterModuleOptions("Ironfur", function(ctx, m, G)
 		Card("When", {
 			{ type = "slider", label = "Glow with seconds left (last stack)", path = "glowThreshold", min = 1, max = 7, step = 1 },
 			{ type = "slider", label = "Voice with seconds left (last stack)", path = "soundThreshold", min = 1, max = 7, step = 1 },
-			{ type = "toggle", label = "Only in combat", path = "soundInCombatOnly" },
+			{ type = "toggle", label = "Only in combat", path = "soundInCombatOnly", tip = "Only alert while you are in combat." },
 			{ type = "slider", label = "Seconds one Ironfur lasts (fallback)", path = "duration", min = 4, max = 15, step = 1,
 				tip = "Used where the game hides the aura (in keys); the real time takes over when it is readable." },
 			{ type = "description", text = "Put Ironfur on a Cooldown Manager buff bar to get the glow there; or switch on the icon below." },

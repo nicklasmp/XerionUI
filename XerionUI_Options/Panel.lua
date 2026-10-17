@@ -12,8 +12,10 @@ local W, H = 980, 680
 local SIDEBAR_W = 228
 local HEADER_H = 46
 local PAGEHEAD_H = 88
+local NAV_H = 36
+local MIN_W, MIN_H, MAX_W, MAX_H = 780, 520, 1600, 1200
 local ITEM_H = 30
-O.LAYOUT = { SIDEBAR_W = SIDEBAR_W, HEADER_H = HEADER_H, PAGEHEAD_H = PAGEHEAD_H, ITEM_H = ITEM_H }
+O.LAYOUT = { SIDEBAR_W = SIDEBAR_W, HEADER_H = HEADER_H, PAGEHEAD_H = PAGEHEAD_H, NAV_H = NAV_H, ITEM_H = ITEM_H }
 
 O.systemPages = {}      -- ordered list of { key, title, desc, icon, build }
 O.moduleBuilders = {}   -- [module key] = function(ctx, module, G) -> cards
@@ -111,6 +113,7 @@ end
 --------------------------------------------------------------------------------
 local function SavePosition()
 	local point, _, relPoint, x, y = S.frame:GetPoint(1)
+	if not x then return end
 	XUI.DB.global.panel.point = { point, relPoint, math.floor(x + 0.5), math.floor(y + 0.5) }
 end
 
@@ -175,7 +178,10 @@ end
 
 local function CreateWindow()
 	S.frame = CreateFrame("Frame", "XUI_OptionsFrame", UIParent)
-	S.frame:SetSize(W, H)
+	local panel = XUI.DB.global.panel
+	S.frame:SetSize(math.max(MIN_W, math.min(MAX_W, panel.w or W)), math.max(MIN_H, math.min(MAX_H, panel.h or H)))
+	S.frame:SetResizable(true)
+	if S.frame.SetResizeBounds then S.frame:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H) end
 	S.frame:SetFrameStrata("HIGH")
 	S.frame:SetToplevel(true)
 	S.frame:SetClampedToScreen(true)
@@ -248,6 +254,20 @@ local function CreateWindow()
 		XUI:SetUnlocked(true)
 	end)
 	unlock:SetPoint("RIGHT", close, "LEFT", -4, 0)
+	-- takes back the last change made with a control (Undo.lua)
+	local undo = O:IconButton(header, "reset", 30, nil, function() O.Undo.Undo() end)
+	undo:SetPoint("RIGHT", unlock, "LEFT", -4, 0)
+	undo:HookScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+		local what = O.Undo.Describe()
+		GameTooltip:SetText(what and ("Undo: " .. what) or "Nothing to undo")
+		if what then GameTooltip:AddLine(O.Undo.Count() .. " step(s) remembered", 0.6, 0.6, 0.6) end
+		GameTooltip:Show()
+	end)
+	undo:HookScript("OnLeave", function() GameTooltip:Hide() end)
+	S.undoButton = undo
+	O.Undo.OnChange(function() O:RefreshUndo() end)
+	O:RefreshUndo()
 	-- accent dot by the version number while there are patch notes you have not opened
 	versionBtn.dot = O:Icon(versionBtn, "circle", 7, nil, "OVERLAY")
 	versionBtn.dot:SetPoint("LEFT", versionBtn, "RIGHT", 1, 3)
@@ -275,7 +295,7 @@ local function CreateWindow()
 	search:SetFont(O:FontPath(), O.SIZE.text, "")
 	search:SetTextColor(O:Color("text"))
 	search:SetTextInsets(28, 8, 0, 0)
-	O:Skin(search, "control", "controlLine")
+	O:Skin(search, "field", "fieldLine")
 	local sIcon = O:Icon(search, "search", 13, "muted")
 	sIcon:SetPoint("LEFT", 9, 0)
 	local hint = O:Text(search, O.SIZE.text, "faint")
@@ -343,11 +363,44 @@ local function CreateWindow()
 
 	-- content
 	S.content = CreateFrame("Frame", nil, S.frame)
-	S.content:SetPoint("TOPLEFT", SIDEBAR_W, -(HEADER_H + PAGEHEAD_H))
+	S.content:SetPoint("TOPLEFT", SIDEBAR_W, -(HEADER_H + PAGEHEAD_H + NAV_H))
 	S.content:SetPoint("BOTTOMRIGHT", 0, 1)
 	S.pageHead = O.CreatePageHead(S.frame)
 	S.pageHead:SetPoint("TOPLEFT", SIDEBAR_W, -HEADER_H)
 	S.pageHead:SetPoint("TOPRIGHT", 0, -HEADER_H)
+	S.navbar = O.CreateNavBar(S.frame)
+	S.navbar:SetPoint("TOPLEFT", SIDEBAR_W, -(HEADER_H + PAGEHEAD_H))
+	S.navbar:SetPoint("TOPRIGHT", 0, -(HEADER_H + PAGEHEAD_H))
+
+	-- corner grip: drag to resize; the open page lays itself out again
+	local relayout = XUI.Coalesce(function()
+		local page = S.pages[S.currentKey]
+		if page and page.built then page:Layout() end
+		O:RefreshNavBar()
+	end)
+	S.frame:SetScript("OnSizeChanged", relayout)
+	local grip = CreateFrame("Button", nil, S.frame)
+	grip:SetSize(18, 18)
+	grip:SetPoint("BOTTOMRIGHT", -2, 2)
+	grip:SetFrameLevel(S.frame:GetFrameLevel() + 20)
+	grip.tex = grip:CreateTexture(nil, "OVERLAY")
+	grip.tex:SetAllPoints()
+	grip.tex:SetTexture("Interface/ChatFrame/UI-ChatIM-SizeGrabber-Up")
+	grip.tex:SetVertexColor(O:Color("muted"))
+	grip:SetScript("OnEnter", function(self)
+		self.tex:SetVertexColor(O:Accent())
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText("Drag to resize")
+		GameTooltip:Show()
+	end)
+	grip:SetScript("OnLeave", function(self) self.tex:SetVertexColor(O:Color("muted")) GameTooltip:Hide() end)
+	grip:SetScript("OnMouseDown", function() S.frame:StartSizing("BOTTOMRIGHT") end)
+	grip:SetScript("OnMouseUp", function()
+		S.frame:StopMovingOrSizing()
+		local p = XUI.DB.global.panel
+		p.w, p.h = math.floor(S.frame:GetWidth() + 0.5), math.floor(S.frame:GetHeight() + 0.5)
+		SavePosition()
+	end)
 
 	S.frame:SetScript("OnHide", function()
 		O.CloseDropdown()
@@ -359,6 +412,7 @@ local function CreateWindow()
 	local owner = {}
 	XUI:On("ProfileChanged", owner, function()
 		if not S.frame:IsShown() then return end
+		O.Undo.Clear()
 		for _, page in pairs(S.pages) do page:Refresh() end
 		O:RefreshSidebar()
 		O:RefreshPageHead()
@@ -382,7 +436,22 @@ function O:RefreshNotesButton()
 	b.dot:SetVertexColor(O:Accent())
 end
 
-function O:Open(key)
+-- The Undo button in the header is only there while there is something to undo.
+function O:RefreshUndo()
+	if S.undoButton then S.undoButton:SetShown(O.Undo.Count() > 0) end
+end
+
+-- Puts the window back at the default size (General > Window).
+function O:ResetWindowSize()
+	local panel = XUI.DB.global.panel
+	panel.w, panel.h = W, H
+	if S.frame then
+		S.frame:SetSize(W, H)
+		SavePosition()
+	end
+end
+
+function O:Open(key, focus)
 	if not S.frame then CreateWindow() end
 	key = key or S.currentKey or (O.systemPages[1] and O.systemPages[1].key)
 	-- a module that sits in a group opens the group's page
@@ -392,6 +461,7 @@ function O:Open(key)
 		for _, s in ipairs(O.systemPages) do if s.key == key then found = true end end
 		if not found then key = O.systemPages[1].key end
 	end
+	local changed = S.currentKey ~= key
 	if S.currentKey and S.pages[S.currentKey] and S.currentKey ~= key then S.pages[S.currentKey]:Hide() end
 	S.currentKey = key
 	if key == "changelog" then
@@ -406,7 +476,17 @@ function O:Open(key)
 	O:RefreshSidebar()
 	O:RefreshPageHead()
 	local page = GetPage(key)
-	if page then page:Show() end
+	if page then
+		-- a page you come back to starts unfiltered
+		if page.built and changed then page:SetFilter("") end
+		page:Show()
+		-- a hit from the sidebar search: land on the setting itself
+		if focus then
+			C_Timer.After(0.1, function()
+				if S.currentKey == key and page:Focus(focus) then O:RefreshNavBar(page) end
+			end)
+		end
+	end
 end
 
 function O:Close()

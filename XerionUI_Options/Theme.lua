@@ -22,6 +22,11 @@ O.C = {
 	control      = { 0.150, 0.150, 0.150, 1 },
 	controlHover = { 0.195, 0.195, 0.195, 1 },
 	controlLine  = { 0.230, 0.230, 0.230, 1 },
+	-- value fields (dropdowns, number and text boxes): darker than the card with a
+	-- clearly lighter outline, so every place you can type or pick reads as one
+	field        = { 0.062, 0.062, 0.062, 1 },
+	fieldHover   = { 0.095, 0.095, 0.095, 1 },
+	fieldLine    = { 0.340, 0.340, 0.340, 1 },
 	track        = { 0.230, 0.230, 0.230, 1 },
 	selected     = { 0.130, 0.130, 0.130, 1 },
 	text         = { 0.93, 0.93, 0.93, 1 },

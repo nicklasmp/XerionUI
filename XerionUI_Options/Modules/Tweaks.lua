@@ -22,11 +22,11 @@ O:RegisterModuleOptions("EUINameplates", function(ctx, m, G)
 				disabled = function() return not m.db.customBorder end },
 		}),
 		Card("Shield amount", Join({
-			{ type = "toggle", label = "Show the shield amount", path = "shield.enabled" },
-			{ type = "toggle", label = "Enemies only", path = "shield.enemyOnly", disabled = off },
+			{ type = "toggle", label = "Show the shield amount", path = "shield.enabled", tip = "Show how much absorb shield the unit has." },
+			{ type = "toggle", label = "Enemies only", path = "shield.enemyOnly", disabled = off, tip = "Skip the shield amount on friendly units." },
 			{ type = "spacer" },
-			{ type = "slider", label = "Offset X", path = "shield.offX", min = -40, max = 40, step = 1, disabled = off },
-			{ type = "slider", label = "Offset Y", path = "shield.offY", min = -40, max = 40, step = 1, disabled = off },
+			{ type = "slider", label = "Offset X", path = "shield.offX", min = -40, max = 40, step = 1, disabled = off, tip = "Moves it sideways; negative is left." },
+			{ type = "slider", label = "Offset Y", path = "shield.offY", min = -40, max = 40, step = 1, disabled = off, tip = "Moves it up or down; negative is down." },
 		}, G.Font("shieldText", { color = true }))),
 	}
 end)
@@ -78,10 +78,10 @@ O:RegisterModuleOptions("EUIFocusCastbar", function(ctx, m, G)
 			{ type = "toggle", label = "Speak when you can interrupt", path = "kick.enabled",
 				tip = "Speaks when your FocusKick target casts something you can interrupt and your kick is ready." },
 			{ type = "description", text = "Speech only: whether a cast can be interrupted is hidden in keys, and only speech can follow it without Lua knowing. A sound file would play on every cast." },
-			{ type = "input", label = "Words", path = "kick.text", disabled = off },
-			{ type = "dropdown", label = "Voice", path = "kick.voice", values = function() return XUI.Audio:Voices() end, disabled = off },
-			{ type = "slider", label = "Volume", path = "kick.volume", min = 0, max = 100, step = 5, disabled = off },
-			{ type = "slider", label = "Speed", path = "kick.rate", min = -10, max = 10, step = 1, disabled = off },
+			{ type = "input", label = "Words", path = "kick.text", disabled = off, tip = "What is spoken." },
+			{ type = "dropdown", label = "Voice", path = "kick.voice", values = function() return XUI.Audio:Voices() end, disabled = off, tip = "The text to speech voice installed on this computer." },
+			{ type = "slider", label = "Volume", path = "kick.volume", min = 0, max = 100, step = 5, disabled = off, tip = "How loud the spoken text is." },
+			{ type = "slider", label = "Speed", path = "kick.rate", min = -10, max = 10, step = 1, disabled = off, tip = "How fast the voice speaks; negative is slower." },
 			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 	}
@@ -96,7 +96,7 @@ O:RegisterModuleOptions("EUITargetedSpellBars", function(ctx, m, G)
 			{ type = "button", text = "Re-detect", onClick = function() m:Redetect() end },
 		}),
 		Card("Cast spark", {
-			{ type = "toggle", label = "Show a spark on the cast progress", path = "spark" },
+			{ type = "toggle", label = "Show a spark on the cast progress", path = "spark", tip = "A bright mark at the end of the filled part of the cast bar." },
 			{ type = "slider", label = "Width", path = "sparkWidth", min = 1, max = 10, step = 1, disabled = off },
 			{ type = "color", label = "Color", path = "sparkColor", disabled = off },
 			{ type = "button", text = "EllesmereUI preview", onClick = function() m:TogglePreview() end },
@@ -113,8 +113,8 @@ O:RegisterModuleOptions("EUIPartyFrames", function(ctx, m, G)
 			{ type = "toggle", label = "Show health + shield %", path = "health.enabled" },
 			{ type = "dropdown", label = "Position", path = "health.anchor", values = m.ANCHORS, disabled = off },
 			{ type = "toggle", label = "Use EllesmereUI's name font", path = "health.matchName", disabled = off },
-			{ type = "slider", label = "Offset X", path = "health.x", min = -60, max = 60, step = 1, disabled = off },
-			{ type = "slider", label = "Offset Y", path = "health.y", min = -30, max = 30, step = 1, disabled = off },
+			{ type = "slider", label = "Offset X", path = "health.x", min = -60, max = 60, step = 1, disabled = off, tip = "Moves it sideways; negative is left." },
+			{ type = "slider", label = "Offset Y", path = "health.y", min = -30, max = 30, step = 1, disabled = off, tip = "Moves it up or down; negative is down." },
 		}),
 		Card("Text", G.Font("healthText"), { hidden = function() return off() or m.db.health.matchName end }),
 		Card("Color", {
@@ -131,8 +131,8 @@ O:RegisterModuleOptions("EUIPartyFrames", function(ctx, m, G)
 		Card("Debuff stack count", {
 			{ type = "dropdown", label = "Position on each debuff icon", path = "stack.placement", values = m.STACK_PLACES },
 			{ type = "spacer" },
-			{ type = "slider", label = "Offset X", path = "stack.x", min = -40, max = 40, step = 1 },
-			{ type = "slider", label = "Offset Y", path = "stack.y", min = -40, max = 40, step = 1 },
+			{ type = "slider", label = "Offset X", path = "stack.x", min = -40, max = 40, step = 1, tip = "Moves it sideways; negative is left." },
+			{ type = "slider", label = "Offset Y", path = "stack.y", min = -40, max = 40, step = 1, tip = "Moves it up or down; negative is down." },
 			{ type = "description", text = "Preview shows a sample debuff on your first party frame." },
 		}),
 	}

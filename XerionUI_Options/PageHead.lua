@@ -109,11 +109,21 @@ function O.CreatePageHead(parent)
 	end)
 	f.state:SetPoint("RIGHT", f.test, "LEFT", -8, 0)
 
-	-- everything needed to understand a problem, as one text to copy
-	f.diag = HeadButton("search", "Diagnostics", 118, "A text with the game build, this module's status, its checks, recent errors and its own debug lines - copy it when something does not work.", function()
+	-- the "more" menu: rarely used page tools stay out of the way of the main buttons
+	f.diag = HeadButton("dots", "More", 30, "Diagnostics and other page tools.", function(self)
 		local m = f.module
-		if m then O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end
+		if not m then return end
+		O:ShowMenu(self, {
+			{
+				text = "Diagnostics",
+				tip = "A text with the game build, this module's status, its checks, recent errors and its own debug lines - copy it when something does not work.",
+				onClick = function() O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end,
+			},
+		})
 	end)
+	f.diag.text:SetText("")
+	f.diag.icon:ClearAllPoints()
+	f.diag.icon:SetPoint("CENTER")
 
 	-- the texts end left of the leftmost control so they never run under it
 	function f.FitTexts()
@@ -221,6 +231,71 @@ function O:RefreshPageHead()
 end
 
 --------------------------------------------------------------------------------
+-- A small menu under a button: items = { { text, tip, onClick } }. Closes on a
+-- click anywhere, on Escape and when the window hides.
+--------------------------------------------------------------------------------
+local menu
+
+function O:ShowMenu(anchor, items)
+	if not menu then
+		menu = CreateFrame("Frame", "XUI_OptionsMenu", UIParent)
+		menu:SetFrameStrata("FULLSCREEN_DIALOG")
+		menu:SetToplevel(true)
+		menu:EnableMouse(true)
+		O:Skin(menu, "card", "fieldLine")
+		tinsert(UISpecialFrames, "XUI_OptionsMenu")
+		menu.blocker = CreateFrame("Button", nil, UIParent)
+		menu.blocker:SetAllPoints(UIParent)
+		menu.blocker:SetFrameStrata("FULLSCREEN")
+		menu.blocker:SetScript("OnClick", function() menu:Hide() end)
+		menu.blocker:Hide()
+		menu:SetScript("OnShow", function() menu.blocker:Show() end)
+		menu:SetScript("OnHide", function() menu.blocker:Hide() end)
+		menu.rows = {}
+	end
+	local y = 4
+	for i, item in ipairs(items) do
+		local r = menu.rows[i]
+		if not r then
+			r = CreateFrame("Button", nil, menu)
+			r:SetHeight(26)
+			r.hl = O:Rect(r, "controlHover", "BACKGROUND")
+			r.hl:SetAllPoints()
+			r.hl:Hide()
+			r.text = O:Text(r, O.SIZE.text, "text")
+			r.text:SetPoint("LEFT", 10, 0)
+			r:SetScript("OnEnter", function(self)
+				self.hl:Show()
+				if self.tip then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					GameTooltip:SetText(self.text:GetText(), 1, 1, 1)
+					GameTooltip:AddLine(self.tip, 0.75, 0.75, 0.75, true)
+					GameTooltip:Show()
+				end
+			end)
+			r:SetScript("OnLeave", function(self) self.hl:Hide() GameTooltip:Hide() end)
+			r:SetScript("OnClick", function(self)
+				menu:Hide()
+				if self.onClick then self.onClick() end
+			end)
+			menu.rows[i] = r
+		end
+		r.text:SetText(item.text)
+		r.tip, r.onClick = item.tip, item.onClick
+		r:ClearAllPoints()
+		r:SetPoint("TOPLEFT", 4, -y)
+		r:SetPoint("TOPRIGHT", -4, -y)
+		r:Show()
+		y = y + 26
+	end
+	for i = #items + 1, #menu.rows do menu.rows[i]:Hide() end
+	menu:SetSize(190, y + 4)
+	menu:ClearAllPoints()
+	menu:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", 0, -4)
+	menu:Show()
+end
+
+--------------------------------------------------------------------------------
 -- A window with a text to copy (Ctrl+A, Ctrl+C)
 --------------------------------------------------------------------------------
 local textPopup
@@ -245,7 +320,7 @@ function O:ShowText(title, text)
 		local holder = CreateFrame("Frame", nil, p)
 		holder:SetPoint("TOPLEFT", 16, -62)
 		holder:SetPoint("BOTTOMRIGHT", -16, 16)
-		O:Skin(holder, "control", "controlLine")
+		O:Skin(holder, "field", "fieldLine")
 		local sf = CreateFrame("ScrollFrame", nil, holder, "ScrollFrameTemplate")
 		sf:SetPoint("TOPLEFT", 6, -6)
 		sf:SetPoint("BOTTOMRIGHT", -24, 6)

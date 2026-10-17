@@ -222,6 +222,72 @@ Step("sidebar: search, class folding, dock", function()
 	O:RebuildAll()
 end)
 
+Step("options: filter, jump to a setting, undo, menu, resize", function()
+	local O = XUI.Options
+	local S = O.S
+	local key, page
+	for _, m in ipairs(XUI.modules) do
+		O:Open(m.key)
+		MOCK.Advance(0.1)
+		local p = S.pages[m.key]
+		if p and p.nav then key, page = m.key, p break end
+	end
+	assert(page, "no module page has card navigation")
+
+	-- filter: nothing matches, then one word, then cleared
+	page:SetFilter("zzzzqqq")
+	assert(page.empty and page.empty:IsShown(), "no-match note is missing")
+	page:SetFilter("color")
+	page:SetFilter("")
+	assert(not page.empty:IsShown(), "no-match note stays after clearing")
+
+	-- chips switch or scroll to a card
+	for _, v in ipairs(page.nav.values) do
+		page.nav.set(v.value)
+		O:RefreshNavBar(page)
+	end
+
+	-- a toggle, undone
+	local toggle, slider
+	for _, card in ipairs(page.cards) do
+		for _, c in ipairs(card.items) do
+			if c.desc.type == "toggle" and c.desc.path and not toggle then toggle = c end
+			if c.desc.type == "slider" and c.desc.path and type(c.desc.label) == "string" and not slider then
+				slider = { control = c, card = card.spec.title }
+			end
+		end
+	end
+	assert(toggle, "no toggle on the page")
+	local d, ctx = toggle.desc, toggle.ctx
+	local before = O:GetValue(d, ctx) and true or false
+	O.Undo.Clear()
+	O:SetValue(d, ctx, not before)
+	assert(O.Undo.Count() == 1, "a change is not remembered")
+	O.Undo.Undo()
+	assert((O:GetValue(d, ctx) and true or false) == before, "undo did not restore the value")
+	assert(O.Undo.Count() == 0, "undo left a step behind")
+
+	-- a hit from the sidebar search lands on the setting
+	if slider then
+		local label = slider.control.desc.label
+		S.searchText = label:lower()
+		O:RefreshSidebar()
+		S.searchText = ""
+		O:RefreshSidebar()
+		O:Open(key, { card = slider.card, label = label })
+		MOCK.Advance(0.3)
+		assert(page:Focus({ card = slider.card, label = label }), "could not focus a setting")
+	end
+
+	-- the more menu, resize and reset
+	O:ShowMenu(S.pageHead.diag, { { text = "Test", onClick = function() end } })
+	_G.XUI_OptionsMenu:Hide()
+	S.frame:SetSize(1100, 760)
+	MOCK.Advance(0.1)
+	O:ResetWindowSize()
+	O:Open("general")
+end)
+
 Step("diagnostics, self-check and perf", function()
 	XUI.perfOn = true
 	local text = XUI.Health.Report()

@@ -172,7 +172,9 @@ Prefer the widgets in `Widgets.lua` over hand-built frames: `CreateText`, `Creat
 | `Dropdown.lua` | the shared dropdown list (filter box, media previews, sound play buttons) |
 | `Page.lua` | contexts, cards, grid layout, scroll |
 | `Groups.lua` | the shared option groups (see below) |
-| `Panel.lua` | window, sidebar + search, page header (enable / preview) |
+| `Panel.lua` | window, sidebar + search, page header (enable / preview), resize grip, Undo button |
+| `NavBar.lua` | chips and filter box between page header and cards |
+| `Undo.lua` | the undo stack behind the header button |
 | `Pages/*.lua` | Global Style, General, Profiles, Patch notes (data in `ChangelogData.lua`, generated from `CHANGELOG.md` by `tools/genchangelog.js`, run by `bump.js`) |
 | `Modules/*.lua` | one builder per module, grouped by category |
 
@@ -223,7 +225,12 @@ The harness (fengari, Lua 5.3) mocks the WoW API closely enough to load the TOCs
 | Attach a position to another frame | `position.attach` (+ `point`/`relPoint`), `Movers:Apply`, `G.Position` |
 | Unlock mode snapping to other movers, guides, double-click to open settings | `Core/Movers.lua` |
 | Window spacing | General: `panel.density`, `O:SetDensity` |
-
+| Resizable window | corner grip in `Panel.lua`, size in `panel.w/h`, `O:ResetWindowSize` (General) |
+| Card chips + filter box above every page | `NavBar.lua`; chips come from `page.nav` (`BuildNav` in `Page.lua`), the filter is `page:SetFilter` |
+| Sidebar search lands on the setting | `Sidebar.lua` (`settingsIndex`, `AddHits`), `O:Open(key, focus)`, `Page:Focus` (opens the card, scrolls, flashes) |
+| Undo button in the header | `Undo.lua`; every control writes through `O:SetValue`, which records the step (`desc.noUndo` opts out) |
+| The "more" menu in the page head | `O:ShowMenu` (`PageHead.lua`), holds Diagnostics |
+| Value fields (dropdown, number and text boxes) | palette `field` / `fieldHover` / `fieldLine` in `Theme.lua`; use them for anything you can type in or pick from |
 ## Diagnostics, self-check and performance
 
 | What | Where |
@@ -231,11 +238,10 @@ The harness (fengari, Lua 5.3) mocks the WoW API closely enough to load the TOCs
 | Self-check per module (EllesmereUI fields, Cooldown Manager, damage meter, aura sounds) | `Core/Health.lua` (`Health.CHECKS`, `Health.Issues`), shown as a yellow dot/status and a "Needs attention" card |
 | Diagnostics text (build, class, EllesmereUI, status, checks, errors, `DebugInfo`) | `Health.Report`, the **Diagnostics** button in a module's page head (`O:ShowText`) |
 | Time per module | `/xui perf on`, play, `/xui perf`; `XUI.SafeCallFor` times the outermost call per module |
-| All modules on one page | `Pages/Overview.lua` ("Modules") |
 | Banner on a module that is off | module page builder in `Panel.lua` |
 
 Add a check by putting a function in `Health.CHECKS[moduleKey]` that calls `problem("text")` for each missing dependency.
 
 ## Options window files
 
-`Panel.lua` (window, opening, page lookup, the shared state table `O.S`), `PageHead.lua` (page header, Diagnostics popup), `Sidebar.lua` (search, class folding, entries), `ModuleGroups.lua` (modules that share one sidebar entry and page, `O.MODULE_GROUPS`; every member keeps its own module, switch and saved settings), `Preview.lua` (preview that follows the page, window docking). Aura-engine helpers shared by modules are in `Core/Engine.lua` (`XUI.Engine`).
+`Panel.lua` (window, opening, page lookup, the shared state table `O.S`), `PageHead.lua` (page header, "more" menu, Diagnostics popup), `NavBar.lua` (card chips, page filter), `Undo.lua`, `Sidebar.lua` (search, class folding, entries), `ModuleGroups.lua` (modules that share one sidebar entry and page, `O.MODULE_GROUPS`; every member keeps its own module, switch and saved settings), `Preview.lua` (preview that follows the page, window docking). Aura-engine helpers shared by modules are in `Core/Engine.lua` (`XUI.Engine`).

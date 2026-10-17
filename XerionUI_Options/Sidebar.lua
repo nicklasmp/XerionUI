@@ -87,7 +87,7 @@ local function SidebarItem(i)
 			if self.key == S.currentKey then S.expandedClass[self.classToken] = not S.expandedClass[self.classToken]
 			else S.expandedClass[self.classToken] = true end
 		end
-		O:Open(self.key)
+		O:Open(self.key, self.focus)
 	end)
 	itemPool[i] = b
 	return b
@@ -138,7 +138,7 @@ end
 
 -- Paints one row from its state: open page, hover, on/off, health.
 function O:PaintItem(b, full)
-	local selected = b.key == S.currentKey
+	local selected = b.key == S.currentKey and not b.focus
 	local hot = IsHot(b)
 	local m = b.module
 	local ar, ag, ab = O:Accent()
@@ -176,12 +176,16 @@ function O:PaintItem(b, full)
 end
 
 -- Lower-case words the search matches a module against: its name, category,
--- description and the labels of its options.
-local searchIndex = {}
+-- description and the labels of its options. settingsIndex keeps the options
+-- themselves ({ card, label } per setting) so a hit can open the setting.
+local searchIndex, settingsIndex = {}, {}
+local SETTING_TYPES = { toggle = true, slider = true, dropdown = true, color = true, input = true, keybind = true }
 local ModuleWords
 function ModuleWords(m)
 	if searchIndex[m.key] then return searchIndex[m.key] end
 	local words = { m.name:lower(), (m.desc or ""):lower() }
+	local settings = {}
+	settingsIndex[m.key] = settings
 	if m.isGroup then
 		for _, member in ipairs(m.members) do words[#words + 1] = ModuleWords(member) end
 	end
@@ -194,6 +198,9 @@ function ModuleWords(m)
 				for _, d in ipairs(card.items or {}) do
 					local label = d.label or d.text
 					if type(label) == "string" then words[#words + 1] = label:lower() end
+					if SETTING_TYPES[d.type] and type(d.label) == "string" then
+						settings[#settings + 1] = { card = card.title, label = d.label }
+					end
 				end
 			end
 		end
@@ -239,14 +246,15 @@ function O:RefreshSidebar()
 	local y, ni, nh = 4, 0, 0
 	wipe(S.entries)
 	-- a new search starts from a fresh index, so option labels that changed show up
-	if S.searchText == "" then wipe(searchIndex) end
+	if S.searchText == "" then wipe(searchIndex) wipe(settingsIndex) end
 
 	-- mode: "page" (top-level text), "module" (on a guide line) or "group" (a class)
-	local function AddItem(key, title, m, mode, indent, classToken)
+	local function AddItem(key, title, m, mode, indent, classToken, focus)
 		ni = ni + 1
 		indent = indent or 0
 		local b = SidebarItem(ni)
 		b.key, b.module, b.classToken, b.mode = key, m, classToken, mode
+		b.focus = focus
 		b.dot = nil
 		b:ClearAllPoints()
 		b:SetPoint("TOPLEFT", child, "TOPLEFT", 0, -y)
@@ -262,7 +270,7 @@ function O:RefreshSidebar()
 		b.chev:Hide()
 		b.sw:SetShown(m ~= nil)
 		b.count:SetText("")
-		if mode == "module" then
+		if mode == "module" or mode == "setting" then
 			local gx = GUIDE_X + indent
 			b.guide:SetPoint("TOPLEFT", gx, 0)
 			b.guide:SetPoint("BOTTOMLEFT", gx, 0)
@@ -273,8 +281,8 @@ function O:RefreshSidebar()
 			b.sel:SetPoint("BOTTOMRIGHT")
 			b.bar:SetPoint("TOPLEFT", gx - 1, 0)
 			b.bar:SetPoint("BOTTOMLEFT", gx - 1, 0)
-			b.text:SetPoint("LEFT", gx + 18, 0)
-			b.text:SetPoint("RIGHT", -42, 0)
+			b.text:SetPoint("LEFT", gx + (mode == "setting" and 30 or 18), 0)
+			b.text:SetPoint("RIGHT", mode == "setting" and -10 or -42, 0)
 		else
 			b.hl:SetAllPoints()
 			b.sel:SetAllPoints()
@@ -293,8 +301,23 @@ function O:RefreshSidebar()
 		b.text:SetText(m and m.untested and (title .. "  |cff777777untested|r") or title)
 		b:Show()
 		O:PaintItem(b, true)
-		S.entries[#S.entries + 1] = key
+		if mode ~= "setting" then S.entries[#S.entries + 1] = key end
 		y = y + (mode == "group" and HEAD_H or ITEM_H)
+	end
+
+	-- while searching: the settings of a module that match, under its row. A click
+	-- opens the page, the card that holds the setting, and flashes it.
+	local function AddHits(m)
+		if S.searchText == "" or m.isGroup then return end
+		ModuleWords(m)
+		local n = 0
+		for _, s in ipairs(settingsIndex[m.key] or {}) do
+			if Matches(((s.card or "") .. " " .. s.label):lower()) then
+				n = n + 1
+				if n > 4 then break end
+				AddItem(m.key, (s.card and (s.card .. " / ") or "") .. s.label, nil, "setting", STEP, nil, s)
+			end
+		end
 	end
 
 	-- a foldable group heading: chevron, name, "3/8" modules switched on.
@@ -366,7 +389,10 @@ function O:RefreshSidebar()
 					if S.expandedClass[c.token] == nil then S.expandedClass[c.token] = (c.token == XUI.playerClass) end
 					AddItem(ce.entry.key, c.name, nil, "group", STEP, c.token)
 					if S.searchText ~= "" or S.expandedClass[c.token] then
-						for _, s in ipairs(rows) do AddItem(s.entry.key, s.name, s.entry, "module", STEP) end
+						for _, s in ipairs(rows) do
+								AddItem(s.entry.key, s.name, s.entry, "module", STEP)
+								AddHits(s.entry)
+							end
 					end
 				end
 			end
@@ -419,11 +445,17 @@ function O:RefreshSidebar()
 								O:RefreshSidebar()
 							end }, nil, STEP)
 							if not dFolded then
-								for _, m in ipairs(byDungeon[d]) do AddItem(m.key, m.name, m, "module", STEP) end
+								for _, m in ipairs(byDungeon[d]) do
+										AddItem(m.key, m.name, m, "module", STEP)
+										AddHits(m)
+									end
 							end
 						end
 					else
-						for _, m in ipairs(list) do AddItem(m.key, m.name, m, "module") end
+						for _, m in ipairs(list) do
+								AddItem(m.key, m.name, m, "module")
+								AddHits(m)
+							end
 					end
 				end
 			end

@@ -21,6 +21,7 @@ local Controls = O.Controls
 local LABEL_H = 16
 local FIELD_H = 26
 local FIELD_W = 250 -- the control half of a row: dropdown, text box, slider
+local BOX_W = 56    -- the number box beside a slider
 
 
 --------------------------------------------------------------------------------
@@ -31,13 +32,18 @@ function O:GetValue(desc, ctx)
 	if desc.path then return GetPath(ctx:Root(), desc.path) end
 end
 
-function O:SetValue(desc, ctx, value)
+-- noUndo: the write is an undo itself (or otherwise not worth remembering)
+function O:SetValue(desc, ctx, value, noUndo)
+	-- a tab or other navigation control is not a setting; nothing to take back
+	if desc.noUndo or desc.type == "tabs" then noUndo = true end
+	local before = not noUndo and O.Undo and O.Undo.Capture(desc, ctx) or nil
 	if desc.set then
 		desc.set(ctx, value)
 	elseif desc.path then
 		SetPath(ctx:Root(), desc.path, value)
 	end
 	ctx:Changed(desc.path, value, desc)
+	if before then O.Undo.Push(desc, ctx, before, value) end
 end
 
 local function IsDisabled(desc, ctx)
@@ -159,20 +165,22 @@ function Controls.slider(parent, desc, ctx)
 	f.label:SetText(Resolve(desc.label, ctx) or "")
 	f.label:SetPoint("LEFT")
 
+	-- the number is a real field: dark, outlined, accent outline while typing
 	local box = CreateFrame("EditBox", nil, f)
-	box:SetSize(48, 20)
+	box:SetSize(BOX_W, 22)
 	box:SetPoint("RIGHT")
 	box:SetAutoFocus(false)
 	box:SetFont(O:FontPath(), O.SIZE.text, "")
 	box:SetTextColor(O:Color("text"))
-	box:SetJustifyH("RIGHT")
-	box:SetTextInsets(0, 2, 0, 0)
+	box:SetJustifyH("CENTER")
+	box:SetTextInsets(4, 4, 0, 0)
+	O:Skin(box, "field", "fieldLine")
 	f.box = box
 
 	local s = CreateFrame("Slider", nil, f)
 	s:SetOrientation("HORIZONTAL")
 	s:SetPoint("RIGHT", box, "LEFT", -10, 0)
-	s:SetSize(FIELD_W - 56, 16) -- box (48) + gap (8): ends level with the dropdowns
+	s:SetSize(FIELD_W - BOX_W - 8, 16) -- box + gap (8): ends level with the dropdowns
 	f.label:SetPoint("RIGHT", s, "LEFT", -12, 0)
 	s:SetHitRectInsets(0, 0, -4, -4)
 	s:SetMinMaxValues(desc.min, desc.max)
@@ -226,7 +234,13 @@ function Controls.slider(parent, desc, ctx)
 	box:SetScript("OnEscapePressed", function() box:ClearFocus() f:Refresh() end)
 	box:SetScript("OnEditFocusLost", function() f:Refresh() end)
 	-- selected on entry, so typing replaces the number
-	box:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+	box:SetScript("OnEditFocusGained", function(self)
+		O:SetBorderColor(self, O:Accent())
+		self:HighlightText()
+	end)
+	box:HookScript("OnEditFocusLost", function(self) O:SetBorderColor(self, O:Color("fieldLine")) end)
+	box:SetScript("OnEnter", function(self) if not f.disabled and not self:HasFocus() then O:SetSkinColor(self, "fieldHover") end end)
+	box:SetScript("OnLeave", function(self) O:SetSkinColor(self, "field") end)
 	AddTooltip(s, desc)
 
 	function f:Refresh()
@@ -259,7 +273,7 @@ end
 local function Field(f)
 	local b = CreateFrame("Button", nil, f)
 	b:SetHeight(FIELD_H)
-	O:Skin(b, "control", "controlLine")
+	O:Skin(b, "field", "fieldLine")
 	b.text = O:Text(b, O.SIZE.text, "text")
 	b.text:SetPoint("LEFT", 8, 0)
 	b.text:SetPoint("RIGHT", -24, 0)
@@ -267,9 +281,9 @@ local function Field(f)
 	b.arrow:SetPoint("RIGHT", -7, 0)
 	b:SetScript("OnEnter", function(self)
 		if f.disabled then return end
-		O:SetSkinColor(self, "controlHover")
+		O:SetSkinColor(self, "fieldHover")
 	end)
-	b:SetScript("OnLeave", function(self) O:SetSkinColor(self, "control") end)
+	b:SetScript("OnLeave", function(self) O:SetSkinColor(self, "field") end)
 	return b
 end
 
@@ -420,7 +434,7 @@ function Controls.input(parent, desc, ctx)
 		holder:SetSize(FIELD_W, FIELD_H)
 		f.label:SetPoint("RIGHT", holder, "LEFT", -12, 0)
 	end
-	O:Skin(holder, "control", "controlLine")
+	O:Skin(holder, "field", "fieldLine")
 
 	local box
 	if multiline then
@@ -465,7 +479,7 @@ function Controls.input(parent, desc, ctx)
 		O:SetBorderColor(holder, r, g, b, 1)
 		if desc.selectAll then box:HighlightText() end
 	end)
-	box:HookScript("OnEditFocusLost", function() O:SetBorderColor(holder, O:Color("controlLine")) end)
+	box:HookScript("OnEditFocusLost", function() O:SetBorderColor(holder, O:Color("fieldLine")) end)
 	AddTooltip(holder, desc)
 
 	function f:Refresh()
@@ -796,7 +810,7 @@ function Controls.spellList(parent, desc, ctx)
 			r.label:SetFont(O:FontPath(), O.SIZE.small, "")
 			r.label:SetTextColor(O:Color("text"))
 			r.label:SetTextInsets(6, 6, 0, 0)
-			O:Skin(r.label, "control", "controlLine")
+			O:Skin(r.label, "field", "fieldLine")
 			local function commit()
 				local labels = GetPath(ctx:Root(), desc.labels)
 				local t = (r.label:GetText() or ""):match("^%s*(.-)%s*$")
@@ -849,7 +863,7 @@ function Controls.spellList(parent, desc, ctx)
 	f.add:SetFont(O:FontPath(), O.SIZE.text, "")
 	f.add:SetTextColor(O:Color("text"))
 	f.add:SetTextInsets(8, 8, 0, 0)
-	O:Skin(f.add, "control", "controlLine")
+	O:Skin(f.add, "field", "fieldLine")
 	f.hint = O:Text(f.add, O.SIZE.text, "faint")
 	f.hint:SetPoint("LEFT", 8, 0)
 	f.hint:SetText("Spell ID")

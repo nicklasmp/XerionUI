@@ -11,6 +11,7 @@
 # out of date refuses to load unless "Load out of date AddOns" is ticked.
 
 Theme.lua
+Undo.lua
 Controls.lua
 Dropdown.lua
 Page.lua
@@ -19,6 +20,7 @@ Classes.lua
 ModuleGroups.lua
 Panel.lua
 PageHead.lua
+NavBar.lua
 Sidebar.lua
 Preview.lua
 ChangelogData.lua

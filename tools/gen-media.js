@@ -109,6 +109,9 @@ function writeTGA(name, c, color) {
 // search: magnifier
 { const c = canvas(32); fill(c, ring(13.5, 13.5, 7.5, 2.6)); fill(c, line(19, 19, 26, 26, 3)); writeTGA('search', c); }
 
+// dots: three dots in a row ("more" menu)
+{ const c = canvas(32); fill(c, disc(8, 16, 2.6)); fill(c, disc(16, 16, 2.6)); fill(c, disc(24, 16, 2.6)); writeTGA('dots', c); }
+
 // reset: circular arrow
 {
   const c = canvas(32);

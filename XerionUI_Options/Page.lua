@@ -21,7 +21,7 @@ local CARD_GAP = 12
 local ROW_H = 38     -- a control row
 local STACK_PAD = 10 -- above and below a stacked control
 local HEAD_H = 28    -- a sub-heading band inside a card
-local MAX_CARD_W = 720
+local MAX_CARD_W = 900
 
 -- How tightly the pages are packed: compact, normal or roomy.
 local DENSITY = {
@@ -156,7 +156,7 @@ Page.__index = Page
 
 -- spec: { build = function(ctx) return cards end, ctx = context }
 function O:CreatePage(parent, spec)
-	local page = setmetatable({ spec = spec, ctx = spec.ctx, cards = {} }, Page)
+	local page = setmetatable({ spec = spec, ctx = spec.ctx, cards = {}, filter = "" }, Page)
 	page.ctx.page = page
 	page.scroll, page.child = self:CreateScroll(parent)
 	page.scroll:SetAllPoints(parent)
@@ -201,12 +201,15 @@ local function BuildCard(page, spec)
 	return card
 end
 
--- A long page is split with tabs, one per card title, so the level under a
--- component never reads as one endless list. Pages that bring their own tabs
--- set spec.tabbed; cards without a title (notices, switches) stay on every tab.
+-- A page with several titled cards gets a row of chips in the bar above it (see
+-- NavBar.lua): from AUTO_TABS_FROM cards on, the chips switch which card is
+-- shown, so a long page never reads as one endless list; with 2-3 cards they
+-- scroll to the card. Pages that bring their own tabs set spec.tabbed; cards
+-- without a title (notices, switches) stay on every tab. While a filter is typed,
+-- every card is searched, whatever tab is open.
 local AUTO_TABS_FROM = 4
 
-local function AutoTabs(specs)
+local function BuildNav(page, specs)
 	local order, seen = {}, {}
 	for _, s in ipairs(specs) do
 		if s.title and not seen[s.title] then
@@ -214,33 +217,34 @@ local function AutoTabs(specs)
 			order[#order + 1] = { value = s.title, text = s.title }
 		end
 	end
-	if #order < AUTO_TABS_FROM then return specs end
+	if #order < 2 then return end
+	if #order < AUTO_TABS_FROM then
+		page.nav = { mode = "scroll", values = order, set = function(v) page:ScrollToCard(v) end }
+		return
+	end
 	local state = { tab = order[1].value }
 	for _, s in ipairs(specs) do
 		local title, own = s.title, s.hidden
 		if title then
 			s.hidden = function(ctx)
-				if state.tab ~= title then return true end
+				if state.tab ~= title and not (ctx.page and ctx.page.filter ~= "") then return true end
 				if type(own) == "function" then return own(ctx) and true or false end
 				return own and true or false
 			end
 		end
 	end
-	-- the tab bar goes below the cards that lead the page without a title
-	local at = 1
-	while specs[at] and not specs[at].title do at = at + 1 end
-	table.insert(specs, at, O.Card(nil, {
-		{ type = "tabs", values = order,
-			get = function() return state.tab end, set = function(_, v) state.tab = v end },
-	}))
-	return specs
+	page.nav = {
+		mode = "tab", values = order,
+		get = function() return state.tab end,
+		set = function(v) state.tab = v page:Refresh() end,
+	}
 end
 
 function Page:Build()
 	if self.built then return end
 	self.built = true
 	local specs = self.spec.build(self.ctx) or {}
-	if not self.spec.tabbed then specs = AutoTabs(specs) end
+	if not self.spec.tabbed then BuildNav(self, specs) end
 	for _, spec in ipairs(specs) do
 		self.cards[#self.cards + 1] = BuildCard(self, spec)
 	end
@@ -252,6 +256,36 @@ local function Hidden(desc, ctx)
 	return h and true or false
 end
 
+-- The lower-case text a filter is matched against for one control.
+local function ControlText(control)
+	local d = control.desc
+	if d.type == "description" or d.type == "spacer" or d.type == "tabs" then return "" end
+	local parts = {}
+	for _, v in ipairs({ d.label, d.type == "button" and d.text or nil, d.tip }) do
+		v = O.ResolveValue(v, control.ctx)
+		if type(v) == "string" then parts[#parts + 1] = v:lower() end
+	end
+	return table.concat(parts, " ")
+end
+
+local function HasAllWords(text, words)
+	for _, w in ipairs(words) do
+		if not text:find(w, 1, true) then return false end
+	end
+	return true
+end
+
+-- Sets what the page is filtered by ("" shows everything again).
+function Page:SetFilter(text)
+	text = (text or ""):lower():match("^%s*(.-)%s*$")
+	if text == self.filter then return end
+	self.filter = text
+	self.words = {}
+	for w in text:gmatch("%S+") do self.words[#self.words + 1] = w end
+	self.scroll:SetVerticalScroll(0)
+	self:Layout()
+end
+
 function Page:Layout()
 	local width = self.scroll:GetWidth()
 	if not width or width <= 1 then return end
@@ -259,9 +293,29 @@ function Page:Layout()
 	local x0 = math.floor((width - 8 - cardW) / 2)
 	local inner = cardW - CARD_PAD * 2
 	local y = PAGE_PAD
+	local filtering, matches = self.filter ~= "", 0
 	for _, card in ipairs(self.cards) do
 		local spec, f = card.spec, card.frame
-		if Hidden(spec, card.ctx) then
+		-- while filtering: which controls of the card match, and does the card show
+		local pass, show = nil, not Hidden(spec, card.ctx)
+		if show and filtering then
+			pass = {}
+			local titleHit = spec.title and HasAllWords(spec.title:lower(), self.words)
+			local any, keep = false, false
+			for _, control in ipairs(card.items) do
+				local d = control.desc
+				if not Hidden(d, card.ctx) then
+					if d.type == "tabs" and not spec.title then
+						pass[control] = true keep = true -- the selector of a page with sub-pages stays
+					elseif titleHit or HasAllWords(ControlText(control), self.words) then
+						pass[control] = true any = true
+					end
+				end
+			end
+			show = any or keep
+			if any then matches = matches + 1 end
+		end
+		if not show then
 			f:Hide()
 			if card.head then card.head:Hide() end
 		else
@@ -276,7 +330,7 @@ function Page:Layout()
 			for _, control in ipairs(card.items) do
 				local desc = control.desc
 				local kind = desc.type
-				if Hidden(desc, card.ctx) or kind == "spacer" then
+				if Hidden(desc, card.ctx) or kind == "spacer" or (pass and not pass[control]) then
 					control:Hide()
 				else
 					control:SetWidth(inner)
@@ -323,8 +377,85 @@ function Page:Layout()
 			y = y + f:GetHeight() + CARD_GAP
 		end
 	end
+	if filtering and matches == 0 then
+		if not self.empty then
+			self.empty = O:Text(self.child, O.SIZE.text, "muted")
+			self.empty:SetPoint("TOPLEFT", self.child, "TOPLEFT", PAGE_PAD + 4, -PAGE_PAD - 4)
+		end
+		self.empty:SetText(("No settings on this page match \"%s\"."):format(self.filter))
+		self.empty:Show()
+		y = y + 40
+	elseif self.empty then
+		self.empty:Hide()
+	end
 	self.child:SetHeight(y + PAGE_PAD)
 	self.scroll:UpdateBar()
+end
+
+-- Scrolls so the card titled `title` is at the top of the page.
+function Page:ScrollToCard(title)
+	for _, card in ipairs(self.cards) do
+		if card.spec.title == title and card.frame:IsShown() then
+			local anchor = card.head or card.frame
+			local top, childTop = anchor:GetTop(), self.child:GetTop()
+			if top and childTop then
+				local range = self.scroll:GetVerticalScrollRange()
+				self.scroll:SetVerticalScroll(math.max(0, math.min(range, childTop - top - 8)))
+				self.scroll:UpdateBar()
+			end
+			return true
+		end
+	end
+	return false
+end
+
+-- A short accent glow on a control, so a jump from the search shows where it landed.
+local function Flash(control)
+	if not control.flash then
+		local t = O:Rect(control, nil, "BACKGROUND", 3)
+		t:SetPoint("TOPLEFT", -8, 4)
+		t:SetPoint("BOTTOMRIGHT", 8, -4)
+		local ag = t:CreateAnimationGroup()
+		local fade = ag:CreateAnimation("Alpha")
+		fade:SetFromAlpha(1)
+		fade:SetToAlpha(0)
+		fade:SetDuration(1.6)
+		ag:SetScript("OnFinished", function() t:Hide() end)
+		control.flash, control.flashAnim = t, ag
+	end
+	local r, g, b = O:Accent()
+	control.flash:SetVertexColor(r, g, b, 0.28)
+	control.flash:Show()
+	control.flashAnim:Stop()
+	control.flashAnim:Play()
+end
+
+-- Opens the card and scrolls to the setting with this label (from a search hit):
+-- focus = { card = "Border", label = "Thickness (pixels)" }. False if not found.
+function Page:Focus(focus)
+	if not (self.built and focus and focus.label) then return false end
+	self:SetFilter("")
+	if self.nav and self.nav.mode == "tab" and focus.card then self.nav.set(focus.card) end
+	self:Refresh()
+	local want = focus.label:lower()
+	for _, card in ipairs(self.cards) do
+		if card.frame:IsShown() and (focus.card == nil or card.spec.title == focus.card) then
+			for _, control in ipairs(card.items) do
+				local label = O.ResolveValue(control.desc.label, control.ctx)
+				if control:IsShown() and type(label) == "string" and label:lower() == want then
+					local top, childTop = control:GetTop(), self.child:GetTop()
+					if top and childTop then
+						local range = self.scroll:GetVerticalScrollRange()
+						self.scroll:SetVerticalScroll(math.max(0, math.min(range, childTop - top - 90)))
+						self.scroll:UpdateBar()
+					end
+					Flash(control)
+					return true
+				end
+			end
+		end
+	end
+	return false
 end
 
 function Page:Refresh()
@@ -341,6 +472,7 @@ function Page:Show()
 	self:Build()
 	self.scroll:Show()
 	self:Refresh()
+	if O.RefreshNavBar then O:RefreshNavBar(self) end
 	-- the scroll frame may only have its size on the next frame
 	C_Timer.After(0, function() if self.scroll:IsShown() then self:Layout() end end)
 end
@@ -357,6 +489,7 @@ function Page:Rebuild()
 		if card.head then card.head:Hide() card.head:SetParent(nil) end
 	end
 	wipe(self.cards)
+	self.nav = nil
 	self.built = false
 	if self.scroll:IsShown() then self:Show() end
 end
