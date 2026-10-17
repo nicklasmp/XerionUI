@@ -24,6 +24,27 @@ function O.CreatePageHead(parent)
 	f.icon:SetPoint("BOTTOMRIGHT", -1, 1)
 	f.iconBorder = XUI.Style:Border(f.iconFrame, 1)
 
+	-- where the page sits in the sidebar; a click shows it there
+	f.crumb = CreateFrame("Button", nil, f)
+	f.crumb:SetHeight(14)
+	f.crumb:SetPoint("TOPLEFT", f, "TOPLEFT", 20, -4)
+	f.crumb.text = O:Text(f.crumb, O.SIZE.small, "faint")
+	f.crumb.text:SetPoint("LEFT", 4, 0)
+	f.crumb:SetScript("OnEnter", function(self)
+		self.text:SetTextColor(O:Color("label"))
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+		GameTooltip:SetText("Show in sidebar")
+		GameTooltip:Show()
+	end)
+	f.crumb:SetScript("OnLeave", function(self) self.text:SetTextColor(O:Color("faint")) GameTooltip:Hide() end)
+	f.crumb:SetScript("OnClick", function()
+		if not S.currentKey then return end
+		O:Unfold(S.currentKey)
+		O:RefreshSidebar()
+		O:RevealSelected()
+	end)
+	f.crumb:Hide()
+
 	f.title = O:Text(f, O.SIZE.title, "text")
 	f.title:SetPoint("TOPLEFT", f.iconFrame, "TOPRIGHT", 14, 0)
 	f.desc = O:Text(f, O.SIZE.text, "muted")
@@ -138,11 +159,49 @@ function O.CreatePageHead(parent)
 	end
 	f:SetScript("OnSizeChanged", function() f.FitTexts() end)
 
+	-- a text cut short by the controls shows in full on hover
+	f.textHit = CreateFrame("Button", nil, f)
+	f.textHit:SetPoint("TOPLEFT", f.title, "TOPLEFT")
+	f.textHit:SetPoint("BOTTOMRIGHT", f.status, "BOTTOMRIGHT")
+	f.textHit:SetScript("OnEnter", function(self)
+		local cut = false
+		for _, fs in ipairs({ f.title, f.desc, f.status }) do
+			if fs.IsTruncated and fs:IsTruncated() then cut = true end
+		end
+		if not cut then return end
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+		GameTooltip:SetText(f.title:GetText() or "", 1, 1, 1)
+		if (f.desc:GetText() or "") ~= "" then GameTooltip:AddLine(f.desc:GetText(), 0.75, 0.75, 0.75, true) end
+		if (f.status:GetText() or "") ~= "" then GameTooltip:AddLine(f.status:GetText(), 0.6, 0.6, 0.6, true) end
+		GameTooltip:Show()
+	end)
+	f.textHit:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
 	f.line = O:Rect(f, "line", "ARTWORK")
 	f.line:SetHeight(1)
 	f.line:SetPoint("BOTTOMLEFT")
 	f.line:SetPoint("BOTTOMRIGHT")
 	return f
+end
+
+-- "Category / Dungeon" or "Classes / Warrior" for the open page; nil for the
+-- general pages, which sit at the top of the sidebar on their own.
+local function CrumbFor(key)
+	local token = key:match("^class:(%u+)$") or key:match("^spec:(%u+):")
+	if token then
+		for _, ce in ipairs(O.classEntries) do
+			if ce.class.token == token then
+				return key:find("^spec:") and ("Classes / " .. ce.class.name) or "Classes"
+			end
+		end
+		return "Classes"
+	end
+	local e = XUI:GetModule(key) or O.groupByKey[key]
+	if not (e and e.category) then return nil end
+	local name = e.category
+	for _, c in ipairs(XUI.CATEGORIES) do if c.key == e.category then name = c.name end end
+	if e.category == "dungeon" and e.dungeon then name = name .. " / " .. e.dungeon end
+	return name
 end
 
 function O:RefreshPageHead()
@@ -172,6 +231,12 @@ function O:RefreshPageHead()
 	f.FitTexts()
 	C_Timer.After(0, f.FitTexts) -- anchors above resolve a frame later
 	f.status:SetText("")
+	local crumb = S.currentKey and CrumbFor(S.currentKey)
+	f.crumb:SetShown(crumb ~= nil)
+	if crumb then
+		f.crumb.text:SetText(crumb)
+		f.crumb:SetWidth(f.crumb.text:GetStringWidth() + 8)
+	end
 	if m then
 		f.icon:SetTexture(XUI.ModuleIcon(m))
 		f.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)

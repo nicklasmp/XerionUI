@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.32.0", date = "2026-10-17", notes = {
+		"Breadcrumb above the page title shows where a page sits and reveals it in the sidebar",
+		"Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search",
+		"All/Active/Inactive show counts; fold-all button; back/forward (header buttons, Alt+Left/Right)",
+		"Page filter box looks different from the sidebar search; header text shows in full on hover when cut; Undo button keeps its place; untested modules marked with * and a tooltip",
+	} },
 	{ version = "2.31.4", date = "2026-10-17", notes = {
 		"Opening a page from a link or search hit unfolds its group and scrolls it into view",
 		"Sidebar keeps its order while you switch modules; it settles when the pointer leaves",
@@ -54,8 +60,5 @@ O.CHANGELOG = {
 		"Options: filter box and card chips above every page; the sidebar search lists matching settings and jumps to them",
 		"Options: Undo button in the header, a more menu for Diagnostics",
 		"Options: clearer value fields (dropdowns, number and text boxes) and tooltips on the shared style rows",
-	} },
-	{ version = "2.29.1", date = "2026-10-17", notes = {
-		"Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown",
 	} },
 }

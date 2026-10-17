@@ -243,6 +243,14 @@ local function CreateWindow()
 	end)
 	undo:HookScript("OnLeave", function() GameTooltip:Hide() end)
 	S.undoButton = undo
+	-- back / forward through the pages you opened (Alt+Left / Alt+Right)
+	local forward = O:IconButton(header, "chevron", 30, "Forward", function() O:GoHistory(1) end)
+	forward:SetPoint("RIGHT", undo, "LEFT", -4, 0)
+	forward.icon:SetRotation(math.rad(90))
+	local back = O:IconButton(header, "chevron", 30, "Back", function() O:GoHistory(-1) end)
+	back:SetPoint("RIGHT", forward, "LEFT", -4, 0)
+	back.icon:SetRotation(math.rad(-90))
+	S.backButton, S.forwardButton = back, forward
 	O.Undo.OnChange(function() O:RefreshUndo() end)
 	O:RefreshUndo()
 	-- accent dot by the version number while there are patch notes you have not opened
@@ -270,7 +278,7 @@ local function CreateWindow()
 	local search = CreateFrame("EditBox", nil, side)
 	search:SetHeight(28)
 	search:SetPoint("TOPLEFT", 12, -12)
-	search:SetPoint("TOPRIGHT", -12, -12)
+	search:SetPoint("TOPRIGHT", -44, -12)
 	search:SetAutoFocus(false)
 	search:SetFont(O:FontPath(), O.SIZE.text, "")
 	search:SetTextColor(O:Color("text"))
@@ -284,6 +292,7 @@ local function CreateWindow()
 	search:SetScript("OnTextChanged", function(self)
 		S.searchText = (self:GetText() or ""):lower()
 		S.resortSidebar = true
+		S.cursor = 1
 		hint:SetShown(S.searchText == "")
 		O:RefreshSidebar()
 	end)
@@ -292,8 +301,16 @@ local function CreateWindow()
 	end)
 	search:SetScript("OnEnterPressed", function(self)
 		self:ClearFocus()
-		if S.entries[1] then O:Open(S.entries[1]) end
+		local key = S.entries[S.cursor or 1]
+		if key then O:Open(key) end
 	end)
+	search:SetScript("OnArrowPressed", function(_, key)
+		if key == "DOWN" then O:MoveSearchCursor(1) elseif key == "UP" then O:MoveSearchCursor(-1) end
+	end)
+	S.searchBox = search
+
+	local foldAll = O:IconButton(side, "layers", 28, "Fold or unfold all groups", function() O:ToggleFoldAll() end)
+	foldAll:SetPoint("TOPRIGHT", -12, -12)
 
 	-- filter chips: all modules, only the ones switched on, or only the ones off
 	local chips = {}
@@ -324,6 +341,7 @@ local function CreateWindow()
 		c.text = O:Text(c, O.SIZE.small, "muted")
 		c.text:SetPoint("CENTER", 0, 1)
 		c.text:SetText(def[1])
+		c.label = def[1]
 		c.filter = def[2]
 		c:SetScript("OnClick", function(self)
 			XUI.DB.global.panel.filter = self.filter
@@ -333,6 +351,7 @@ local function CreateWindow()
 		end)
 		chips[i] = c
 	end
+	S.filterChips = chips
 	-- the three tabs share the sidebar width
 	local function LayoutChips()
 		local tabW = (side:GetWidth() - 24) / 3
@@ -361,6 +380,23 @@ local function CreateWindow()
 	S.navbar = O.CreateNavBar(S.frame)
 	S.navbar:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, -PAGEHEAD_H)
 	S.navbar:SetPoint("TOPRIGHT", 0, -(HEADER_H + PAGEHEAD_H))
+
+	-- Ctrl+F jumps to the sidebar search, Alt+Left / Alt+Right go back / forward;
+	-- every other key still reaches the game
+	S.frame:EnableKeyboard(true)
+	S.frame:SetPropagateKeyboardInput(true)
+	S.frame:SetScript("OnKeyDown", function(self, key)
+		if key == "F" and IsControlKeyDown() then
+			self:SetPropagateKeyboardInput(false)
+			S.searchBox:SetFocus()
+			S.searchBox:HighlightText()
+		elseif IsAltKeyDown() and (key == "LEFT" or key == "RIGHT") then
+			self:SetPropagateKeyboardInput(false)
+			O:GoHistory(key == "LEFT" and -1 or 1)
+		else
+			self:SetPropagateKeyboardInput(true)
+		end
+	end)
 
 	-- corner grip: drag to resize; the open page lays itself out again
 	local relayout = XUI.Coalesce(function()
@@ -475,9 +511,9 @@ function O:RefreshNotesButton()
 	b.dot:SetVertexColor(O:Accent())
 end
 
--- The Undo button in the header is only there while there is something to undo.
+-- The Undo button in the header is dimmed while there is nothing to undo.
 function O:RefreshUndo()
-	if S.undoButton then S.undoButton:SetShown(O.Undo.Count() > 0) end
+	if S.undoButton then S.undoButton:SetAlpha(O.Undo.Count() > 0 and 1 or 0.35) end
 end
 
 -- Puts the window back at the default size (General > Window).
@@ -508,6 +544,25 @@ function O:Unfold(key)
 	end
 end
 
+S.history = S.history or {}
+
+function O:RefreshHistoryButtons()
+	local pos = S.historyPos or 0
+	if S.backButton then S.backButton:SetAlpha(pos > 1 and 1 or 0.35) end
+	if S.forwardButton then S.forwardButton:SetAlpha(pos < #S.history and 1 or 0.35) end
+end
+
+-- Steps through the pages you opened: -1 back, 1 forward.
+function O:GoHistory(step)
+	local target = (S.historyPos or 0) + step
+	local key = S.history[target]
+	if not key then return end
+	S.historyPos = target
+	S.navigating = true
+	O:Open(key)
+	S.navigating = false
+end
+
 function O:Open(key, focus)
 	if not S.frame then CreateWindow() end
 	key = key or S.currentKey or (O.systemPages[1] and O.systemPages[1].key)
@@ -519,7 +574,16 @@ function O:Open(key, focus)
 		if not found then key = O.systemPages[1].key end
 	end
 	local changed = S.currentKey ~= key
-	if changed then O:Unfold(key) end
+	if changed then
+		O:Unfold(key)
+		if not S.navigating then
+			local hist = S.history
+			for i = #hist, (S.historyPos or 0) + 1, -1 do hist[i] = nil end
+			if hist[#hist] ~= key then hist[#hist + 1] = key end
+			if #hist > 50 then table.remove(hist, 1) end
+			S.historyPos = #hist
+		end
+	end
 	if S.currentKey and S.pages[S.currentKey] and S.currentKey ~= key then S.pages[S.currentKey]:Hide() end
 	S.currentKey = key
 	if key == "changelog" then
@@ -532,6 +596,7 @@ function O:Open(key, focus)
 	O.SyncAutoPreview(key)
 	S.UpdateDockSoon()
 	O:RefreshSidebar()
+	O:RefreshHistoryButtons()
 	if changed then O:RevealSelected() end
 	O:RefreshPageHead()
 	local page = GetPage(key)

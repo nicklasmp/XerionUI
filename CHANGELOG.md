@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.32.0 - 2026-10-17
+- Breadcrumb above the page title shows where a page sits and reveals it in the sidebar
+- Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search
+- All/Active/Inactive show counts; fold-all button; back/forward (header buttons, Alt+Left/Right)
+- Page filter box looks different from the sidebar search; header text shows in full on hover when cut; Undo button keeps its place; untested modules marked with * and a tooltip
+
 ## 2.31.4 - 2026-10-17
 - Opening a page from a link or search hit unfolds its group and scrolls it into view
 - Sidebar keeps its order while you switch modules; it settles when the pointer leaves

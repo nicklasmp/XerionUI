@@ -80,8 +80,15 @@ local function SidebarItem(i)
 	end)
 	b.sw:SetScript("OnLeave", function() O:PaintItem(b) GameTooltip:Hide() O:SettleSidebar() end)
 
-	b:SetScript("OnEnter", function(self) O:PaintItem(self) end)
-	b:SetScript("OnLeave", function(self) O:PaintItem(self) O:SettleSidebar() end)
+	b:SetScript("OnEnter", function(self)
+		O:PaintItem(self)
+		if self.module and self.module.untested then
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetText("Untested in game")
+			GameTooltip:Show()
+		end
+	end)
+	b:SetScript("OnLeave", function(self) O:PaintItem(self) GameTooltip:Hide() O:SettleSidebar() end)
 	b:SetScript("OnClick", function(self)
 		if self.classToken then
 			-- a second click on the open class folds it
@@ -141,15 +148,17 @@ end
 function O:PaintItem(b, full)
 	local selected = b.key == S.currentKey and not b.focus
 	local hot = IsHot(b)
+	-- while searching, the row Enter would open is lit like a hovered one
+	local cursor = S.searchText ~= "" and not b.focus and b.key == S.entries[S.cursor or 1]
 	local m = b.module
 	local ar, ag, ab = O:Accent()
 	b.sel:SetShown(selected)
-	b.hl:SetShown(hot and not selected)
+	b.hl:SetShown((hot or cursor) and not selected)
 	b.bar:SetShown(selected)
 	b.bar:SetVertexColor(ar, ag, ab)
-	local color = (selected or hot) and "text" or "label"
+	local color = (selected or hot or cursor) and "text" or "label"
 	if m then
-		if not m.db.enabled and not selected then color = hot and "label" or "faint" end
+		if not m.db.enabled and not selected then color = (hot or cursor) and "label" or "faint" end
 		b.text:SetTextColor(O:Color(color))
 		-- dot colour: accent = running, amber/red = problem, ring = off
 		b.sw.hole:Hide()
@@ -263,10 +272,82 @@ local function ByStateThenName(a, b)
 	return a.name:lower() < b.name:lower()
 end
 
+-- Colours the words of the search inside a row's title.
+local function Highlight(text)
+	if S.searchText == "" or text:find("|c", 1, true) then return text end
+	local lower, marks = text:lower(), {}
+	for word in S.searchText:gmatch("%S+") do
+		local i, j = lower:find(word, 1, true)
+		if i then marks[#marks + 1] = { i, j } end
+	end
+	if #marks == 0 then return text end
+	table.sort(marks, function(a, b) return a[1] < b[1] end)
+	local merged = { marks[1] }
+	for k = 2, #marks do
+		local last = merged[#merged]
+		if marks[k][1] <= last[2] + 1 then last[2] = math.max(last[2], marks[k][2])
+		else merged[#merged + 1] = marks[k] end
+	end
+	local r, g, b = O:Accent()
+	local open = ("|cff%02x%02x%02x"):format(r * 255 + 0.5, g * 255 + 0.5, b * 255 + 0.5)
+	local out, pos = {}, 1
+	for _, m in ipairs(merged) do
+		out[#out + 1] = text:sub(pos, m[1] - 1) .. open .. text:sub(m[1], m[2]) .. "|r"
+		pos = m[2] + 1
+	end
+	out[#out + 1] = text:sub(pos)
+	return table.concat(out)
+end
+
+-- Repaints every visible row (the search cursor moved).
+function O:PaintAllItems()
+	for _, b in ipairs(itemPool) do if b:IsShown() then O:PaintItem(b) end end
+end
+
+-- Moves the search cursor (the row Enter opens) up or down the hits.
+function O:MoveSearchCursor(delta)
+	if S.searchText == "" or #S.entries == 0 then return end
+	S.cursor = math.max(1, math.min(#S.entries, (S.cursor or 1) + delta))
+	O:PaintAllItems()
+	O:RevealSelected(S.entries[S.cursor])
+end
+
+-- Counts behind the All / Active / Inactive tabs.
+function O:RefreshFilterCounts()
+	local chips = S.filterChips
+	if not chips then return end
+	local on, off = 0, 0
+	for _, m in ipairs(XUI.modules) do
+		if m:IsAvailable() then
+			if m.db.enabled then on = on + 1 else off = off + 1 end
+		end
+	end
+	local counts = { on + off, on, off }
+	local wide = (chips[1]:GetWidth() or 0) >= 70
+	for i, c in ipairs(chips) do
+		c.text:SetText(wide and ("%s |cff777777%d|r"):format(c.label, counts[i]) or c.label)
+	end
+end
+
+-- Folds every group, or unfolds them all when everything is already folded.
+function O:ToggleFoldAll()
+	local panel = XUI.DB.global.panel
+	local anyOpen = false
+	for _, cat in ipairs(XUI.CATEGORIES) do
+		if not panel[cat.key .. "Folded"] then anyOpen = true end
+	end
+	for _, cat in ipairs(XUI.CATEGORIES) do panel[cat.key .. "Folded"] = anyOpen or nil end
+	if anyOpen then
+		for token in pairs(S.expandedClass) do S.expandedClass[token] = false end
+	end
+	panel.dungeonsFolded = nil
+	O:RefreshSidebar()
+end
+
 function O:RefreshSidebar()
 	if not S.sidebar then return end
 	local child = S.sidebar.child
-	local y, ni, nh = 4, 0, 0
+	local y, ni, nh, nm = 4, 0, 0, 0
 	if S.resortSidebar or not S.sidebar:IsMouseOver() then
 		wipe(sortOn)
 		S.resortSidebar = nil
@@ -326,10 +407,11 @@ function O:RefreshSidebar()
 			end
 			b.text:SetPoint("RIGHT", -16, 0)
 		end
-		b.text:SetText(m and m.untested and (title .. "  |cff777777untested|r") or title)
+		b.text:SetText(Highlight(title) .. (m and m.untested and " |cff777777*|r" or ""))
 		b:Show()
 		O:PaintItem(b, true)
 		if mode ~= "setting" then S.entries[#S.entries + 1] = key end
+		if mode == "module" then nm = nm + 1 end
 		y = y + (mode == "group" and HEAD_H or ITEM_H)
 	end
 
@@ -342,9 +424,13 @@ function O:RefreshSidebar()
 		for _, s in ipairs(settingsIndex[m.key] or {}) do
 			if Matches(((s.card or "") .. " " .. s.label):lower()) then
 				n = n + 1
-				if n > 4 then break end
-				AddItem(m.key, (s.card and (s.card .. " / ") or "") .. s.label, nil, "setting", STEP, nil, s)
+				if n <= 4 then
+					AddItem(m.key, (s.card and (s.card .. " / ") or "") .. s.label, nil, "setting", STEP, nil, s)
+				end
 			end
+		end
+		if n > 4 then
+			AddItem(m.key, ("+%d more on this page"):format(n - 4), nil, "setting", STEP, nil, { more = true })
 		end
 	end
 
@@ -489,6 +575,33 @@ function O:RefreshSidebar()
 			end
 		end
 	end
+	-- nothing left to list: say why instead of showing a bare column
+	local empty = S.sidebar.empty
+	if not empty then
+		empty = O:Text(child, O.SIZE.small, "muted")
+		empty:SetJustifyH("LEFT")
+		empty:SetWordWrap(true)
+		S.sidebar.empty = empty
+	end
+	local message
+	if nm == 0 then
+		local filter = panel.filter
+		if S.searchText ~= "" then message = ('No modules match "%s".'):format(S.searchText)
+		elseif filter == "on" then message = "No modules are switched on."
+		elseif filter == "off" then message = "Every module is switched on." end
+	end
+	if message then
+		empty:ClearAllPoints()
+		empty:SetPoint("TOPLEFT", child, "TOPLEFT", 16, -(y + 8))
+		empty:SetWidth(math.max(60, (child:GetWidth() or 200) - 32))
+		empty:SetText(message)
+		empty:Show()
+		y = y + 48
+	else
+		empty:Hide()
+	end
+	if (S.cursor or 1) > #S.entries then S.cursor = math.max(1, #S.entries) end
+	O:RefreshFilterCounts()
 	for i = ni + 1, #itemPool do itemPool[i]:Hide() end
 	for i = nh + 1, #headPool do headPool[i]:Hide() end
 	child:SetHeight(y + 8)
@@ -497,12 +610,13 @@ end
 
 -- Scrolls the list so the open page's row is in view (after the next layout, so
 -- the scroll range already includes a group that was just unfolded).
-function O:RevealSelected()
+function O:RevealSelected(key)
+	key = key or S.currentKey
 	C_Timer.After(0, function()
 		local sf = S.sidebar
 		if not sf then return end
 		for _, b in ipairs(itemPool) do
-			if b:IsShown() and b.key == S.currentKey and not b.focus and b.top then
+			if b:IsShown() and b.key == key and not b.focus and b.top then
 				local view, cur = sf:GetHeight(), sf:GetVerticalScroll()
 				local bottom = b.top + b:GetHeight()
 				local want = cur
