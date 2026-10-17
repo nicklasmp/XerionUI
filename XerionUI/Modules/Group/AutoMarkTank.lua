@@ -62,23 +62,30 @@ local function Allowed()
 	return M.db.inParty
 end
 
+-- one unit of the Wanted scan (a named function so pcall needs no closure per unit)
+local function CollectIfWanted(unit, index, out)
+	if not UnitExists(unit) then return end
+	local role = UnitGroupRolesAssigned(unit)
+	if XUI.IsSecret(role) or role ~= "TANK" then return end
+	local current = GetRaidTargetIndex(unit)
+	if XUI.IsSecret(current) or current == index then return end
+	if current and not M.db.replace then return end
+	out[#out + 1] = unit
+end
+
 -- The tanks that need the marker.
 local function Wanted()
 	local out = {}
 	if not Allowed() then return out end
 	local index = M.db.marker
 	for _, unit in ipairs(Units()) do
-		pcall(function()
-			if not UnitExists(unit) then return end
-			local role = UnitGroupRolesAssigned(unit)
-			if XUI.IsSecret(role) or role ~= "TANK" then return end
-			local current = GetRaidTargetIndex(unit)
-			if XUI.IsSecret(current) or current == index then return end
-			if current and not M.db.replace then return end
-			out[#out + 1] = unit
-		end)
+		pcall(CollectIfWanted, unit, index, out)
 	end
 	return out
+end
+
+local function IsTank(unit)
+	return UnitExists(unit) and UnitGroupRolesAssigned(unit) == "TANK"
 end
 
 local button, label, icon, close, title
@@ -92,7 +99,7 @@ local function TankText()
 		-- preview or nothing on offer: show any tank in the group, else yourself
 		unit = "player"
 		for _, u in ipairs(Units()) do
-			local ok, isTank = pcall(function() return UnitExists(u) and UnitGroupRolesAssigned(u) == "TANK" end)
+			local ok, isTank = pcall(IsTank, u)
 			if ok and isTank == true then
 				unit = u
 				break

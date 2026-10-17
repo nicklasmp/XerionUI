@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.29.1", date = "2026-10-17", notes = {
+		"Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown",
+	} },
 	{ version = "2.29.0", date = "2026-10-17", notes = {
 		"World Markers: set the place/clear keys directly in the options with a new key bind control",
 	} },
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.23.2", date = "2026-10-16", notes = {
 		"Patch notes: back to the list view (no tabs)",
-	} },
-	{ version = "2.23.1", date = "2026-10-16", notes = {
-		"Removed the Cooldown Manager Glow Probe diagnostics module",
 	} },
 }

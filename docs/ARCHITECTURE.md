@@ -15,8 +15,9 @@ Load order matters; each file builds on the ones above it.
 
 | File | Provides |
 |---|---|
-| `Init.lua` | `XUI` table, printing, secret-value helpers (`IsSecret`, `Readable`, `Probe`), `SafeCall`, table/path/colour helpers, `Coalesce`, the internal message bus (`XUI:On/Off/Fire`), addon-load and player-info helpers |
+| `Init.lua` | `XUI` table, printing, secret-value helpers (`IsSecret`, `Readable`, `Probe`), `SafeCall`, table/path/colour helpers, `Coalesce`, `XUI.Children(frame, scratch)` (GetChildren into a reused table), the internal message bus (`XUI:On/Off/Fire`), addon-load and player-info helpers |
 | `Midnight.lua` | secret-safe questions (`Ask`), `AuraPayloadChurns`, `Restricted`/`AuraSoundsBlocked`, AuraContainer helpers, duration text formatters, `PlayerIsTank`, `KeyActive`, `ClassColor` |
+| `Inspect.lua` | `XUI.NewInspectQueue(module, try)`: the throttled NotifyInspect queue shared by Interrupts and Party CDs |
 | `Data.lua` | shared game data (interrupt spells, `Data.PlayerKick()`) |
 | `Database.lua` | `XUI.DB`: saved variables, profiles, defaults (inflate on activate, strip on logout), import/export |
 | `Media.lua` | `XUI.Media`: LibSharedMedia lookups with caching and fallbacks, sorted lists (built once per registration, shared: read only, `Media.version` bumps when they change) |

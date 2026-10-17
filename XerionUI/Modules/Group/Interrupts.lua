@@ -105,6 +105,7 @@ local obs = { total = 0, readable = 0, secret = 0, mine = 0, guessed = 0, unmatc
 -- Members and lengths
 --------------------------------------------------------------------------------
 local members = {}
+local unitByGUID = {} -- guid -> unit, rebuilt with members
 local specByGUID = {}
 
 local function Heals(spec, role)
@@ -467,9 +468,10 @@ local function StackBefore(a, b)
 	return (a.order or 0) < (b.order or 0)
 end
 
+local visibleRows = {}
 local function ShowRows()
 	table.sort(shown, StackBefore)
-	local visible = {}
+	local visible = wipe(visibleRows)
 	for _, row in ipairs(shown) do
 		if row:IsShown() then visible[#visible + 1] = row end
 	end
@@ -649,16 +651,8 @@ end
 --------------------------------------------------------------------------------
 -- Inspecting party members for their spec
 --------------------------------------------------------------------------------
-local inspectQueue = {}
-local inspectTicker
-local lastInspectAt = 0
+local inspectQ
 local QueueInspect, ScheduleRebuild
-
-local function UnitForGUID(guid)
-	for unit, m in pairs(members) do
-		if m.guid == guid then return unit end
-	end
-end
 
 local function ReadSpec(unit)
 	local CSI = C_SpecializationInfo
@@ -669,26 +663,18 @@ local function ReadSpec(unit)
 end
 
 local function StopInspects()
-	wipe(inspectQueue)
-	if inspectTicker then M:CancelTicker(inspectTicker) inspectTicker = nil end
+	if inspectQ then inspectQ:Stop() end
 	for _, m in pairs(members) do m.tries = nil end
 end
 
-local function InspectStep()
-	if #inspectQueue == 0 then
-		M:CancelTicker(inspectTicker)
-		inspectTicker = nil
-		return
-	end
-	if InspectFrame and InspectFrame:IsShown() then return end
-	if GetTime() - lastInspectAt < 2 then return end
-	local unit = table.remove(inspectQueue, 1)
+-- true keeps the unit waiting for its inspect answer
+local function TryInspect(unit, q)
 	local m = members[unit]
-	if not m or m.spec then return end
+	if not m or m.spec then return false end
 	if m.guid and specByGUID[m.guid] then
 		m.spec = specByGUID[m.guid]
 		ScheduleRebuild()
-		return
+		return false
 	end
 	m.tries = (m.tries or 0) + 1
 	if m.tries > 12 then
@@ -699,19 +685,19 @@ local function InspectStep()
 				QueueInspect(unit)
 			end
 		end)
-		return
+		return false
 	end
-	if Read(CanInspect, unit) and NotifyInspect then
-		lastInspectAt = GetTime()
-		pcall(NotifyInspect, unit)
-	end
-	inspectQueue[#inspectQueue + 1] = unit
+	if Read(CanInspect, unit) then q:Notify(unit) end
+	return true
 end
 
 QueueInspect = function(unit)
-	for _, u in ipairs(inspectQueue) do if u == unit then return end end
-	inspectQueue[#inspectQueue + 1] = unit
-	if not inspectTicker then inspectTicker = M:NewTicker(1, InspectStep) end
+	inspectQ = inspectQ or XUI.NewInspectQueue(M, TryInspect)
+	inspectQ:Add(unit)
+end
+
+local function UnitForGUID(guid)
+	return guid and unitByGUID[guid]
 end
 
 local function OnInspectReady(guid)
@@ -736,6 +722,7 @@ local function Rebuild()
 	local db = M.db
 	local old = members
 	members = {}
+	wipe(unitByGUID)
 	wipe(shown)
 	local keep = {}
 	for idx, unit in ipairs(UNITS) do
@@ -754,6 +741,7 @@ local function Rebuild()
 				}
 				m.heals = Heals(isSelf and SelfSpecId() or m.spec, m.role)
 				members[unit] = m
+				if guid then unitByGUID[guid] = unit end
 				local spell, poll
 				if isSelf then
 					spell, poll = D.PlayerKick()
@@ -1246,7 +1234,6 @@ end
 function M:OnDisable()
 	CastFrames(false)
 	StopInspects()
-	inspectTicker = nil
 	rebuildPending = false
 	wipe(pendings)
 	wipe(meterHits)

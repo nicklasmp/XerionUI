@@ -188,6 +188,7 @@ XUI.CDM_ALL_VIEWERS = { "EssentialCooldownViewer", "UtilityCooldownViewer", "Buf
 -- Every Cooldown Manager item frame (Blizzard's viewers, and EllesmereUI's
 -- custom buff bars when it is installed) whose cooldown stands for `spellID`.
 -- `viewers` defaults to the buff viewers.
+local barKids = {}
 function XUI.FindCDMFrames(spellID, viewers, out)
 	out = out or {}
 	local seen = {}
@@ -218,7 +219,7 @@ function XUI.FindCDMFrames(spellID, viewers, out)
 			if want and bd.key and (bt == "buffs" or bt == "custom_buff") then
 				local okB, bar = pcall(getBar, bd.key)
 				if okB and bar and bar.GetChildren then
-					for _, f in ipairs({ bar:GetChildren() }) do
+					for _, f in ipairs(XUI.Children(bar, barKids)) do
 						local tex = f and (f.Icon or f._tex)
 						if f._isCustomBuffFrame and not f._isPlaceholderFrame and tex and tex.GetTexture and not seen[f] then
 							local okT, t = pcall(tex.GetTexture, tex)

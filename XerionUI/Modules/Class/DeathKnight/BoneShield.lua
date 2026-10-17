@@ -87,11 +87,12 @@ local function AddUnique(list, f)
 	list[#list + 1] = f
 end
 
+local ossKids = {}
 local function ScanOssuary()
 	for _, name in ipairs(XUI.CDM_BUFF_VIEWERS) do
 		local viewer = _G[name]
 		if viewer and viewer.GetChildren then
-			for _, f in ipairs({ viewer:GetChildren() }) do
+			for _, f in ipairs(XUI.Children(viewer, ossKids)) do
 				if FrameIsOssuary(f) then AddUnique(ossuaryFrames, f) end
 			end
 		end
@@ -360,11 +361,13 @@ function M:OnEnable()
 	Rescan()
 	TrySync()
 	SyncTicker()
+	-- the viewers' RefreshData hooks do the steady-state work; this only
+	-- catches viewers the Cooldown Manager builds late, for two minutes
 	self:NewTicker(5, function()
 		HookViewers()
 		Rescan()
 		self:ScanArt()
-	end)
+	end, 24)
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player", function(_, _, _, _, spellID)
 		if IsSecret(spellID) or self:IsPreview() then return end
 		if IsRefresher(spellID) then Restart() end
@@ -488,12 +491,13 @@ local function OnRefreshTexture(f)
 	if ArtOn() and IsBoneShieldFrame(f) then PaintArt(f) else painted[f] = nil end
 end
 
+local artKids = {}
 function M:ScanArt()
 	local on = ArtOn()
 	for _, name in ipairs(XUI.CDM_BUFF_VIEWERS) do
 		local viewer = _G[name]
 		if viewer and viewer.GetChildren then
-			for _, f in ipairs({ viewer:GetChildren() }) do
+			for _, f in ipairs(XUI.Children(viewer, artKids)) do
 				if f and f.GetIconTexture then
 					if on then
 						if not artHooked[f] and f.RefreshSpellTexture then

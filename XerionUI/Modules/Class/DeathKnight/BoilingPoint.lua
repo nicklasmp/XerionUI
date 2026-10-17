@@ -140,7 +140,9 @@ local function Frame()
 	if frame then return frame end
 	frame = XUI.Widgets:CreateBar("XUI_BoilingPoint")
 	frame:Hide()
-	frame:SetScript("OnUpdate", OnUpdate)
+	-- the drain only runs while the bar is on screen
+	frame:SetScript("OnShow", function(f) f:SetScript("OnUpdate", OnUpdate) end)
+	frame:SetScript("OnHide", function(f) f:SetScript("OnUpdate", nil) end)
 	glowHost = CreateFrame("Frame", nil, frame)
 	glowHost:SetAllPoints(frame)
 	XUI.Movers:Register(frame, M, "position")

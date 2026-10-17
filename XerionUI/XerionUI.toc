@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.29.0
+## Version: 2.29.1
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -22,6 +22,7 @@ Libs\LibDeflate\LibDeflate.lua
 # Core (order matters: each file builds on the ones above it)
 Core\Init.lua
 Core\Midnight.lua
+Core\Inspect.lua
 Core\Data.lua
 Core\Database.lua
 Core\Media.lua
