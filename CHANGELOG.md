@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.1 - 2026-10-17
+- Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)
+
 ## 2.34.0 - 2026-10-17
 - Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)
 

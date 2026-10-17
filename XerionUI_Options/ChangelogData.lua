@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.1", date = "2026-10-17", notes = {
+		"Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)",
+	} },
 	{ version = "2.34.0", date = "2026-10-17", notes = {
 		"Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.6", date = "2026-10-17", notes = {
 		"Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group",
-	} },
-	{ version = "2.30.5", date = "2026-10-17", notes = {
-		"Move Meter Reset into a new Damage Meter group under Group",
 	} },
 }

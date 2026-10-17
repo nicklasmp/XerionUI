@@ -56,7 +56,7 @@ local function SidebarItem(i)
 	b.state:SetPoint("RIGHT", -14, 0)
 	b.state:SetText("off")
 	b.flag = O:Icon(b, "circle", 8, nil, "OVERLAY")
-	b.flag:SetPoint("RIGHT", -16, 0)
+	b.flag:SetPoint("RIGHT", -14, 0)
 
 	b:SetScript("OnEnter", function(self)
 		O:PaintItem(self)
@@ -157,10 +157,13 @@ function O:PaintItem(b, full)
 		if not on and not selected then color = (hot or cursor) and "label" or "faint" end
 		b.text:SetTextColor(O:Color(color))
 		if full or not b.dot then b.dot = DotState(m) end
-		-- off: dimmed text and an "off" tag; a problem: amber / red dot
-		b.state:SetShown(not on and not m.isGroup)
-		b.flag:SetShown(on and (b.dot == "warn" or b.dot == "bad"))
-		if b.dot == "bad" then b.flag:SetVertexColor(O:Color("danger")) else b.flag:SetVertexColor(1, 0.8, 0.2) end
+		-- every row has a status dot: green = on, grey = off, amber / red = a problem
+		b.state:Hide()
+		b.flag:Show()
+		if b.dot == "bad" then b.flag:SetVertexColor(O:Color("danger"))
+		elseif b.dot == "warn" then b.flag:SetVertexColor(1, 0.8, 0.2)
+		elseif b.dot == "on" then b.flag:SetVertexColor(0.35, 0.8, 0.45)
+		else b.flag:SetVertexColor(0.4, 0.4, 0.4, 0.6) end
 	else
 		b.text:SetTextColor(O:Color(color))
 		b.state:Hide()
@@ -388,7 +391,7 @@ function O:RefreshSidebar()
 			else
 				b.text:SetPoint("LEFT", 18, 0)
 			end
-			b.text:SetPoint("RIGHT", -16, 0)
+			b.text:SetPoint("RIGHT", m and -32 or -16, 0)
 		end
 		b.text:SetText(Highlight(title) .. (m and m.untested and " |cff777777*|r" or ""))
 		b:Show()
