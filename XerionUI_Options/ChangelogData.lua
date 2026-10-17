@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.5", date = "2026-10-17", notes = {
+		"Move Meter Reset into a new Damager Meter group under Group",
+	} },
 	{ version = "2.30.4", date = "2026-10-17", notes = {
 		"Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.26.1", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup restyled as a card with header, centred tank name and an inset action row",
-	} },
-	{ version = "2.26.0", date = "2026-10-16", notes = {
-		"Style cards (Font, Border, Glow, Icon, Bar, Background) get a Reset to default button that puts that card back to the module's or the Global Style default",
 	} },
 }

@@ -26,11 +26,6 @@ O.MODULE_GROUPS = {
 		members = { { "EUIFocusCastbar", "Focus cast bar" }, { "EUITargetedSpellBars", "Targeted spell bars" } },
 	},
 	{
-		key = "grp:tank", name = "Tank", category = "group",
-		desc = "Co-tank tracking and marking the tank of your group.",
-		members = { { "CoTank", "Co-Tank" }, { "AutoMarkTank", "Auto mark tank" } },
-	},
-	{
 		key = "grp:party", name = "Party Tracking", category = "group",
 		desc = "Interrupts and cooldowns of your party members.",
 		members = { { "Interrupts", "Interrupts" }, { "PartyCDs", "Party cooldowns" } },

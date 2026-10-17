@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.5 - 2026-10-17
+- Move Meter Reset into a new Damager Meter group under Group
+
 ## 2.30.4 - 2026-10-17
 - Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group
 
