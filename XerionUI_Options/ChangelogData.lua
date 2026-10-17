@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.4", date = "2026-10-17", notes = {
+		"Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group",
+	} },
 	{ version = "2.30.3", date = "2026-10-17", notes = {
 		"World Markers options: removed the meaningless Preview button",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.26.0", date = "2026-10-16", notes = {
 		"Style cards (Font, Border, Glow, Icon, Bar, Background) get a Reset to default button that puts that card back to the module's or the Global Style default",
-	} },
-	{ version = "2.25.1", date = "2026-10-16", notes = {
-		"Autocast shine: default particles 16 (EllesmereUI's default of four layers of four sparks); speed and scale already match",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.4 - 2026-10-17
+- Split Group Utility: Shroud, Who Has the Key, Bonus Roll Confirm and World Markers are now separate entries under Group
+
 ## 2.30.3 - 2026-10-17
 - World Markers options: removed the meaningless Preview button
 

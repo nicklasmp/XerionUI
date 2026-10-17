@@ -41,15 +41,6 @@ O.MODULE_GROUPS = {
 		members = { { "Externals", "Externals" } },
 	},
 	{
-		key = "grp:utility", name = "Group Utility", category = "group",
-		desc = "Small helpers for dungeons and groups.",
-		members = {
-			{ "Shroud", "Shroud / Mass Invis" }, { "InstanceKeys", "Who has the key" },
-			{ "BonusRollConfirm", "Bonus roll confirm" },
-			{ "WorldMarkers", "World markers" },
-		},
-	},
-	{
 		key = "grp:reminders", name = "Reminders", category = "combat",
 		desc = "Warnings and prompts that tell you when something needs your attention.",
 		members = {
