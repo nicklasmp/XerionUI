@@ -1,0 +1,4 @@
+<Bindings>
+	<Binding name="CLICK XUI_WorldMarkerNext:LeftButton" header="XERIONUI" category="ADDONS" />
+	<Binding name="CLICK XUI_WorldMarkerClear:LeftButton" />
+</Bindings>

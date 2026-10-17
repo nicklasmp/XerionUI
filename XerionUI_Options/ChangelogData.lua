@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.27.0", date = "2026-10-17", notes = {
+		"Options panel gets a soft corner-glow backdrop tinted from the accent color",
+	} },
 	{ version = "2.26.3", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.22.1", date = "2026-10-16", notes = {
 		"Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card",
-	} },
-	{ version = "2.22.0", date = "2026-10-16", notes = {
-		"Patch notes: own button in the window header with a dot while there are notes you have not opened; unread versions are marked new",
 	} },
 }

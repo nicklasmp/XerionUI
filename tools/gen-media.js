@@ -203,3 +203,15 @@ function writeTGA(name, c, color) {
   }
   writeTGA('spark', c);
 }
+
+// glow: a large, very soft radial falloff for the options window backdrop
+{
+  const N = 128;
+  const c = canvas(N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const r = Math.min(1, Math.hypot(x + 0.5 - N / 2, y + 0.5 - N / 2) / (N / 2));
+    const s = 1 - r * r * (3 - 2 * r);   // smoothstep: no visible edge or banding
+    c.a[y * N + x] = s * s;
+  }
+  writeTGA('glow', c);
+}

@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.26.3
+## Version: 2.27.0
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -48,6 +48,7 @@ Modules\Group\AutoGossip.lua
 Modules\Group\BonusRollConfirm.lua
 Modules\Group\MeterReset.lua
 Modules\Group\AutoMarkTank.lua
+Modules\Group\WorldMarkers.lua
 Modules\Group\DamageAmp.lua
 Modules\Group\ChaosBarrage.lua
 Modules\Group\CoTank.lua

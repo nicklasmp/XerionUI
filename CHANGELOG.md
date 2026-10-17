@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.27.0 - 2026-10-17
+- Options panel gets a soft corner-glow backdrop tinted from the accent color
+
 ## 2.26.3 - 2026-10-16
 - Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret
 

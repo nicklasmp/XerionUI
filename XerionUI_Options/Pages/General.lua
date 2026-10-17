@@ -20,6 +20,7 @@ O:RegisterSystemPage({
 			local f = _G.XUI_OptionsFrame
 			if f then f:SetScale(XUI.DB.global.panel.scale) end
 		elseif path == "accent" then
+			O:RefreshBackdrop()
 			O:RefreshSidebar()
 			O:RefreshPageHead()
 		end
