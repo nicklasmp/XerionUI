@@ -80,7 +80,7 @@ local function GetPage(key)
 							for _, issue in ipairs(XUI.Health.Issues(m)) do lines[#lines + 1] = "- " .. issue end
 							return table.concat(lines, "\n")
 						end },
-					}, { hidden = function() return #XUI.Health.Issues(m) == 0 end }),
+					}, { nonav = true, hidden = function() return #XUI.Health.Issues(m) == 0 end }),
 				}
 				local own
 				if build then

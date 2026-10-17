@@ -18,6 +18,7 @@ local M = XUI:NewModule("EUIFlyingBar", {
 	category = "tweaks",
 	icon = [[Interface\Icons\Ability_DragonRiding_Glyph01]],
 	order = 60,
+	noPreview = true,
 	requires = "EllesmereUIBlizzardSkin",
 	defaults = {
 		hideIcon = true,

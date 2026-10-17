@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.31.1 - 2026-10-17
+- Preview now only appears on modules that draw a sample; the rest have Test only
+- Preview and Test live only in the page header, no duplicate buttons inside the pages
+- Removed Preview from the Skyriding Bar
+- Pages with fewer than four cards no longer get tab chips, and Needs attention is never a tab
+
 ## 2.31.0 - 2026-10-17
 - Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default
 

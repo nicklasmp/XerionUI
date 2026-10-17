@@ -201,10 +201,11 @@ local function BuildCard(page, spec)
 	return card
 end
 
--- A page with several titled cards gets a row of chips in the bar above it (see
+-- A page with many titled cards gets a row of chips in the bar above it (see
 -- NavBar.lua): from AUTO_TABS_FROM cards on, the chips switch which card is
--- shown, so a long page never reads as one endless list; with 2-3 cards they
--- scroll to the card. Pages that bring their own tabs set spec.tabbed; cards
+-- shown, so a long page never reads as one endless list; a shorter page just
+-- scrolls and gets no chips. A card with nonav (a notice such as "Needs
+-- attention") is never a chip and stays on every tab. Pages that bring their own tabs set spec.tabbed; cards
 -- without a title (notices, switches) stay on every tab. While a filter is typed,
 -- every card is searched, whatever tab is open.
 local AUTO_TABS_FROM = 4
@@ -212,20 +213,16 @@ local AUTO_TABS_FROM = 4
 local function BuildNav(page, specs)
 	local order, seen = {}, {}
 	for _, s in ipairs(specs) do
-		if s.title and not seen[s.title] then
+		if s.title and not s.nonav and not seen[s.title] then
 			seen[s.title] = true
 			order[#order + 1] = { value = s.title, text = s.title }
 		end
 	end
-	if #order < 2 then return end
-	if #order < AUTO_TABS_FROM then
-		page.nav = { mode = "scroll", values = order, set = function(v) page:ScrollToCard(v) end }
-		return
-	end
+	if #order < AUTO_TABS_FROM then return end
 	local state = { tab = order[1].value }
 	for _, s in ipairs(specs) do
 		local title, own = s.title, s.hidden
-		if title then
+		if title and not s.nonav then
 			s.hidden = function(ctx)
 				if state.tab ~= title and not (ctx.page and ctx.page.filter ~= "") then return true end
 				if type(own) == "function" then return own(ctx) and true or false end

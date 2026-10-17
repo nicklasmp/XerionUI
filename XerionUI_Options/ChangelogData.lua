@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.31.1", date = "2026-10-17", notes = {
+		"Preview now only appears on modules that draw a sample; the rest have Test only",
+		"Preview and Test live only in the page header, no duplicate buttons inside the pages",
+		"Removed Preview from the Skyriding Bar",
+		"Pages with fewer than four cards no longer get tab chips, and Needs attention is never a tab",
+	} },
 	{ version = "2.31.0", date = "2026-10-17", notes = {
 		"Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default",
 	} },
@@ -48,8 +54,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.28.1", date = "2026-10-17", notes = {
 		"Stronger corner glow in the options panel backdrop",
-	} },
-	{ version = "2.28.0", date = "2026-10-17", notes = {
-		"New World Markers module: bindable keys that place world markers one after another and clear them all (Key Bindings -> AddOns -> XerionUI)",
 	} },
 }
