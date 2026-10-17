@@ -509,12 +509,12 @@ end)
 
 Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	local applied = 0
-	local ns = { plates = {}, GetOffensiveDispelTypes = function() return false, false end }
+	local ns = { plates = {}, GetOffensiveDispelTypes = function() return false, false end, GetDispelGlowStyle = function() return 98 end }
 	_G.EllesmereNameplates_NS = ns
 	local AK = { styles = {}, RestyleSoon = function() end }
 	local started = 0
 	_G.EllesmereUI = { AuraKit = AK, _ModuleNS = {},
-		Glows = { StartSpecGlow = function() started = started + 1 end, StopGlow = function() end } }
+		Glows = { PANDEMIC_BORDER = 98, StartSpecGlow = function() started = started + 1 end, StopGlow = function() end } }
 	AK.styles["np:buffs"] = {
 		purgeGlow = true,
 		applyExtra = function() applied = applied + 1 end,

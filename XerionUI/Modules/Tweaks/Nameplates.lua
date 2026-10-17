@@ -83,11 +83,18 @@ local BOOST_LAYERS = 3
 -- Pandemic Border; any other style is left to EllesmereUI. Desaturated and tinted it takes any color but turns
 -- thin, because the red art is dark once it is grey: a second copy of the art
 -- is laid over it with additive blending, which brings back the weight.
+-- The texture's own shown state is secret on engine buttons, so the style that
+-- shows it is read from EllesmereUI's setting instead.
+local function PandemicStyle()
+	local np, G = NP(), _G.EllesmereUI and _G.EllesmereUI.Glows
+	return np and G and type(np.GetDispelGlowStyle) == "function" and np.GetDispelGlowStyle() == G.PANDEMIC_BORDER
+end
+
 local function Tint(host, on)
 	local tex = host._euiPanTex
 	if not (tex and tex.SetVertexColor) then return false end
 	local layers = boost[host]
-	if on and tex:IsShown() then
+	if on and PandemicStyle() then
 		local c = M.db.borderColor
 		local r, g, b, a = c[1] or 1, c[2] or 0.82, c[3] or 0.25, c[4] or 1
 		tex:SetDesaturated(true)
