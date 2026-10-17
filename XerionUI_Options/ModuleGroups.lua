@@ -46,6 +46,7 @@ O.MODULE_GROUPS = {
 		members = {
 			{ "Shroud", "Shroud / Mass Invis" }, { "InstanceKeys", "Who has the key" },
 			{ "BonusRollConfirm", "Bonus roll confirm" },
+			{ "WorldMarkers", "World markers" },
 		},
 	},
 	{

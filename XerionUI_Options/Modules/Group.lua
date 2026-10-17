@@ -584,6 +584,30 @@ O:RegisterModuleOptions("MeterReset", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+O:RegisterModuleOptions("WorldMarkers", function(ctx, m, G)
+	local function keys(binding)
+		return function() return m.BoundKeys(binding) or "not bound" end
+	end
+	local markers = {}
+	for id = 1, 8 do
+		markers[#markers + 1] = { type = "toggle", label = m.NAMES[id], path = "use." .. id }
+	end
+	return {
+		Card("Keys", {
+			{ type = "description",
+				text = "Bind the keys in Key Bindings, under AddOns -> XerionUI. Each press of the first key places the next marker below; the second key clears every marker." },
+			{ type = "description", text = function() return "Place next marker: " .. keys(m.NEXT_BINDING)() end },
+			{ type = "description", text = function() return "Clear all markers: " .. keys(m.CLEAR_BINDING)() end },
+			{ type = "button", text = "Open key bindings", onClick = function() m:OpenBindings() end },
+		}),
+		Card("Markers in the cycle", Join(markers, {
+			{ type = "toggle", label = "Start over after clearing", path = "resetOnClear",
+				tip = "Square is placed first again after you clear the markers." },
+		})),
+	}
+end)
+
+--------------------------------------------------------------------------------
 O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
 	return {
 		Card("Bar", {

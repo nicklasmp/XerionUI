@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.28.0 - 2026-10-17
+- New World Markers module: bindable keys that place world markers one after another and clear them all (Key Bindings -> AddOns -> XerionUI)
+
 ## 2.27.0 - 2026-10-17
 - Options panel gets a soft corner-glow backdrop tinted from the accent color
 

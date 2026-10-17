@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.28.0", date = "2026-10-17", notes = {
+		"New World Markers module: bindable keys that place world markers one after another and clear them all (Key Bindings -> AddOns -> XerionUI)",
+	} },
 	{ version = "2.27.0", date = "2026-10-17", notes = {
 		"Options panel gets a soft corner-glow backdrop tinted from the accent color",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.22.2", date = "2026-10-16", notes = {
 		"Cooldown Manager Bar Glows: glows on custom bars' icons are now recognised; debug shows ignored glows",
-	} },
-	{ version = "2.22.1", date = "2026-10-16", notes = {
-		"Cooldown Manager Bar Glows now hooks the glow engine itself, so cooldown-ready and proc glows are replaced too; tab rows wrap instead of running past the card",
 	} },
 }
