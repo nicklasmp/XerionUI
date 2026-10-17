@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.34.4 - 2026-10-17
+- Nameplates: dispel border color works again with EllesmereUI 9.6 (the border texture moved to host._euiPanTex); it only applies while EllesmereUI's Dispel Glow style is Blizzard Pandemic Border
+
 ## 2.34.3 - 2026-10-17
 - Fix ADDON_ACTION_BLOCKED from the options window's keyboard shortcuts in combat
 

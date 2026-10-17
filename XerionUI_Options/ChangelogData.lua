@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.34.4", date = "2026-10-17", notes = {
+		"Nameplates: dispel border color works again with EllesmereUI 9.6 (the border texture moved to host._euiPanTex); it only applies while EllesmereUI's Dispel Glow style is Blizzard Pandemic Border",
+	} },
 	{ version = "2.34.3", date = "2026-10-17", notes = {
 		"Fix ADDON_ACTION_BLOCKED from the options window's keyboard shortcuts in combat",
 	} },
@@ -55,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.31.0", date = "2026-10-17", notes = {
 		"Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default",
-	} },
-	{ version = "2.30.8", date = "2026-10-17", notes = {
-		"Meter Reset now lives in a Damage Meter group under Group",
 	} },
 }

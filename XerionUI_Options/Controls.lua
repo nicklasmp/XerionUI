@@ -85,9 +85,15 @@ local function Switch(parent, w, h)
 	w, h = w or 30, h or 16
 	local s = CreateFrame("Frame", nil, parent)
 	s:SetSize(w, h)
+	-- two half-circle caps and a rect that only touch (never overlap), so the
+	-- anti-aliased edges are not blended twice
 	local l = O:Icon(s, "circle", h, nil, "BACKGROUND")
+	l:SetSize(h / 2, h)
+	l:SetTexCoord(0, 0.5, 0, 1)
 	l:SetPoint("LEFT")
 	local r = O:Icon(s, "circle", h, nil, "BACKGROUND")
+	r:SetSize(h / 2, h)
+	r:SetTexCoord(0.5, 1, 0, 1)
 	r:SetPoint("RIGHT")
 	local mid = O:Rect(s, nil, "BACKGROUND")
 	mid:SetPoint("TOPLEFT", h / 2, 0)

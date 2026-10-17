@@ -530,7 +530,10 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	local button = CreateFrame("Button")
 	local host = CreateFrame("Frame", nil, button)
 	local tex = host:CreateTexture()
-	host.GetRegions = function() return tex end
+	-- EllesmereUI 9.6 keeps the border on host._euiPanTex; the host's first region can be anything
+	host:CreateTexture()
+	host._euiPanTex = tex
+	tex:Show()
 	style.applyExtra(button, { npGlowHost = host }, style)
 	assert(applied == 1, "original applyExtra not called")
 	local dbg = table.concat(m:DebugInfo(), "; ")

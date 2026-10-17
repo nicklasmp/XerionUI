@@ -72,24 +72,22 @@ end
 
 local GLOW_KEYS = { "np:buffs", "np:buffs2" }
 local stats = { wraps = 0, buttons = 0, tinted = 0 }
-local borderTex = setmetatable({}, { __mode = "k" })
 local boost = setmetatable({}, { __mode = "k" })
 local BORDER_ATLAS = "UI-CooldownManager-PandemicBorder"
 local BOOST_LAYERS = 3
 
--- EllesmereUI's border is Blizzard's red pandemic art on a host frame that
--- sits on the aura button. Desaturated and tinted it takes any color but turns
+-- EllesmereUI's border is Blizzard's red pandemic art: a texture it keeps on
+-- the glow host as host._euiPanTex (EllesmereUI 9.6 and later; the host also
+-- holds the regions of whatever glow style is picked, so it is not the host's
+-- first region). It is only shown while the Dispel Glow style is Blizzard
+-- Pandemic Border; any other style is left to EllesmereUI. Desaturated and tinted it takes any color but turns
 -- thin, because the red art is dark once it is grey: a second copy of the art
 -- is laid over it with additive blending, which brings back the weight.
 local function Tint(host, on)
-	local tex = borderTex[host]
-	if not tex then
-		tex = host:GetRegions()
-		if not (tex and tex.SetVertexColor) then return false end
-		borderTex[host] = tex
-	end
+	local tex = host._euiPanTex
+	if not (tex and tex.SetVertexColor) then return false end
 	local layers = boost[host]
-	if on then
+	if on and tex:IsShown() then
 		local c = M.db.borderColor
 		local r, g, b, a = c[1] or 1, c[2] or 0.82, c[3] or 0.25, c[4] or 1
 		tex:SetDesaturated(true)
@@ -103,7 +101,7 @@ local function Tint(host, on)
 			if not t then
 				local ok, made = pcall(host.CreateTexture, host, nil, "ARTWORK", nil, i)
 				if ok and made then
-					made:SetAllPoints(host)
+					made:SetAllPoints(tex)
 					made:SetAtlas(BORDER_ATLAS)
 					made:SetBlendMode("ADD")
 					t = made
