@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.1", date = "2026-10-17", notes = {
+		"Global glow now defaults to EllesmereUI's Auto-Cast Shine: four layers of sparks (sizes 7/6/5/4), layer k laps k times slower; saved profiles move onto it once (colour kept)",
+	} },
 	{ version = "2.30.0", date = "2026-10-17", notes = {
 		"Options window: resizable (corner grip, Reset window size in General)",
 		"Options: filter box and card chips above every page; the sidebar search lists matching settings and jumps to them",
@@ -49,8 +52,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.24.1", date = "2026-10-16", notes = {
 		"Patch notes: remove the header button again; the version number opens the notes and carries the unread dot",
-	} },
-	{ version = "2.24.0", date = "2026-10-16", notes = {
-		"Options: tabs are now rounded pills with an accent fill for the active one, and a group's tabs show a dot for which modules are switched on",
 	} },
 }
