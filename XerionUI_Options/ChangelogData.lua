@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.30.7", date = "2026-10-17", notes = {
+		"Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable",
+	} },
 	{ version = "2.30.6", date = "2026-10-17", notes = {
 		"Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.26.3", date = "2026-10-16", notes = {
 		"Auto Mark Tank popup no longer falls back to the word Tank when previewing or when the name is secret",
-	} },
-	{ version = "2.26.2", date = "2026-10-16", notes = {
-		"Auto Mark Tank popup shows the tank name in the action row",
 	} },
 }

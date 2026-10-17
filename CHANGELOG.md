@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.30.7 - 2026-10-17
+- Auto NPC Dialog: dialogs without a known dungeon (built-ins, typed IDs) are listed under 'Other' so the module is always reachable
+
 ## 2.30.6 - 2026-10-17
 - Auto Mark Tank and Co-Tank are separate entries under Group instead of one Tank group
 
