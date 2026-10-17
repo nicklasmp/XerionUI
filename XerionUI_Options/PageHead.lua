@@ -52,6 +52,20 @@ function O.CreatePageHead(parent)
 	f.status = O:Text(f, O.SIZE.small, "danger")
 	f.status:SetPoint("TOPLEFT", f.desc, "BOTTOMLEFT", 0, -4)
 
+	-- "OFF" tag after the title of a module that is switched off
+	f.offBadge = CreateFrame("Frame", nil, f)
+	f.offBadge:SetSize(34, 18)
+	O:Skin(f.offBadge, "control", "controlLine")
+	f.offBadge.text = O:Text(f.offBadge, O.SIZE.small, "muted")
+	f.offBadge.text:SetPoint("CENTER", 0, 1)
+	f.offBadge.text:SetText("OFF")
+	f.offBadge:Hide()
+	function f.PlaceBadge()
+		local w = math.min(f.title:GetStringWidth() or 0, math.max(0, (f.title:GetWidth() or 0) - 40))
+		f.offBadge:ClearAllPoints()
+		f.offBadge:SetPoint("LEFT", f.title, "LEFT", w + 10, 0)
+	end
+
 	-- module controls, right to left
 	f.enable = CreateFrame("Button", nil, f)
 	f.enable:SetSize(112, 28) -- wide enough for the switch plus "Disabled"
@@ -70,15 +84,19 @@ function O.CreatePageHead(parent)
 		end
 	end)
 
+	-- a hairline between the page's actions and the on/off switch
+	f.divider = O:Rect(f, "line", "ARTWORK")
+	f.divider:SetSize(1, 24)
+	f.divider:SetPoint("RIGHT", f.enable, "LEFT", -10, 0)
+
+	-- Preview and Test are icon-only: the row stays short and the title keeps its room
 	f.preview = CreateFrame("Button", nil, f)
-	f.preview:SetSize(96, 28)
-	f.preview:SetPoint("RIGHT", f.enable, "LEFT", -12, 0)
+	f.preview:SetSize(28, 28)
+	f.preview:SetPoint("RIGHT", f.divider, "LEFT", -10, 0)
 	O:Skin(f.preview, "control")
 	f.preview.icon = O:Icon(f.preview, "eye", 16, "muted")
-	f.preview.icon:SetPoint("LEFT", 10, 0)
-	f.preview.text = O:Text(f.preview, O.SIZE.text, "label")
-	f.preview.text:SetPoint("LEFT", f.preview.icon, "RIGHT", 8, 0)
-	f.preview.text:SetText("Preview")
+	f.preview.icon:SetPoint("CENTER")
+	f.preview.text = O:Text(f.preview, O.SIZE.small, "label") -- recoloured with the icon; never filled
 	f.preview:SetScript("OnClick", function()
 		local m = f.module
 		if m then
@@ -90,24 +108,29 @@ function O.CreatePageHead(parent)
 	f.preview:SetScript("OnLeave", function(self) O:SetSkinColor(self, "control") end)
 	O:Tooltip(f.preview, "Preview", "Shows the module with sample content so you can see your changes. Ends when the window closes.")
 
-	local function HeadButton(icon, text, width, tip, onClick)
+	-- text == false makes an icon-only button; `title` then names it in the tooltip
+	local function HeadButton(icon, text, width, tip, onClick, title)
 		local b = CreateFrame("Button", nil, f)
 		b:SetSize(width, 28)
 		O:Skin(b, "control")
 		b.icon = O:Icon(b, icon, 16, "muted")
-		b.icon:SetPoint("LEFT", 10, 0)
 		b.text = O:Text(b, O.SIZE.text, "label")
-		b.text:SetPoint("LEFT", b.icon, "RIGHT", 8, 0)
-		b.text:SetText(text)
+		if text == false then
+			b.icon:SetPoint("CENTER")
+		else
+			b.icon:SetPoint("LEFT", 10, 0)
+			b.text:SetPoint("LEFT", b.icon, "RIGHT", 8, 0)
+			b.text:SetText(text)
+		end
 		b:SetScript("OnClick", onClick)
 		b:SetScript("OnEnter", function(self) O:SetSkinColor(self, "controlHover") end)
 		b:SetScript("OnLeave", function(self) O:SetSkinColor(self, "control") end)
-		if tip then O:Tooltip(b, text, tip) end
+		if tip then O:Tooltip(b, title or text, tip) end
 		return b
 	end
 
 	-- plays a short sample through the module's real code
-	f.test = HeadButton("play", "Test", 76, "Runs a short sample through the real code, as if it had been triggered in the game.", function()
+	f.test = HeadButton("play", false, 28, "Runs a short sample through the real code, as if it had been triggered in the game.", function()
 		local m = f.module
 		if m and m.Test then
 			-- a test goes through the real code, not the sample
@@ -115,7 +138,7 @@ function O.CreatePageHead(parent)
 			XUI.SafeCallFor(m, m.Test, m)
 			O:RefreshPageHead()
 		end
-	end)
+	end, "Test")
 	f.test:SetPoint("RIGHT", f.preview, "LEFT", -8, 0)
 
 	-- cycles the looks the preview can take
@@ -131,7 +154,7 @@ function O.CreatePageHead(parent)
 	f.state:SetPoint("RIGHT", f.test, "LEFT", -8, 0)
 
 	-- the "more" menu: rarely used page tools stay out of the way of the main buttons
-	f.diag = HeadButton("dots", "More", 30, "Diagnostics and other page tools.", function(self)
+	f.diag = HeadButton("dots", false, 28, "Diagnostics and other page tools.", function(self)
 		local m = f.module
 		if not m then return end
 		O:ShowMenu(self, {
@@ -141,10 +164,7 @@ function O.CreatePageHead(parent)
 				onClick = function() O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end,
 			},
 		})
-	end)
-	f.diag.text:SetText("")
-	f.diag.icon:ClearAllPoints()
-	f.diag.icon:SetPoint("CENTER")
+	end, "More")
 
 	-- the texts end left of the leftmost control so they never run under it
 	function f.FitTexts()
@@ -156,6 +176,7 @@ function O.CreatePageHead(parent)
 			fs:SetWordWrap(false)
 			fs:SetWidth(w)
 		end
+		f.PlaceBadge()
 	end
 	f:SetScript("OnSizeChanged", function() f.FitTexts() end)
 
@@ -181,6 +202,53 @@ function O.CreatePageHead(parent)
 	f.line:SetHeight(1)
 	f.line:SetPoint("BOTTOMLEFT")
 	f.line:SetPoint("BOTTOMRIGHT")
+	return f
+end
+
+--------------------------------------------------------------------------------
+-- Banner: a strip under the nav bar for a module's problem (kind "bad" = it does
+-- not run or throws errors, "warn" = it runs but a check failed). Height 0 when
+-- there is nothing to say, so the cards sit right under the nav bar.
+--------------------------------------------------------------------------------
+local BANNER_H = 34
+
+function O.CreateBanner(parent)
+	local f = CreateFrame("Frame", nil, parent)
+	f:SetHeight(0)
+	f:Hide()
+	f.bg = O:Rect(f, nil, "BACKGROUND")
+	f.bg:SetAllPoints()
+	f.bar = O:Rect(f, nil, "ARTWORK")
+	f.bar:SetWidth(3)
+	f.bar:SetPoint("TOPLEFT")
+	f.bar:SetPoint("BOTTOMLEFT")
+	f.icon = O:Icon(f, "warn", 14, nil, "OVERLAY")
+	f.icon:SetPoint("LEFT", 16, 0)
+	f.text = O:Text(f, O.SIZE.small, "label")
+	f.text:SetPoint("LEFT", f.icon, "RIGHT", 10, 0)
+	f.text:SetPoint("RIGHT", -16, 0)
+	f.text:SetWordWrap(true)
+	f.text:SetMaxLines(2)
+	f.line = O:Rect(f, "line", "ARTWORK")
+	f.line:SetHeight(1)
+	f.line:SetPoint("BOTTOMLEFT")
+	f.line:SetPoint("BOTTOMRIGHT")
+	function f:Set(kind, text)
+		if not kind then
+			self:Hide()
+			self:SetHeight(0)
+			return
+		end
+		local r, g, b = O:Color("danger")
+		if kind == "warn" then r, g, b = 1, 0.8, 0.2 end
+		self.bg:SetVertexColor(r, g, b, 0.10)
+		self.bar:SetVertexColor(r, g, b, 1)
+		self.icon:SetTexture(O.MEDIA .. (kind == "warn" and "warn" or "close"))
+		self.icon:SetVertexColor(r, g, b, 1)
+		self.text:SetText(text or "")
+		self:SetHeight(BANNER_H)
+		self:Show()
+	end
 	return f
 end
 
@@ -231,6 +299,8 @@ function O:RefreshPageHead()
 	f.FitTexts()
 	C_Timer.After(0, f.FitTexts) -- anchors above resolve a frame later
 	f.status:SetText("")
+	f.offBadge:Hide()
+	if S.banner then S.banner:Set(nil) end
 	local crumb = S.currentKey and CrumbFor(S.currentKey)
 	f.crumb:SetShown(crumb ~= nil)
 	if crumb then
@@ -244,19 +314,26 @@ function O:RefreshPageHead()
 		f.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
 		f.title:SetText(m.name)
 		f.desc:SetText(m.desc or "")
+		f.PlaceBadge()
 		f.enable.switch:SetState(m.db.enabled)
 		f.enable.label:SetText(m.db.enabled and "Enabled" or "Disabled")
+		f.enable.label:SetTextColor(O:Color(m.db.enabled and "text" or "muted"))
+		-- a module that is off says so next to its name, not only in the small print
+		f.offBadge:SetShown(not m.db.enabled)
 		local ok, why = m:CanRun()
 		local note = m.untested and "  |cff888888Untested in game.|r" or ""
+		-- problems go to the banner under the nav bar; the header keeps the calm states
+		local banner
 		if (m.errorCount or 0) > 0 then
-			f.status:SetTextColor(O:Color("danger"))
-			f.status:SetText(("%d Lua error(s), last: %s"):format(m.errorCount, (m.errors and m.errors[#m.errors] or ""):match("^[^\n]*"):sub(1, 140)))
+			banner = { "bad", ("%d Lua error(s), last: %s"):format(m.errorCount, (m.errors and m.errors[#m.errors] or ""):match("^[^\n]*"):sub(1, 200)) }
 		elseif m.db.enabled and not ok then
-			f.status:SetTextColor(O:Color("danger"))
-			f.status:SetText("Not running: " .. (why or "unknown reason"))
+			banner = { "bad", "Not running: " .. (why or "unknown reason") }
 		elseif m.db.enabled and m.running and #XUI.Health.Issues(m) > 0 then
-			f.status:SetTextColor(1, 0.8, 0.2)
-			f.status:SetText("Running, but check this: " .. XUI.Health.Issues(m)[1] .. note)
+			banner = { "warn", "Running, but check this: " .. XUI.Health.Issues(m)[1] }
+		end
+		if S.banner then S.banner:Set(banner and banner[1], banner and banner[2]) end
+		if banner then
+			f.status:SetText("")
 		elseif m.db.enabled and m.running then
 			f.status:SetTextColor(O:Accent())
 			f.status:SetText("Running." .. note)

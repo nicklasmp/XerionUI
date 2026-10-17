@@ -125,6 +125,31 @@ function writeTGA(name, c, color) {
   writeTGA('reset', c);
 }
 
+// undo: the reset arrow mirrored, so "take back" and "restore default" read apart
+{
+  const c = canvas(32);
+  fill(c, (x, y) => {
+    const d = Math.hypot(x - 16, y - 16);
+    if (Math.abs(d - 9) > 1.3) return false;
+    const ang = Math.atan2(y - 16, 32 - x - 16);
+    return !(ang > -Math.PI / 2 && ang < -0.15);
+  });
+  fill(c, tri(16, 2.5, 16, 11.5, 10, 7));
+  writeTGA('undo', c);
+}
+
+// ring: an empty status dot (a module that is switched off)
+{ const c = canvas(32); fill(c, ring(16, 16, 11, 4)); writeTGA('ring', c); }
+
+// warn: a triangle with an exclamation mark (a module that runs but needs a look)
+{
+  const c = canvas(32);
+  fill(c, tri(16, 3.5, 29, 27, 3, 27));
+  cut(c, line(16, 12, 16, 19, 2.6));
+  cut(c, disc(16, 23, 1.8));
+  writeTGA('warn', c);
+}
+
 // play
 { const c = canvas(32); fill(c, tri(11, 8, 11, 24, 24, 16)); writeTGA('play', c); }
 

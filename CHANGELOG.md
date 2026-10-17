@@ -2,6 +2,14 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.35.0 - 2026-10-17
+- Options panel: per-setting reset-to-default arrow next to changed values
+- Options panel: module problems shown in a banner under the tab bar; OFF badge next to the title of a disabled module
+- Options panel: Preview, Test and More are icon buttons; separate undo icon and wider header gaps
+- Options panel: sidebar status uses shapes (dot, ring, triangle, cross) as well as colour; empty Inactive tab dimmed
+- Options panel: higher contrast for muted and faint text, larger section headings, softer corner glow
+- Options panel: Tab / Shift+Tab move between number and text boxes; missing SharedMedia entries are marked in red
+
 ## 2.34.7 - 2026-10-17
 - Options: pixel-exact toggle switch textures
 

@@ -37,7 +37,7 @@ function O.CreateNavBar(parent)
 	icon:SetPoint("LEFT", 8, 0)
 	local hint = O:Text(box, O.SIZE.small, "faint")
 	hint:SetPoint("LEFT", 26, 0)
-	hint:SetText("Filter settings")
+	hint:SetText("Filter this page")
 	box:SetScript("OnTextChanged", function(self)
 		local text = self:GetText() or ""
 		hint:SetShown(text == "")

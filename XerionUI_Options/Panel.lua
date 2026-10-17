@@ -49,7 +49,7 @@ O.S = S
 function O.ModuleContext(m)
 	return O:NewContext(function() return m.db end, function(path)
 		XUI:NotifySettingChanged(m, path)
-	end, { module = m })
+	end, { module = m, defaults = function() return XUI.DB.moduleDefaults[m.key] end })
 end
 
 function O:GetPageIfBuilt(key) return S.pages[key] end
@@ -97,7 +97,7 @@ local function GetPage(key)
 			if s.key == key then
 				spec = {
 					tabbed = s.list, -- a page that is meant to be a list is not split into tabs
-					ctx = O:NewContext(s.root, s.onChange, { system = s }),
+					ctx = O:NewContext(s.root, s.onChange, { system = s, defaults = s.defaults }),
 					build = function(ctx) return s.build(ctx, O.Groups) end,
 				}
 				break
@@ -120,10 +120,10 @@ end
 
 -- Soft glows in the window corners, all in the accent color itself.
 local GLOWS = {
-	{ point = "TOPLEFT",     x = 0.0, y = 0.0, size = 620, a = 0.28 },
-	{ point = "TOPRIGHT",    x = 0.0, y = 0.0, size = 700, a = 0.34 },
-	{ point = "BOTTOMLEFT",  x = 0.0, y = 0.0, size = 660, a = 0.26 },
-	{ point = "BOTTOMRIGHT", x = 0.0, y = 0.0, size = 620, a = 0.30 },
+	{ point = "TOPLEFT",     x = 0.0, y = 0.0, size = 620, a = 0.20 },
+	{ point = "TOPRIGHT",    x = 0.0, y = 0.0, size = 700, a = 0.25 },
+	{ point = "BOTTOMLEFT",  x = 0.0, y = 0.0, size = 660, a = 0.19 },
+	{ point = "BOTTOMRIGHT", x = 0.0, y = 0.0, size = 620, a = 0.22 },
 }
 
 function O:RefreshBackdrop()
@@ -224,15 +224,16 @@ local function CreateWindow()
 	end)
 	versionBtn:SetScript("OnClick", function() O:Open("changelog") end)
 
-	local close = O:IconButton(header, "close", 30, nil, function() S.frame:Hide() end)
+	-- three clusters with wider gaps between them: close | unlock, undo | back, forward
+	local close = O:IconButton(header, "close", 30, "Close", function() S.frame:Hide() end)
 	close:SetPoint("RIGHT", -10, 0)
 	local unlock = O:IconButton(header, "move", 30, "Unlock frames", function()
 		S.frame:Hide()
 		XUI:SetUnlocked(true)
 	end)
-	unlock:SetPoint("RIGHT", close, "LEFT", -4, 0)
+	unlock:SetPoint("RIGHT", close, "LEFT", -14, 0)
 	-- takes back the last change made with a control (Undo.lua)
-	local undo = O:IconButton(header, "reset", 30, nil, function() O.Undo.Undo() end)
+	local undo = O:IconButton(header, "undo", 30, nil, function() O.Undo.Undo() end)
 	undo:SetPoint("RIGHT", unlock, "LEFT", -4, 0)
 	undo:HookScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
@@ -245,7 +246,7 @@ local function CreateWindow()
 	S.undoButton = undo
 	-- back / forward through the pages you opened (Alt+Left / Alt+Right)
 	local forward = O:IconButton(header, "chevron", 30, "Forward", function() O:GoHistory(1) end)
-	forward:SetPoint("RIGHT", undo, "LEFT", -4, 0)
+	forward:SetPoint("RIGHT", undo, "LEFT", -14, 0)
 	forward.icon:SetRotation(math.rad(90))
 	local back = O:IconButton(header, "chevron", 30, "Back", function() O:GoHistory(-1) end)
 	back:SetPoint("RIGHT", forward, "LEFT", -4, 0)
@@ -288,7 +289,7 @@ local function CreateWindow()
 	sIcon:SetPoint("LEFT", 9, 0)
 	local hint = O:Text(search, O.SIZE.text, "faint")
 	hint:SetPoint("LEFT", 28, 0)
-	hint:SetText("Search")
+	hint:SetText("Search modules")
 	search:SetScript("OnTextChanged", function(self)
 		S.searchText = (self:GetText() or ""):lower()
 		S.resortSidebar = true
@@ -329,10 +330,12 @@ local function CreateWindow()
 				c.text:SetTextColor(O:Color("text"))
 			else
 				c.under:Hide()
-				c.text:SetTextColor(O:Color("muted"))
+				-- a tab that would list nothing is dimmed (opened, it says why it is empty)
+				c.text:SetTextColor(O:Color(c.empty and "faint" or "muted"))
 			end
 		end
 	end
+	S.paintChips = PaintChips
 	for i, def in ipairs({ { "All", nil }, { "Inactive", "off" } }) do
 		local c = CreateFrame("Button", nil, side)
 		c:SetHeight(24)
@@ -373,15 +376,20 @@ local function CreateWindow()
 	S.sidebar:SetAllPoints(list)
 
 	-- content
-	S.content = CreateFrame("Frame", nil, S.frame)
-	S.content:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, -(PAGEHEAD_H + NAV_H))
-	S.content:SetPoint("BOTTOMRIGHT", 0, 1)
 	S.pageHead = O.CreatePageHead(S.frame)
 	S.pageHead:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, 0)
 	S.pageHead:SetPoint("TOPRIGHT", 0, -HEADER_H)
 	S.navbar = O.CreateNavBar(S.frame)
 	S.navbar:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, -PAGEHEAD_H)
 	S.navbar:SetPoint("TOPRIGHT", 0, -(HEADER_H + PAGEHEAD_H))
+	-- a problem with the open module (errors, not running) gets a strip of its own
+	-- between the nav bar and the cards; the content sits below it
+	S.banner = O.CreateBanner(S.frame)
+	S.banner:SetPoint("TOPLEFT", S.navbar, "BOTTOMLEFT")
+	S.banner:SetPoint("TOPRIGHT", S.navbar, "BOTTOMRIGHT")
+	S.content = CreateFrame("Frame", nil, S.frame)
+	S.content:SetPoint("TOPLEFT", S.banner, "BOTTOMLEFT")
+	S.content:SetPoint("BOTTOMRIGHT", 0, 1)
 
 	-- Ctrl+F jumps to the sidebar search, Alt+Left / Alt+Right go back / forward;
 	-- every other key still reaches the game

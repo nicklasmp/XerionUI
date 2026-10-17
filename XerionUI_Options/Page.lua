@@ -196,6 +196,7 @@ local function BuildCard(page, spec)
 		assert(make, "XerionUI options: unknown control type " .. tostring(desc.type))
 		local control = make(f, desc, ctx)
 		control.page = page
+		O.AttachReset(control, desc, ctx)
 		card.items[#card.items + 1] = control
 	end
 	return card
@@ -414,6 +415,36 @@ function Page:Layout()
 	end
 	self.child:SetHeight(y + PAGE_PAD)
 	self.scroll:UpdateBar()
+end
+
+-- Tab / Shift+Tab inside a number or text box: on to the next (or back to the
+-- previous) box on the page, wrapping around. Only boxes that are on screen count.
+function O.TabFrom(control, dir)
+	local page = control.page
+	if not page then return end
+	local boxes, at = {}, nil
+	for _, card in ipairs(page.cards) do
+		for _, c in ipairs(card.items) do
+			if c.box and c:IsShown() and not c.disabled and not c.desc.readOnly then
+				boxes[#boxes + 1] = c
+				if c == control then at = #boxes end
+			end
+		end
+	end
+	if not at or #boxes < 2 then return end
+	local nextControl = boxes[(at - 1 + dir) % #boxes + 1]
+	-- bring it into view, then focus it
+	local top, childTop = nextControl:GetTop(), page.child:GetTop()
+	if top and childTop then
+		local view = page.scroll:GetHeight()
+		local scroll = page.scroll:GetVerticalScroll()
+		local y = childTop - top
+		if y < scroll or y > scroll + view - 40 then
+			page.scroll:SetVerticalScroll(math.max(0, math.min(page.scroll:GetVerticalScrollRange(), y - 60)))
+			page.scroll:UpdateBar()
+		end
+	end
+	nextControl.box:SetFocus()
 end
 
 -- Scrolls so the card titled `title` is at the top of the page.

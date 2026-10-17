@@ -77,6 +77,56 @@ local function AddTooltip(f, desc)
 end
 
 --------------------------------------------------------------------------------
+-- Reset to default: a small arrow in the card's left margin, next to a row whose
+-- value differs from its default. Only for settings that live at a `path` and
+-- whose context knows the defaults (ctx.defaults() returns the table the path
+-- is relative to). Page.lua attaches it to every control it builds.
+--------------------------------------------------------------------------------
+local RESETTABLE = { toggle = true, slider = true, dropdown = true, color = true, input = true }
+
+function O.AttachReset(control, desc, ctx)
+	if not (RESETTABLE[desc.type] and desc.path and not desc.get and not desc.set and not desc.noReset and ctx.defaults) then return end
+	local function Default()
+		local d = ctx.defaults()
+		if type(d) ~= "table" then return nil end
+		return GetPath(d, desc.path)
+	end
+	local size = max(10, min(12, (O.CARD_PAD or 16) - 4))
+	local btn = CreateFrame("Button", nil, control)
+	btn:SetSize(size + 4, 18)
+	btn:SetPoint("RIGHT", control, "LEFT", -1, 0)
+	btn.icon = O:Icon(btn, "reset", size, "faint")
+	btn.icon:SetPoint("CENTER")
+	btn:Hide()
+	btn:SetScript("OnEnter", function(self)
+		self.icon:SetVertexColor(O:Accent())
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText("Reset to default", 1, 1, 1)
+		local d = Default()
+		local shown = type(d) == "boolean" and (d and "On" or "Off") or (type(d) ~= "table" and tostring(d)) or nil
+		if shown and shown ~= "" then GameTooltip:AddLine("Default: " .. shown, 0.75, 0.75, 0.75, true) end
+		GameTooltip:Show()
+	end)
+	btn:SetScript("OnLeave", function(self)
+		self.icon:SetVertexColor(O:Color("faint"))
+		GameTooltip:Hide()
+	end)
+	btn:SetScript("OnClick", function()
+		local d = Default()
+		if d == nil then return end
+		if type(d) == "table" then d = XUI.CopyTable(d) end
+		O:SetValue(desc, ctx, d)
+		GameTooltip:Hide()
+	end)
+	local refresh = control.Refresh
+	function control:Refresh()
+		refresh(self)
+		local d = Default()
+		btn:SetShown(d ~= nil and not XUI.DeepEqual(O:GetValue(desc, ctx), d))
+	end
+end
+
+--------------------------------------------------------------------------------
 -- Toggle: Label ........... [switch]
 --------------------------------------------------------------------------------
 -- w/h default to 30x16; pass whole, even pixel sizes (never SetScale it, that
@@ -251,6 +301,11 @@ function Controls.slider(parent, desc, ctx)
 		f:Refresh()
 	end
 	box:SetScript("OnEnterPressed", Commit)
+	box:SetScript("OnTabPressed", function()
+		local dir = IsShiftKeyDown() and -1 or 1
+		Commit()
+		O.TabFrom(f, dir)
+	end)
 	box:SetScript("OnEscapePressed", function() box:ClearFocus() f:Refresh() end)
 	box:SetScript("OnEditFocusLost", function() f:Refresh() end)
 	-- selected on entry, so typing replaces the number
@@ -344,7 +399,7 @@ local function TextFor(values, value, isMedia)
 		if v.value == value then return v.text end
 	end
 	if value == nil or value == "" then return "None" end
-	if isMedia then return tostring(value) .. "  |cff888888(not installed)|r" end
+	if isMedia then return tostring(value) .. "  |cffe64d4d(not installed)|r", true end
 	return tostring(value)
 end
 
@@ -363,11 +418,25 @@ function Controls.dropdown(parent, desc, ctx)
 			O:SetValue(desc, ctx, v)
 		end)
 	end)
-	AddTooltip(f.field, desc)
+	-- the tip, plus a word on a media name that is not installed
+	f.field:HookScript("OnEnter", function(self)
+		if not (desc.tip or f.missing) then return end
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:AddLine(Resolve(desc.label, ctx) or "", 1, 1, 1)
+		if desc.tip then GameTooltip:AddLine(desc.tip, 0.75, 0.75, 0.75, true) end
+		if f.missing then
+			GameTooltip:AddLine("Not installed: the SharedMedia pack that holds it is missing, so the default shows instead. Pick another or install the pack.", 0.9, 0.3, 0.3, true)
+		end
+		GameTooltip:Show()
+	end)
+	f.field:HookScript("OnLeave", function() GameTooltip:Hide() end)
 	function f:Refresh()
 		self.value = O:GetValue(desc, ctx)
 		self.disabled = IsDisabled(desc, ctx)
-		local text = TextFor(O:DropdownValues(desc, ctx), self.value, desc.media ~= nil)
+		local text, missing = TextFor(O:DropdownValues(desc, ctx), self.value, desc.media ~= nil)
+		self.missing = missing
+		if missing then self.field.arrow:SetTexture(O.MEDIA .. "warn") self.field.arrow:SetVertexColor(O:Color("danger"))
+		else self.field.arrow:SetTexture(O.MEDIA .. "chevron") self.field.arrow:SetVertexColor(O:Color("muted")) end
 		self.field.text:SetText(text)
 		if desc.media == "font" and self.value then
 			self.field.text:SetFont(XUI.Media:Fetch("font", self.value), O.SIZE.text, "")
@@ -488,6 +557,11 @@ function Controls.input(parent, desc, ctx)
 	end
 	if not multiline then
 		box:SetScript("OnEnterPressed", function() Commit() box:ClearFocus() end)
+		box:SetScript("OnTabPressed", function()
+			local dir = IsShiftKeyDown() and -1 or 1
+			Commit()
+			O.TabFrom(f, dir)
+		end)
 	end
 	box:SetScript("OnEscapePressed", function() box:ClearFocus() end)
 	box:SetScript("OnEditFocusLost", function()

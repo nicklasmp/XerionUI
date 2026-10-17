@@ -139,6 +139,11 @@ local function DotState(m)
 	return worst
 end
 
+-- texture and size of the status mark per dot state
+local STATUS_SHAPE = {
+	on = { "circle", 8 }, off = { "ring", 9 }, warn = { "warn", 11 }, bad = { "close", 11 },
+}
+
 -- Paints one row from its state: open page, hover, on/off, health.
 function O:PaintItem(b, full)
 	local selected = b.key == S.currentKey and not b.focus
@@ -157,13 +162,20 @@ function O:PaintItem(b, full)
 		if not on and not selected then color = (hot or cursor) and "label" or "faint" end
 		b.text:SetTextColor(O:Color(color))
 		if full or not b.dot then b.dot = DotState(m) end
-		-- every row has a status dot: green = on, grey = off, amber / red = a problem
+		-- every row has a status mark; colour is never the only signal:
+		-- filled dot = on, empty ring = off, triangle = check this, cross = broken
 		b.state:Hide()
 		b.flag:Show()
+		local shape = STATUS_SHAPE[b.dot] or STATUS_SHAPE.off
+		if b.flagShape ~= shape then
+			b.flagShape = shape
+			b.flag:SetTexture(O.MEDIA .. shape[1])
+			b.flag:SetSize(shape[2], shape[2])
+		end
 		if b.dot == "bad" then b.flag:SetVertexColor(O:Color("danger"))
 		elseif b.dot == "warn" then b.flag:SetVertexColor(1, 0.8, 0.2)
 		elseif b.dot == "on" then b.flag:SetVertexColor(0.35, 0.8, 0.45)
-		else b.flag:SetVertexColor(0.4, 0.4, 0.4, 0.6) end
+		else b.flag:SetVertexColor(0.5, 0.5, 0.5, 0.9) end
 	else
 		b.text:SetTextColor(O:Color(color))
 		b.state:Hide()
@@ -311,8 +323,10 @@ function O:RefreshFilterCounts()
 	local counts = { on + off, off }
 	local wide = (chips[1]:GetWidth() or 0) >= 70
 	for i, c in ipairs(chips) do
-		c.text:SetText(wide and ("%s |cff777777%d|r"):format(c.label, counts[i]) or c.label)
+		c.text:SetText(wide and ("%s |cff8a8a8a%d|r"):format(c.label, counts[i]) or c.label)
+		c.empty = i > 1 and counts[i] == 0
 	end
+	if S.paintChips then S.paintChips() end
 end
 
 -- Folds every group, or unfolds them all when everything is already folded.
@@ -392,7 +406,7 @@ function O:RefreshSidebar()
 			end
 			b.text:SetPoint("RIGHT", m and -32 or -16, 0)
 		end
-		b.text:SetText(Highlight(title) .. (m and m.untested and " |cff777777*|r" or ""))
+		b.text:SetText(Highlight(title) .. (m and m.untested and " |cff8a8a8a*|r" or ""))
 		b:Show()
 		O:PaintItem(b, true)
 		if mode ~= "setting" then S.entries[#S.entries + 1] = key end

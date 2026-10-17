@@ -4,6 +4,14 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.35.0", date = "2026-10-17", notes = {
+		"Options panel: per-setting reset-to-default arrow next to changed values",
+		"Options panel: module problems shown in a banner under the tab bar; OFF badge next to the title of a disabled module",
+		"Options panel: Preview, Test and More are icon buttons; separate undo icon and wider header gaps",
+		"Options panel: sidebar status uses shapes (dot, ring, triangle, cross) as well as colour; empty Inactive tab dimmed",
+		"Options panel: higher contrast for muted and faint text, larger section headings, softer corner glow",
+		"Options panel: Tab / Shift+Tab move between number and text boxes; missing SharedMedia entries are marked in red",
+	} },
 	{ version = "2.34.7", date = "2026-10-17", notes = {
 		"Options: pixel-exact toggle switch textures",
 	} },
@@ -51,9 +59,5 @@ O.CHANGELOG = {
 		"Opening a page from a link or search hit unfolds its group and scrolls it into view",
 		"Sidebar keeps its order while you switch modules; it settles when the pointer leaves",
 		"Tab chips that do not fit move into a ... menu; the open tab stays visible",
-	} },
-	{ version = "2.31.3", date = "2026-10-17", notes = {
-		"Options panel corner glows now use the accent color only",
-		"Nav chips hide with their empty cards",
 	} },
 }

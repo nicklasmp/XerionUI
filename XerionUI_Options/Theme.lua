@@ -31,8 +31,10 @@ O.C = {
 	selected     = { 0.130, 0.130, 0.130, 1 },
 	text         = { 0.93, 0.93, 0.93, 1 },
 	label        = { 0.80, 0.80, 0.80, 1 },
-	muted        = { 0.55, 0.55, 0.55, 1 },
-	faint        = { 0.36, 0.36, 0.36, 1 },
+	-- muted and faint carry real information (descriptions, counts, off modules), so
+	-- they stay above the contrast of the card behind them
+	muted        = { 0.63, 0.63, 0.63, 1 },
+	faint        = { 0.50, 0.50, 0.50, 1 },
 	danger       = { 0.90, 0.30, 0.30, 1 },
 }
 
@@ -40,7 +42,7 @@ O.C = {
 -- what a regular face would use.
 O.SIZE = {
 	title = 24,
-	heading = 11,
+	heading = 12,
 	text = 14,
 	small = 12,
 }
