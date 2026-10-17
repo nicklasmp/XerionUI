@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.29.1 - 2026-10-17
+- Performance: shared inspect queue for Interrupts and Party CDs, fewer allocations in scans and polls, bounded Cooldown Manager catch-up tickers, Boiling Point drains only while shown
+
 ## 2.29.0 - 2026-10-17
 - World Markers: set the place/clear keys directly in the options with a new key bind control
 
