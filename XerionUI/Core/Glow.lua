@@ -15,7 +15,7 @@ local Glow = {}
 XUI.Glow = Glow
 
 local WHITE = [[Interface\Buttons\WHITE8X8]]
-local floor, max, min, abs = math.floor, math.max, math.min, math.abs
+local floor, ceil, max, min, abs = math.floor, math.ceil, math.max, math.min, math.abs
 
 local function Level(frame, owner, offset)
 	local ok, lvl = pcall(owner.GetFrameLevel, owner)
@@ -219,7 +219,13 @@ end
 -- nothing but a smudge
 local SPARK = [[Interface\AddOns\XerionUI\Media\spark]]
 
--- o: color, particles (sparks), frequency (laps per second), scale, offset
+-- Same look as EllesmereUI's Auto-Cast Shine: four layers of sparks, the
+-- sparks of layer k are 4-k+... smaller and lap k times slower, and each layer
+-- starts a quarter lap after the one before it.
+local LAYER_SIZES = { 7, 6, 5, 4 }
+
+-- o: color, particles (sparks in all, split over the four layers), frequency
+-- (laps per second of the fastest layer), scale, offset
 function Glow.StartShine(owner, o, isRetry)
 	local st = owner.__xuiShine
 	if not st then
@@ -242,13 +248,14 @@ function Glow.StartShine(owner, o, isRetry)
 		return
 	end
 	w, h = w + 2 * off, h + 2 * off
-	local n = max(1, floor(o.particles or 4))
-	local freq = abs(o.frequency or 0.25)
-	if freq == 0 then freq = 0.25 end
+	local perLayer = max(1, floor((o.particles or 16) / 4))
+	local n = perLayer * 4
+	local freq = abs(o.frequency or 0.5)
+	if freq == 0 then freq = 0.5 end
 	local period = 1 / freq
-	local size = max(6, 9 * (o.scale or 1))
+	local scale = o.scale or 1
 	local r, g, b, a = XUI.UnpackColor(o.color)
-	local sig = ("%.2f:%.2f:%d:%.3f:%.2f"):format(w, h, n, period, size)
+	local sig = ("%.2f:%.2f:%d:%.3f:%.2f"):format(w, h, n, period, scale)
 	local rebuild = st.sig ~= sig
 	st.sig = sig
 
@@ -276,7 +283,10 @@ function Glow.StartShine(owner, o, isRetry)
 			end
 			sp.ag:Stop()
 			-- where along the perimeter this spark starts
-			local d = (i - 1) * P / n
+			local layer = ceil(i / perLayer)
+			local speed = P / (period * layer)
+			local size = LAYER_SIZES[layer] * scale
+			local d = (((i - 1) % perLayer + 1) * P / perLayer + (layer - 1) * P / 4) % P
 			local side, into = 1, d
 			while side < 4 and into >= sides[side][1] do into = into - sides[side][1] side = side + 1 end
 			local len, dx, dy = sides[side][1], sides[side][2], sides[side][3]

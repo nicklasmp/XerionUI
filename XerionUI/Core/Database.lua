@@ -196,6 +196,18 @@ local function WalkFonts(t, depth)
 	end
 end
 
+-- The global glow became EllesmereUI's Auto-Cast Shine: move saved profiles
+-- onto it once (the colour stays).
+local function MigrateGlow(profile)
+	if profile.glowShineMigrated then return end
+	local g = type(profile.style) == "table" and profile.style.glow
+	if type(g) == "table" then
+		local d = DB.STYLE_DEFAULTS.glow
+		g.type, g.frequency, g.particles, g.scale = d.type, d.frequency, d.particles, d.scale
+	end
+	profile.glowShineMigrated = 1
+end
+
 local function MigrateFonts(profile)
 	if profile.fontsMigrated then return end
 	if type(profile.style) == "table" and type(profile.style.font) == "table" then
@@ -260,6 +272,7 @@ function DB:Activate(name)
 		sv.profiles[name] = profile
 	end
 	MigrateFonts(profile)
+	MigrateGlow(profile)
 	Inflate(profile, profileDefaults)
 	self.profile = profile
 	self.profileName = name
@@ -324,6 +337,7 @@ function DB:CopyProfile(source)
 	wipe(self.profile)
 	for k, v in pairs(data) do self.profile[k] = v end
 	MigrateFonts(self.profile)
+	MigrateGlow(self.profile)
 	Inflate(self.profile, profileDefaults)
 	self.style, self.general = self.profile.style, self.profile.general
 	Changed()
