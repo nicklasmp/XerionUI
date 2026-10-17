@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.31.3 - 2026-10-17
+- Options panel corner glows now use the accent color only
+- Nav chips hide with their empty cards
+
 ## 2.31.2 - 2026-10-17
 - A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty
 

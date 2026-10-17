@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.31.3", date = "2026-10-17", notes = {
+		"Options panel corner glows now use the accent color only",
+		"Nav chips hide with their empty cards",
+	} },
 	{ version = "2.31.2", date = "2026-10-17", notes = {
 		"A page tab disappears when its card is hidden by a setting (e.g. Party Frames Text), so no tab is ever empty",
 	} },
@@ -51,8 +55,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.29.0", date = "2026-10-17", notes = {
 		"World Markers: set the place/clear keys directly in the options with a new key bind control",
-	} },
-	{ version = "2.28.2", date = "2026-10-17", notes = {
-		"World Markers: Open key bindings button now opens the Key Bindings page",
 	} },
 }
