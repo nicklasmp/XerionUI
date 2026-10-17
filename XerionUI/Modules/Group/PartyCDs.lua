@@ -319,7 +319,7 @@ local function Now() return floor(GetTime() - T0 + 0.5) end
 local holder, layer, meter
 local slots, members = {}, {}
 local built, failed, waitBuild, pending, fought = false, nil, false, false, false
-local ticker, readTicker, inspectTicker, lastN
+local ticker, readTicker, lastN
 local stats = { reads = 0, secret = 0, errors = 0, edges = 0, own = 0, ownHidden = 0 }
 local specByGUID = {}
 local sensHost
@@ -1420,49 +1420,32 @@ local function InspectSpec(unit)
 	return nil
 end
 
-local queue, lastInspect = {}, 0
+local inspectQ
 
 local function StopInspects()
-	wipe(queue)
-	if inspectTicker then
-		M:CancelTicker(inspectTicker)
-		inspectTicker = nil
-	end
+	if inspectQ then inspectQ:Stop() end
 end
 
-local function InspectStep()
-	if #queue == 0 or not M.running then
-		StopInspects()
-		return
-	end
-	local sheet = InspectFrame
-	if sheet and sheet:IsShown() then return end
-	local now = GetTime()
-	if now - lastInspect < 2 then return end
-	local s = tremove(queue, 1)
+-- true keeps the slot waiting for its inspect answer
+local function TryInspect(s, q)
 	local m, unit = s.member, s.unit
-	if not m or m.fake or (m.spec and not swaps.Wanted(m)) then return end
+	if not m or m.fake or (m.spec and not swaps.Wanted(m)) then return false end
+	local now = GetTime()
 	if (m.tries or 0) >= 12 then
 		if now - (m.triedAt or 0) < 30 then
 			M:After(30, QueueRefresh)
-			return
+			return false
 		end
 		m.tries = 0
 	end
 	m.tries, m.triedAt = (m.tries or 0) + 1, now
-	if Ask(CanInspect, unit) == true and NotifyInspect then
-		lastInspect = now
-		pcall(NotifyInspect, unit)
-	end
-	queue[#queue + 1] = s
+	if Ask(CanInspect, unit) == true then q:Notify(unit) end
+	return true
 end
 
 local function QueueInspect(s)
-	for _, q in ipairs(queue) do
-		if q == s then return end
-	end
-	queue[#queue + 1] = s
-	if not inspectTicker then inspectTicker = M:NewTicker(1, InspectStep) end
+	inspectQ = inspectQ or XUI.NewInspectQueue(M, TryInspect)
+	inspectQ:Add(s)
 end
 
 local function SpecFor(s, m)
@@ -1629,7 +1612,8 @@ end
 -- Module
 --------------------------------------------------------------------------------
 function M:OnEnable()
-	ticker, readTicker, inspectTicker, lastN = nil, nil, nil, nil
+	ticker, readTicker, lastN = nil, nil, nil
+	StopInspects()
 	EnsureFrames()
 	for _, s in ipairs(slots) do
 		if not s.evt then
@@ -1690,7 +1674,7 @@ function M:OnEnable()
 end
 
 function M:OnDisable()
-	ticker, readTicker, inspectTicker, lastN = nil, nil, nil, nil
+	ticker, readTicker, lastN = nil, nil, nil
 	StopInspects()
 	for _, s in ipairs(slots) do
 		if s.evt then s.evt:UnregisterAllEvents() end

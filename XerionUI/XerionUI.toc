@@ -22,6 +22,7 @@ Libs\LibDeflate\LibDeflate.lua
 # Core (order matters: each file builds on the ones above it)
 Core\Init.lua
 Core\Midnight.lua
+Core\Inspect.lua
 Core\Data.lua
 Core\Database.lua
 Core\Media.lua

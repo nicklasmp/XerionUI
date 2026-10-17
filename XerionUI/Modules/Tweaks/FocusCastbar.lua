@@ -55,8 +55,9 @@ local function CenterOffset(frame)
 	return cx * k - ux, cy * k - uy
 end
 
+local barKids = {}
 local function HasStatusBar(frame)
-	for _, child in ipairs({ frame:GetChildren() }) do
+	for _, child in ipairs(XUI.Children(frame, barKids)) do
 		if child.GetObjectType and child:GetObjectType() == "StatusBar" then return true end
 	end
 	return false
