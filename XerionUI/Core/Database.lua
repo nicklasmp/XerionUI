@@ -44,6 +44,7 @@ DB.GLOBAL_DEFAULTS = {
 		density = "normal",
 		w = 980,  -- window size (the corner grip resizes it)
 		h = 680,
+		sideW = 262, -- sidebar width (drag its right edge)
 		classFolded = false,
 		groupFolded = false,
 		dungeonFolded = false,

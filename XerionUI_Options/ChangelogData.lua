@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.31.0", date = "2026-10-17", notes = {
+		"Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default",
+	} },
 	{ version = "2.30.8", date = "2026-10-17", notes = {
 		"Meter Reset now lives in a Damager Meter group under Group",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.28.0", date = "2026-10-17", notes = {
 		"New World Markers module: bindable keys that place world markers one after another and clear them all (Key Bindings -> AddOns -> XerionUI)",
-	} },
-	{ version = "2.27.0", date = "2026-10-17", notes = {
-		"Options panel gets a soft corner-glow backdrop tinted from the accent color",
 	} },
 }

@@ -9,7 +9,8 @@ local O = XUI and XUI.Options
 if not O then return end
 
 local W, H = 980, 680
-local SIDEBAR_W = 228
+local SIDEBAR_W = 262
+local SIDE_MIN, SIDE_MAX = 200, 460
 local HEADER_H = 46
 local PAGEHEAD_H = 88
 local NAV_H = 36
@@ -278,7 +279,10 @@ local function CreateWindow()
 	local side = CreateFrame("Frame", nil, S.frame)
 	side:SetPoint("TOPLEFT", 0, -HEADER_H)
 	side:SetPoint("BOTTOMLEFT")
-	side:SetWidth(SIDEBAR_W)
+	local function SideWidth()
+		return math.max(SIDE_MIN, math.min(SIDE_MAX, XUI.DB.global.panel.sideW or SIDEBAR_W))
+	end
+	side:SetWidth(SideWidth())
 	side.bg = O:Rect(side, "sidebar", "BACKGROUND")
 	side.bg:SetAllPoints()
 	side.bg:SetAlpha(0.86)
@@ -333,11 +337,9 @@ local function CreateWindow()
 			end
 		end
 	end
-	local tabW = (SIDEBAR_W - 24) / 3
 	for i, def in ipairs({ { "All", nil }, { "Active", "on" }, { "Inactive", "off" } }) do
 		local c = CreateFrame("Button", nil, side)
-		c:SetSize(tabW, 24)
-		c:SetPoint("TOPLEFT", 12 + (i - 1) * tabW, -43)
+		c:SetHeight(24)
 		c.under = O:Rect(c, nil, "OVERLAY")
 		c.under:SetHeight(2)
 		c.under:SetPoint("BOTTOMLEFT")
@@ -353,6 +355,16 @@ local function CreateWindow()
 		end)
 		chips[i] = c
 	end
+	-- the three tabs share the sidebar width
+	local function LayoutChips()
+		local tabW = (side:GetWidth() - 24) / 3
+		for i, c in ipairs(chips) do
+			c:SetWidth(tabW)
+			c:ClearAllPoints()
+			c:SetPoint("TOPLEFT", 12 + (i - 1) * tabW, -43)
+		end
+	end
+	LayoutChips()
 	PaintChips()
 
 	local list = CreateFrame("Frame", nil, side)
@@ -363,13 +375,13 @@ local function CreateWindow()
 
 	-- content
 	S.content = CreateFrame("Frame", nil, S.frame)
-	S.content:SetPoint("TOPLEFT", SIDEBAR_W, -(HEADER_H + PAGEHEAD_H + NAV_H))
+	S.content:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, -(PAGEHEAD_H + NAV_H))
 	S.content:SetPoint("BOTTOMRIGHT", 0, 1)
 	S.pageHead = O.CreatePageHead(S.frame)
-	S.pageHead:SetPoint("TOPLEFT", SIDEBAR_W, -HEADER_H)
+	S.pageHead:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, 0)
 	S.pageHead:SetPoint("TOPRIGHT", 0, -HEADER_H)
 	S.navbar = O.CreateNavBar(S.frame)
-	S.navbar:SetPoint("TOPLEFT", SIDEBAR_W, -(HEADER_H + PAGEHEAD_H))
+	S.navbar:SetPoint("TOPLEFT", side, "TOPRIGHT", 0, -PAGEHEAD_H)
 	S.navbar:SetPoint("TOPRIGHT", 0, -(HEADER_H + PAGEHEAD_H))
 
 	-- corner grip: drag to resize; the open page lays itself out again
@@ -379,6 +391,55 @@ local function CreateWindow()
 		O:RefreshNavBar()
 	end)
 	S.frame:SetScript("OnSizeChanged", relayout)
+
+	-- drag the sidebar's right edge to change its width (saved)
+	local split = CreateFrame("Button", nil, S.frame)
+	split:SetWidth(6)
+	split:SetPoint("TOPLEFT", side, "TOPRIGHT", -3, 0)
+	split:SetPoint("BOTTOMLEFT", side, "BOTTOMRIGHT", -3, 0)
+	split:SetFrameLevel(S.frame:GetFrameLevel() + 20)
+	split.line = O:Rect(split, nil, "OVERLAY")
+	split.line:SetWidth(2)
+	split.line:SetPoint("TOP")
+	split.line:SetPoint("BOTTOM")
+	split.line:Hide()
+	local function Dragging(self)
+		local x = GetCursorPosition() / S.frame:GetEffectiveScale()
+		local w = math.max(SIDE_MIN, math.min(SIDE_MAX, math.floor(x - S.frame:GetLeft() + 0.5)))
+		if w ~= math.floor(side:GetWidth() + 0.5) then
+			side:SetWidth(w)
+			XUI.DB.global.panel.sideW = w
+			LayoutChips()
+			relayout()
+		end
+	end
+	split:SetScript("OnEnter", function(self)
+		self.line:SetVertexColor(O:Accent())
+		self.line:Show()
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText("Drag to resize the sidebar")
+		GameTooltip:AddLine("Double-click to reset", 0.6, 0.6, 0.6)
+		GameTooltip:Show()
+	end)
+	split:SetScript("OnLeave", function(self)
+		if not self.dragging then self.line:Hide() end
+		GameTooltip:Hide()
+	end)
+	split:SetScript("OnMouseDown", function(self)
+		self.dragging = true
+		self:SetScript("OnUpdate", Dragging) -- only while the mouse is held
+	end)
+	split:SetScript("OnMouseUp", function(self)
+		self.dragging = nil
+		self:SetScript("OnUpdate", nil)
+		if not self:IsMouseOver() then self.line:Hide() end
+	end)
+	split:SetScript("OnDoubleClick", function()
+		side:SetWidth(SIDEBAR_W)
+		XUI.DB.global.panel.sideW = SIDEBAR_W
+		LayoutChips()
+		relayout()
+	end)
 	local grip = CreateFrame("Button", nil, S.frame)
 	grip:SetSize(18, 18)
 	grip:SetPoint("BOTTOMRIGHT", -2, 2)

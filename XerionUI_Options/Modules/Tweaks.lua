@@ -61,9 +61,6 @@ O:RegisterModuleOptions("ZoneText", function(ctx, m, G)
 			{ type = "slider", label = "Size", path = "scale", min = 50, max = 200, step = 5,
 				tip = "Percent of Blizzard's own size. The color of the text stays as the game sets it for the zone." },
 		}, G.Font("font", { noSize = true }))),
-		Card("Preview", {
-			{ type = "button", text = "Show sample", onClick = function() m:Test() end },
-		}),
 	}
 end)
 
@@ -82,7 +79,6 @@ O:RegisterModuleOptions("EUIFocusCastbar", function(ctx, m, G)
 			{ type = "dropdown", label = "Voice", path = "kick.voice", values = function() return XUI.Audio:Voices() end, disabled = off, tip = "The text to speech voice installed on this computer." },
 			{ type = "slider", label = "Volume", path = "kick.volume", min = 0, max = 100, step = 5, disabled = off, tip = "How loud the spoken text is." },
 			{ type = "slider", label = "Speed", path = "kick.rate", min = -10, max = 10, step = 1, disabled = off, tip = "How fast the voice speaks; negative is slower." },
-			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 	}
 end)

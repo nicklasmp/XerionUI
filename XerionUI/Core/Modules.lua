@@ -310,6 +310,12 @@ function Module:SetEnabled(on)
 	XUI:Fire("ModuleStateChanged", self)
 end
 
+-- A module has a preview only if it draws something in OnRefresh; the rest
+-- (confirm popups, sounds, ...) show their example through Test instead.
+function Module:HasPreview()
+	return not self.noPreview and self.OnRefresh ~= nil
+end
+
 function Module:SetPreview(on)
 	on = on and true or false
 	if self.preview == on then return end

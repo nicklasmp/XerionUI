@@ -238,14 +238,6 @@ function O:GroupPageSpec(key)
 							return table.concat(lines, "\n")
 						end },
 				}
-					if not m.noPreview then
-						items[#items + 1] = { type = "button", text = "Preview",
-							onClick = function() m:SetPreview(not m.preview) end }
-					end
-				if m.Test then
-					items[#items + 1] = { type = "button", text = "Test",
-						onClick = function() XUI.SafeCallFor(m, m.Test, m) end }
-				end
 				local function Tabbed(card)
 					if g.tabs and #g.members > 1 then
 						local own = card.hidden

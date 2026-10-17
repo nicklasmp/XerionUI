@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.31.0 - 2026-10-17
+- Sidebar width can be dragged (right edge, double-click resets) and is 15% wider by default
+
 ## 2.30.8 - 2026-10-17
 - Meter Reset now lives in a Damager Meter group under Group
 

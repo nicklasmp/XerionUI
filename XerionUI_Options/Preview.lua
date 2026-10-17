@@ -20,7 +20,7 @@ function O.SyncAutoPreview(key)
 	end
 	if XUI.DB.global.panel.autoPreview == false then return end
 	local m = XUI:GetModule(key)
-	if m and not m.preview and not S.autoStarted[m] then
+	if m and m:HasPreview() and not m.preview and not S.autoStarted[m] then
 		S.autoStarted[m] = true
 		m:SetPreview(true)
 	end

@@ -152,7 +152,7 @@ function O:RefreshPageHead()
 	f.module = m
 	local showModule = m ~= nil
 	f.enable:SetShown(showModule)
-	f.preview:SetShown(showModule and not m.noPreview)
+	f.preview:SetShown(showModule and m:HasPreview())
 	f.test:SetShown(showModule and m.Test ~= nil)
 	local states = showModule and m.PREVIEW_STATES
 	f.state:SetShown(states and true or false)
@@ -200,7 +200,8 @@ function O:RefreshPageHead()
 			f.status:SetText("Enabled, starting..." .. note)
 		else
 			f.status:SetTextColor(O:Color("muted"))
-			f.status:SetText("Off - switch it on, or use Preview to see it." .. note)
+			f.status:SetText(m:HasPreview() and ("Off - switch it on, or use Preview to see it." .. note)
+				or ("Off - switch it on to use it." .. note))
 		end
 		local ar, ag, ab = O:Accent()
 		if m.preview then

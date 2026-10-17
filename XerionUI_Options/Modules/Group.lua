@@ -563,7 +563,6 @@ O:RegisterModuleOptions("BonusRollConfirm", function(ctx, m, G)
 			{ type = "toggle", label = "Show the loot specialization", path = "showSpec",
 				tip = "Names the spec the roll will award for, so a wrong loot spec is noticed before the roll is gone." },
 			{ type = "toggle", label = "Say what happened", path = "announce" },
-			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 	}
 end)
@@ -578,7 +577,6 @@ O:RegisterModuleOptions("MeterReset", function(ctx, m, G)
 			{ type = "slider", label = "Delay after loading (s)", path = "delay", min = 0, max = 10, step = 1,
 				tip = "Waits a moment after the loading screen so the question does not appear on top of it." },
 			{ type = "toggle", label = "Say what happened", path = "announce" },
-			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 	}
 end)
@@ -689,7 +687,6 @@ O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 		Card("Where", {
 			{ type = "toggle", label = "In parties", path = "inParty" },
 			{ type = "toggle", label = "In raids (needs lead or assist)", path = "inRaid" },
-			{ type = "button", text = "Test", onClick = function() m:Test() end },
 		}),
 		Card("Text", G.Font("text", { color = true })),
 		Card("Border", G.Border("border")),
