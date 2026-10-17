@@ -1,10 +1,11 @@
 --------------------------------------------------------------------------------
 -- XerionUI_Options - Sidebar.lua
 -- (split out of Panel.lua; the window state lives in O.S)
--- A text-only accordion: pages on top, then one foldable group per category
--- (a chevron and a count), its modules below on a thin guide line. The open
--- page gets an accent bar on that line; a module's status dot turns into its
--- on/off switch while the row is hovered or open.
+-- An accordion: pages on top, then one foldable group per category (a chevron
+-- and a count), its modules below on a thin guide line, each with its icon. The
+-- open page gets an accent bar on that line. A module that is switched off is
+-- dimmed, its icon grey, and carries an "off" tag; a problem shows as an amber
+-- or red dot. Switching a module on or off is done in the page header.
 --------------------------------------------------------------------------------
 local XUI = _G.XerionUI
 local O = XUI and XUI.Options
@@ -19,7 +20,26 @@ local STEP = 14      -- extra indent per nesting level
 local itemPool, headPool = {}, {}
 
 local function IsHot(b)
-	return ((b.IsMouseOver and b:IsMouseOver()) or (b.sw and b.sw.IsMouseOver and b.sw:IsMouseOver())) and true or false
+	return (b.IsMouseOver and b:IsMouseOver()) and true or false
+end
+
+-- The icon a row shows: a module's own art, a group's, a page's glyph or a
+-- class crest. Second result: true for the one-colour glyphs (tinted by state).
+local function RowIcon(b, m, mode, key, classToken)
+	if m then
+		if m.isGroup then
+			return m.texture or (m.members[1] and XUI.ModuleIcon(m.members[1]))
+		end
+		return XUI.ModuleIcon(m)
+	elseif mode == "page" then
+		for _, sp in ipairs(O.systemPages) do
+			if sp.key == key then return O.MEDIA .. (sp.icon or "sliders"), true end
+		end
+	elseif classToken then
+		for _, ce in ipairs(O.classEntries) do
+			if ce.class.token == classToken then return ce.class.icon end
+		end
+	end
 end
 
 -- Fold chevron: points down when open, right when folded.
@@ -50,41 +70,43 @@ local function SidebarItem(i)
 	b.count = O:Text(b, O.SIZE.small, "faint")
 	b.count:SetPoint("RIGHT", -16, 0)
 
-	-- status dot (solid = on, ring = off; amber/red = a problem) that becomes a
-	-- real switch while the row is hot. A click here never opens the page.
-	b.sw = CreateFrame("Button", nil, b)
-	b.sw:SetSize(36, ITEM_H)
-	b.sw:SetPoint("RIGHT", -6, 0)
-	b.sw.ring = O:Icon(b.sw, "circle", 8, nil, "ARTWORK")
-	b.sw.ring:SetPoint("CENTER")
-	b.sw.hole = O:Icon(b.sw, "circle", 4, nil, "OVERLAY")
-	b.sw.hole:SetPoint("CENTER")
-	b.sw.switch = O.Switch(b.sw, 26, 14)
-	b.sw.switch:SetPoint("CENTER")
-	b.sw:SetScript("OnClick", function()
-		local m = b.module
-		if not m or m.isGroup then return end
-		m:SetEnabled(not m.db.enabled)
-		S.sidebarDirty = true
-		O:RefreshSidebar()
-		O:RefreshPageHead()
-		if S.pages[m.key] then S.pages[m.key]:Refresh() end
-	end)
-	b.sw:SetScript("OnEnter", function()
-		O:PaintItem(b)
-		if b.module and not b.module.isGroup then
-			GameTooltip:SetOwner(b.sw, "ANCHOR_RIGHT")
-			GameTooltip:SetText(b.module.db.enabled and "Switch off" or "Switch on")
-			GameTooltip:Show()
-		end
-	end)
-	b.sw:SetScript("OnLeave", function() O:PaintItem(b) GameTooltip:Hide() O:SettleSidebar() end)
+	-- icon with a thin dark frame, like the page header's
+	b.iconFrame = CreateFrame("Frame", nil, b)
+	b.iconFrame:SetSize(20, 20)
+	b.icon = b.iconFrame:CreateTexture(nil, "ARTWORK")
+	b.icon:SetPoint("TOPLEFT", 1, -1)
+	b.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+	b.iconBorder = XUI.Style:Border(b.iconFrame, 1)
+
+	-- right edge: "off" for a module that is switched off, a dot for a problem
+	b.state = O:Text(b, O.SIZE.small, "faint")
+	b.state:SetPoint("RIGHT", -14, 0)
+	b.state:SetText("off")
+	b.flag = O:Icon(b, "circle", 8, nil, "OVERLAY")
+	b.flag:SetPoint("RIGHT", -16, 0)
 
 	b:SetScript("OnEnter", function(self)
 		O:PaintItem(self)
-		if self.module and self.module.untested then
+		local m = self.module
+		if not m then return end
+		local lines = {}
+		if not m.db.enabled then lines[#lines + 1] = "Switched off. Open it to switch it on." end
+		if m.db.enabled and not m.isGroup then
+			if (m.errorCount or 0) > 0 then lines[#lines + 1] = m.errorCount .. " Lua error(s)"
+			else
+				local ok, why = m:CanRun()
+				if not ok then lines[#lines + 1] = "Not running: " .. (why or "unknown reason")
+				else
+					local issues = XUI.Health.Issues(m)
+					if #issues > 0 then lines[#lines + 1] = issues[1] end
+				end
+			end
+		end
+		if m.untested then lines[#lines + 1] = "Untested in game" end
+		if #lines > 0 then
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:SetText("Untested in game")
+			GameTooltip:SetText(m.name, 1, 1, 1)
+			for _, l in ipairs(lines) do GameTooltip:AddLine(l, 0.75, 0.75, 0.75, true) end
 			GameTooltip:Show()
 		end
 	end)
@@ -158,29 +180,25 @@ function O:PaintItem(b, full)
 	b.bar:SetVertexColor(ar, ag, ab)
 	local color = (selected or hot or cursor) and "text" or "label"
 	if m then
-		if not m.db.enabled and not selected then color = (hot or cursor) and "label" or "faint" end
+		local on = m.db.enabled
+		if not on and not selected then color = (hot or cursor) and "label" or "faint" end
 		b.text:SetTextColor(O:Color(color))
-		-- dot colour: accent = running, amber/red = problem, ring = off
-		b.sw.hole:Hide()
-		local showSwitch = (hot or selected) and not m.isGroup
 		if full or not b.dot then b.dot = DotState(m) end
-		b.sw.switch:SetShown(showSwitch)
-		b.sw.ring:SetShown(not showSwitch)
-		if b.dot ~= "off" then
-			b.sw.switch:SetState(true)
-			if b.dot == "bad" then b.sw.ring:SetVertexColor(O:Color("danger"))
-			elseif b.dot == "warn" then b.sw.ring:SetVertexColor(1, 0.8, 0.2)
-			else b.sw.ring:SetVertexColor(ar, ag, ab) end
-		else
-			b.sw.switch:SetState(false)
-			b.sw.ring:SetVertexColor(O:Color("faint"))
-			if not showSwitch then
-				b.sw.hole:SetVertexColor(O:Color("sidebar"))
-				b.sw.hole:Show()
-			end
-		end
+		-- off: grey, dimmed icon and an "off" tag; a problem: amber / red dot
+		b.icon:SetDesaturated(not on)
+		b.iconFrame:SetAlpha(on and 1 or 0.4)
+		b.state:SetShown(not on and not m.isGroup)
+		b.flag:SetShown(on and (b.dot == "warn" or b.dot == "bad"))
+		if b.dot == "bad" then b.flag:SetVertexColor(O:Color("danger")) else b.flag:SetVertexColor(1, 0.8, 0.2) end
 	else
 		b.text:SetTextColor(O:Color(color))
+		b.state:Hide()
+		b.flag:Hide()
+		b.icon:SetDesaturated(false)
+		b.iconFrame:SetAlpha(1)
+		if b.mono then
+			if selected then b.icon:SetVertexColor(ar, ag, ab) else b.icon:SetVertexColor(O:Color(hot and "label" or "muted")) end
+		end
 		if b.classToken then b.chev:SetFolded(not S.expandedClass[b.classToken], S.expandedClass[b.classToken]) end
 	end
 end
@@ -377,7 +395,22 @@ function O:RefreshSidebar()
 		b.guide:ClearAllPoints()
 		b.guide:Hide()
 		b.chev:Hide()
-		b.sw:SetShown(m ~= nil)
+		local tex, mono = RowIcon(b, m, mode, key, classToken)
+		b.mono = mono
+		b.iconFrame:ClearAllPoints()
+		b.iconFrame:SetShown(tex ~= nil and mode ~= "setting")
+		if tex and mode ~= "setting" then
+			b.icon:SetTexture(tex)
+			if mono then
+				b.icon:SetTexCoord(0, 1, 0, 1)
+				b.iconBorder:Apply({ useGlobal = false, style = "NONE" })
+			else
+				b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+				b.icon:SetVertexColor(1, 1, 1)
+				b.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
+			end
+		end
+		local hasIcon = tex ~= nil
 		b.count:SetText("")
 		if mode == "module" or mode == "setting" then
 			local gx = GUIDE_X + indent
@@ -390,7 +423,8 @@ function O:RefreshSidebar()
 			b.sel:SetPoint("BOTTOMRIGHT")
 			b.bar:SetPoint("TOPLEFT", gx - 1, 0)
 			b.bar:SetPoint("BOTTOMLEFT", gx - 1, 0)
-			b.text:SetPoint("LEFT", gx + (mode == "setting" and 30 or 18), 0)
+			b.iconFrame:SetPoint("LEFT", gx + 10, 0)
+			b.text:SetPoint("LEFT", gx + (mode == "setting" and 30 or (hasIcon and 38 or 18)), 0)
 			b.text:SetPoint("RIGHT", mode == "setting" and -10 or -42, 0)
 		else
 			b.hl:SetAllPoints()
@@ -400,10 +434,12 @@ function O:RefreshSidebar()
 			if mode == "group" then
 				b.chev:SetPoint("LEFT", 16 + indent, 0)
 				b.chev:Show()
-				b.text:SetPoint("LEFT", 36 + indent, 0)
+				b.iconFrame:SetPoint("LEFT", 34 + indent, 0)
+				b.text:SetPoint("LEFT", (hasIcon and 60 or 36) + indent, 0)
 				b.chev:SetFolded(not S.expandedClass[classToken], S.expandedClass[classToken])
 			else
-				b.text:SetPoint("LEFT", 18, 0)
+				b.iconFrame:SetPoint("LEFT", 16, 0)
+				b.text:SetPoint("LEFT", hasIcon and 42 or 18, 0)
 			end
 			b.text:SetPoint("RIGHT", -16, 0)
 		end

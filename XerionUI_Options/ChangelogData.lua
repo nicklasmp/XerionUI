@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.33.0", date = "2026-10-17", notes = {
+		"Sidebar rows have icons again; the on/off toggle in the sidebar is gone (use the switch in the page header)",
+		"Modules that are off are dimmed with a grey icon and an off tag; amber or red dot marks a problem; hover tooltip explains the state",
+	} },
 	{ version = "2.32.1", date = "2026-10-17", notes = {
 		"Fix typo: \"Damager Meter\" is now \"Damage Meter\"",
 	} },
@@ -54,8 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.30.2", date = "2026-10-17", notes = {
 		"World markers are now placed at the mouse cursor immediately (/wm [@cursor]), no confirming click needed",
-	} },
-	{ version = "2.30.1", date = "2026-10-17", notes = {
-		"Global glow now defaults to EllesmereUI's Auto-Cast Shine: four layers of sparks (sizes 7/6/5/4), layer k laps k times slower; saved profiles move onto it once (colour kept)",
 	} },
 }
