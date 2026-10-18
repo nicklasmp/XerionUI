@@ -544,7 +544,7 @@ function O:RefreshSidebar()
 						-- one sub-heading per dungeon (alphabetical), its modules below it
 						local byDungeon, names = {}, {}
 						for _, m in ipairs(list) do
-							local d = m.dungeon or "Other"
+							local d = m.dungeon or O.DIALOG_NO_ZONE
 							if not byDungeon[d] then byDungeon[d] = {} names[#names + 1] = d end
 							byDungeon[d][#byDungeon[d] + 1] = m
 						end

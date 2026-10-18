@@ -150,6 +150,9 @@ function writeTGA(name, c, color) {
   writeTGA('warn', c);
 }
 
+// ban: a ring with a slash (hide this NPC everywhere)
+{ const c = canvas(32); fill(c, ring(16, 16, 10.5, 2.6)); fill(c, line(9, 9, 23, 23, 2.6)); writeTGA('ban', c); }
+
 // play
 { const c = canvas(32); fill(c, tri(11, 8, 11, 24, 24, 16)); writeTGA('play', c); }
 

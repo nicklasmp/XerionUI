@@ -45,6 +45,9 @@ local M = XUI:NewModule("AutoGossip", {
 		builtinNoConfirm = {}, -- [id] = true: a built-in's "are you sure?" left alone
 		instanceOnly = true,
 		announce = true,
+		-- NPCs that turn up everywhere and never matter (a vendor, a bank): { id, name }.
+		-- Their dialogs are not recorded and not listed, in any dungeon.
+		blacklist = {},
 	},
 })
 
@@ -183,11 +186,48 @@ local function NPCInfo()
 	return name, npcID
 end
 
+--------------------------------------------------------------------------------
+-- NPC blacklist (across every dungeon)
+--------------------------------------------------------------------------------
+-- An entry matches by NPC ID when both sides have one, else by name (any case).
+local function SameNPC(entry, npcID, name)
+	if entry.id and npcID then return entry.id == npcID end
+	return entry.name ~= nil and type(name) == "string" and entry.name:lower() == name:lower()
+end
+
+function M:IsBlacklisted(npcID, name)
+	for _, entry in ipairs(self.db.blacklist or {}) do
+		if SameNPC(entry, npcID, name) then return true end
+	end
+	return false
+end
+
+-- Hides an NPC everywhere: its seen dialogs are dropped (the ones switched on stay,
+-- so a pick never turns into a dialog you can no longer see and switch off).
+function M:Blacklist(npcID, name)
+	npcID, name = tonumber(npcID), Clean(name)
+	if not (npcID or name) or self:IsBlacklisted(npcID, name) then return end
+	local db = self.db
+	db.blacklist = db.blacklist or {}
+	db.blacklist[#db.blacklist + 1] = { id = npcID, name = name }
+	for id, e in pairs(Seen()) do
+		if SameNPC({ id = npcID, name = name }, e.npcID, e.npc) and not self:IsPicked(id) then Seen()[id] = nil end
+	end
+	XUI:Fire("GossipSeen", true)
+end
+
+function M:Unblacklist(index)
+	local list = self.db.blacklist
+	if list and list[index] then table.remove(list, index) end
+	XUI:Fire("GossipSeen", true)
+end
+
 -- Stores every option of the open gossip window, when inside an instance.
 function M:Record(opts)
 	local where = InstanceInfo()
 	if not where or type(opts) ~= "table" then return end
 	local npc, npcID = NPCInfo()
+	if self:IsBlacklisted(npcID, npc) then return end
 	local seen, changed = Seen(), false
 	pcall(function()
 		for _, o in ipairs(opts) do
@@ -240,6 +280,8 @@ function M:Catalogue()
 		if not id or have[id] then return end
 		have[id] = true
 		local e = seen[id] or {}
+		-- a blacklisted NPC's dialogs are hidden, unless one is switched on
+		if self:IsBlacklisted(e.npcID, e.npc) and not self:IsPicked(id) then return end
 		out[#out + 1] = {
 			id = id,
 			text = e.text or legacyNames[id],

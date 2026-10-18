@@ -77,57 +77,6 @@ local function AddTooltip(f, desc)
 end
 
 --------------------------------------------------------------------------------
--- Reset to default: a small arrow in the card's left margin, next to a row whose
--- value differs from its default. Only for settings that live at a `path` and
--- whose context knows the defaults (ctx.defaults() returns the table the path
--- is relative to). Page.lua attaches it to every control it builds.
---------------------------------------------------------------------------------
-local RESETTABLE = { toggle = true, slider = true, dropdown = true, color = true, input = true }
-
-function O.AttachReset(control, desc, ctx)
-	if not (RESETTABLE[desc.type] and desc.path and not desc.get and not desc.set and not desc.noReset and ctx.defaults) then return end
-	local function Default()
-		local d = ctx.defaults()
-		if type(d) ~= "table" then return nil end
-		return GetPath(d, desc.path)
-	end
-	local size = max(10, min(12, (O.CARD_PAD or 16) - 4))
-	local btn = CreateFrame("Button", nil, control)
-	btn:SetSize(size + 4, 18)
-	btn:SetPoint("RIGHT", control, "LEFT", -1, 0)
-	btn.icon = O:Icon(btn, "reset", size, "faint")
-	btn.icon:SetPoint("CENTER")
-	btn:Hide()
-	control.resetButton = btn
-	btn:SetScript("OnEnter", function(self)
-		self.icon:SetVertexColor(O:Accent())
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetText("Reset to default", 1, 1, 1)
-		local d = Default()
-		local shown = type(d) == "boolean" and (d and "On" or "Off") or (type(d) ~= "table" and tostring(d)) or nil
-		if shown and shown ~= "" then GameTooltip:AddLine("Default: " .. shown, 0.75, 0.75, 0.75, true) end
-		GameTooltip:Show()
-	end)
-	btn:SetScript("OnLeave", function(self)
-		self.icon:SetVertexColor(O:Color("faint"))
-		GameTooltip:Hide()
-	end)
-	btn:SetScript("OnClick", function()
-		local d = Default()
-		if d == nil then return end
-		if type(d) == "table" then d = XUI.CopyTable(d) end
-		O:SetValue(desc, ctx, d)
-		GameTooltip:Hide()
-	end)
-	local refresh = control.Refresh
-	function control:Refresh()
-		refresh(self)
-		local d = Default()
-		btn:SetShown(d ~= nil and not XUI.DeepEqual(O:GetValue(desc, ctx), d))
-	end
-end
-
---------------------------------------------------------------------------------
 -- Toggle: Label ........... [switch]
 --------------------------------------------------------------------------------
 -- w/h default to 30x16; pass whole, even pixel sizes (never SetScale it, that
@@ -201,6 +150,7 @@ function Controls.toggle(parent, desc, ctx)
 	btn:SetScript("OnEnter", function() if not f.disabled then f.label:SetTextColor(O:Color("text")) end end)
 	btn:SetScript("OnLeave", function() f:Refresh() end)
 	AddTooltip(btn, desc)
+	f.activate = function() btn:Click() end -- keyboard: Space / Enter
 	function f:Refresh()
 		self.value = O:GetValue(desc, ctx) and true or false
 		self.disabled = IsDisabled(desc, ctx)
@@ -319,6 +269,17 @@ function Controls.slider(parent, desc, ctx)
 	box:SetScript("OnLeave", function(self) O:SetSkinColor(self, "field") end)
 	AddTooltip(s, desc)
 
+	-- keyboard: Space / Enter types a number, Left / Right step the value
+	f.activate = function() if not f.disabled then box:SetFocus() end end
+	f.nudge = function(dir)
+		if f.disabled then return end
+		local v = Snap((f.value or desc.min) + dir * (desc.step or 1), desc)
+		if v ~= f.value then
+			f.value = v
+			O:SetValue(desc, ctx, v)
+		end
+	end
+
 	function f:Refresh()
 		local v = tonumber(O:GetValue(desc, ctx)) or desc.min
 		self.value = v
@@ -419,6 +380,7 @@ function Controls.dropdown(parent, desc, ctx)
 			O:SetValue(desc, ctx, v)
 		end)
 	end)
+	f.activate = function() f.field:Click() end -- keyboard: Space / Enter opens the list
 	-- the tip, plus a word on a media name that is not installed
 	f.field:HookScript("OnEnter", function(self)
 		if not (desc.tip or f.missing) then return end
@@ -494,6 +456,7 @@ function Controls.color(parent, desc, ctx)
 	btn:SetScript("OnEnter", function() if not f.disabled then f.label:SetTextColor(O:Color("text")) end end)
 	btn:SetScript("OnLeave", function() f:Refresh() end)
 	AddTooltip(btn, desc)
+	f.activate = function() btn:Click() end
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)
 		local r, g, b, a = XUI.UnpackColor(O:GetValue(desc, ctx))
@@ -576,6 +539,7 @@ function Controls.input(parent, desc, ctx)
 	end)
 	box:HookScript("OnEditFocusLost", function() O:SetBorderColor(holder, O:Color("fieldLine")) end)
 	AddTooltip(holder, desc)
+	f.activate = function() if not (f.disabled or desc.readOnly) then box:SetFocus() end end
 
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)
@@ -604,6 +568,7 @@ function Controls.button(parent, desc, ctx)
 		f.button:SetWidth(math.max(110, (f.button.text:GetStringWidth() or 0) + 32))
 	end
 	AddTooltip(f.button, desc)
+	f.activate = function() f.button:Click() end
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)
 		self.button.text:SetText(Resolve(desc.text or desc.label, ctx) or "")
@@ -822,6 +787,7 @@ function Controls.keybind(parent, desc, ctx)
 	end)
 	f.btn:SetScript("OnHide", function() if f.capturing then Stop() end end)
 	AddTooltip(f.btn, desc)
+	f.activate = function() if not f.disabled then f.btn:Click() end end
 
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)

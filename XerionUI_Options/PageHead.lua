@@ -139,18 +139,13 @@ function O.CreatePageHead(parent)
 	end)
 	f.state:SetPoint("RIGHT", f.test, "LEFT", -8, 0)
 
-	-- the "more" menu: rarely used page tools stay out of the way of the main buttons
-	f.diag = HeadButton("dots", false, 28, "Diagnostics and other page tools.", function(self)
-		local m = f.module
-		if not m then return end
-		O:ShowMenu(self, {
-			{
-				text = "Diagnostics",
-				tip = "A text with the game build, this module's status, its checks, recent errors and its own debug lines - copy it when something does not work.",
-				onClick = function() O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end,
-			},
-		})
-	end, "More")
+	-- diagnostics: one tool, so it is an icon that opens it directly (no menu)
+	f.diag = HeadButton("notes", false, 28,
+		"A text with the game build, this module's status, its checks, recent errors and its own debug lines - copy it when something does not work.",
+		function()
+			local m = f.module
+			if m then O:ShowText(m.name .. " - diagnostics", XUI.Health.Report(m)) end
+		end, "Diagnostics")
 
 	-- the texts end left of the leftmost control so they never run under it
 	function f.FitTexts()
@@ -324,8 +319,9 @@ function O:RefreshPageHead()
 		if banner then
 			f.status:SetText("")
 		elseif m.db.enabled and m.running then
-			f.status:SetTextColor(O:Accent())
-			f.status:SetText("Running." .. note)
+			-- the switch beside the title already says it runs; only the note stays
+			f.status:SetTextColor(O:Color("muted"))
+			f.status:SetText((note:gsub("^%s+", "")))
 		elseif m.db.enabled then
 			f.status:SetTextColor(O:Color("muted"))
 			f.status:SetText("Enabled, starting..." .. note)

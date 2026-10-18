@@ -27,7 +27,6 @@ local M = XUI:NewModule("CoTank", {
 	order = 40,
 	defaults = {
 		tankOnly = true,
-		pinName = "",
 		bar = T.Bar(200, 22),
 		border = T.Border(),
 		nameText = T.Font(12, { anchor = "LEFT", x = 4, y = 0 }),
@@ -77,34 +76,18 @@ local function IsTankUnit(unit)
 	return false
 end
 
-local function PinnedName(db)
-	local want = (db.pinName or ""):match("^%s*(.-)%s*$")
-	if want == "" then return nil end
-	return want:match("^[^%-]+") or want
-end
-
-local function NameMatches(unit, want)
-	local name = UnitName(unit)
-	if IsSecret(name) or type(name) ~= "string" then return false end
-	return name == want or name:lower() == want:lower()
-end
-
 local function FindCoTank()
 	if not IsInRaid() then return nil end
 	local _, itype = IsInInstance()
 	if itype == "pvp" or itype == "arena" then return nil end
-	local db = M.db
-	local want = PinnedName(db)
-	local gate = db.tankOnly
-	if not want and gate and not XUI.PlayerIsTank(true) then return nil end
-	local pinned, first, kept, unknown
+	if M.db.tankOnly and not XUI.PlayerIsTank(true) then return nil end
+	local first, kept, unknown
 	for i = 1, 40 do
 		local u = RAID[i]
 		if UnitExists(u) then
 			-- the bar must never be you; a secret answer is skipped
 			local same = UnitIsUnit(u, "player")
 			if not IsSecret(same) and not same then
-				if want and not pinned and NameMatches(u, want) then pinned = u end
 				local tank = IsTankUnit(u)
 				if tank then
 					first = first or u
@@ -115,8 +98,6 @@ local function FindCoTank()
 			end
 		end
 	end
-	if pinned then return pinned end
-	if want and gate and not XUI.PlayerIsTank(true) then return nil end
 	if kept or first then return kept or first end
 	if unknown and coUnit and UnitExists(coUnit) then return coUnit end
 	return nil

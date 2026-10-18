@@ -2,6 +2,14 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.36.0 - 2026-10-18
+- Auto NPC Dialog: the Picked tab is replaced by a Blacklist tab; blacklisting an NPC hides it and stops recording it in every dungeon
+- Auto NPC Dialog: the Other group is now called Uncategorized
+- New Misc. category (below EllesmereUI Tweaks) with Meter Reset, Bonus Roll Confirm and World Markers
+- Options panel: keyboard navigation (Tab, Space/Enter, arrows) through switches, dropdowns, sliders and boxes
+- Options panel: Diagnostics is a single icon instead of a menu; the Running status text is gone; the per-setting reset arrow is removed
+- Co-Tank: removed the Always show this player option
+
 ## 2.35.2 - 2026-10-18
 - New addon icon: bold Inter X on black, replaces the X/Twitter-style mark
 

@@ -49,6 +49,7 @@ DB.GLOBAL_DEFAULTS = {
 		groupFolded = false,
 		dungeonFolded = false,
 		tweaksFolded = false,
+		miscFolded = false,
 	},
 	-- gossip options seen inside instances, [optionID] = { text, npc, zone, ... }
 	-- (Modules/Group/AutoGossip.lua)

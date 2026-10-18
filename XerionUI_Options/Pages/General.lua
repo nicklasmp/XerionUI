@@ -12,7 +12,6 @@ O:RegisterSystemPage({
 	icon = "sliders",
 	desc = "Settings for the addon itself. They apply to every profile.",
 	root = function() return XUI.DB.global end,
-	defaults = function() return XUI.DB.GLOBAL_DEFAULTS end,
 	onChange = function(path)
 		if path == "panel.density" then
 			O:SetDensity(XUI.DB.global.panel.density)

@@ -265,8 +265,6 @@ O:RegisterModuleOptions("CoTank", function(ctx, m, G)
 	return {
 		Card("Who", {
 			{ type = "toggle", label = "Only while you are tank-specced", path = "tankOnly" },
-			{ type = "input", label = "Always show this player", path = "pinName",
-				tip = "Leave empty to find the other tank automatically." },
 			{
 				type = "button", text = function() return m.testMode and "Stop test" or "Test on your target" end,
 				tip = "Puts the live bar and the real debuff row on your target (or you), no raid needed.",
@@ -397,6 +395,14 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		end)
 		r.forget:SetPoint("RIGHT", -6, 0)
 
+		-- hides the NPC in every dungeon (Blacklist tab)
+		r.ban = O:IconButton(r, "ban", 22, "Blacklist this NPC", function()
+			local e = r.entry
+			m:Blacklist(e.npcID, e.npc)
+			Changed()
+		end)
+		O:Tooltip(r.ban, "Blacklist this NPC", "Hides the NPC and all its dialogs in every dungeon. Undo it under the Blacklist tab.")
+
 		r.confirm = CreateFrame("Button", nil, r)
 		r.confirm:SetSize(86, GOSSIP_ROW_H - 2)
 		r.confirm.switch = O.Switch(r.confirm)
@@ -430,6 +436,31 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		return r
 	end
 
+	-- one row of the blacklist tab: an NPC and a button that takes it off again
+	f.brows = {}
+	local function BlackRow(i)
+		local r = f.brows[i]
+		if r then return r end
+		r = CreateFrame("Frame", nil, f)
+		r:SetHeight(GOSSIP_ROW_H - 2)
+		r.bg = O:Rect(r, "control", "BACKGROUND")
+		r.bg:SetAllPoints()
+		r.bg:SetAlpha(0.45)
+		r.remove = O:IconButton(r, "close", 22, "Remove from the blacklist", function()
+			m:Unblacklist(r.index)
+			Changed()
+		end)
+		r.remove:SetPoint("RIGHT", -6, 0)
+		r.name = O:Text(r, O.SIZE.text, "text")
+		r.name:SetPoint("LEFT", 12, 5)
+		r.name:SetPoint("RIGHT", r.remove, "LEFT", -8, 0)
+		r.sub = O:Text(r, O.SIZE.small, "muted")
+		r.sub:SetPoint("LEFT", 12, -9)
+		r.sub:SetPoint("RIGHT", r.remove, "LEFT", -8, 0)
+		f.brows[i] = r
+		return r
+	end
+
 	local function Fill(r, e)
 		r.entry = e
 		r.pick.switch:SetState(e.picked, false)
@@ -445,8 +476,14 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		r.sub:SetText(table.concat(sub, "  -  "))
 		r.confirm.switch:SetState(e.confirm, false)
 		r.forget:SetShown(not e.builtin)
+		local canBan = e.npc ~= nil or e.npcID ~= nil
+		r.ban:SetShown(canBan)
+		r.ban:ClearAllPoints()
+		if e.builtin then r.ban:SetPoint("RIGHT", -6, 0) else r.ban:SetPoint("RIGHT", r.forget, "LEFT", -4, 0) end
 		r.confirm:ClearAllPoints()
-		if e.builtin then
+		if canBan then
+			r.confirm:SetPoint("RIGHT", r.ban, "LEFT", -8, 0)
+		elseif e.builtin then
 			r.confirm:SetPoint("RIGHT", -6, 0)
 		else
 			r.confirm:SetPoint("RIGHT", r.forget, "LEFT", -8, 0)
@@ -455,11 +492,39 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		r.sub:SetPoint("RIGHT", r.confirm, "LEFT", -8, 0)
 	end
 
+	-- the blacklist tab: the NPCs hidden in every dungeon
+	local function RefreshBlacklist(self)
+		for k = 1, #self.heads do self.heads[k]:Hide() end
+		for k = 1, #self.rows do self.rows[k]:Hide() end
+		local list = m.db.blacklist or {}
+		for i, entry in ipairs(list) do
+			local r = BlackRow(i)
+			r.index = i
+			r.name:SetText(entry.name or ("NPC " .. entry.id))
+			r.sub:SetText(entry.id and ("NPC ID " .. entry.id) or "matched by name")
+			r:ClearAllPoints()
+			r:SetPoint("TOPLEFT", 0, -(i - 1) * GOSSIP_ROW_H)
+			r:SetPoint("TOPRIGHT", 0, -(i - 1) * GOSSIP_ROW_H)
+			r:Show()
+		end
+		for k = #list + 1, #self.brows do self.brows[k]:Hide() end
+		if #list == 0 then
+			self.empty:SetText("No NPC is blacklisted. Use the blocked-circle button on a dialog to hide its NPC in every dungeon, or add one below.")
+			self.empty:Show()
+			self.height = 40
+		else
+			self.empty:Hide()
+			self.height = #list * GOSSIP_ROW_H
+		end
+	end
+
 	function f:Refresh()
 		local filter = ctx.gossipFilter or "all"
+		if filter == "blacklist" then return RefreshBlacklist(self) end
+		for k = 1, #self.brows do self.brows[k]:Hide() end
 		local list = {}
 		for _, e in ipairs(m:Catalogue()) do
-			if (filter == "all" or e.picked) and (not zoneOnly or (e.zone or O.DIALOG_NO_ZONE) == zoneOnly) then list[#list + 1] = e end
+			if (not zoneOnly or (e.zone or O.DIALOG_NO_ZONE) == zoneOnly) then list[#list + 1] = e end
 		end
 		local y, nh, nr, i = 0, 0, 0, 1
 		while i <= #list do
@@ -499,9 +564,7 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		for k = nh + 1, #self.heads do self.heads[k]:Hide() end
 		for k = nr + 1, #self.rows do self.rows[k]:Hide() end
 		if #list == 0 then
-			self.empty:SetText(filter == "all"
-				and "No dialogs seen yet. Talk to an NPC inside a dungeon and its options show up under that dungeon."
-				or "Nothing is picked. Switch a dialog on under All.")
+			self.empty:SetText("No dialogs seen yet. Talk to an NPC inside a dungeon and its options show up under that dungeon.")
 			self.empty:Show()
 			y = 40
 		else
@@ -521,6 +584,37 @@ local function GossipList(parent, ctx, m, zoneOnly)
 	return f
 end
 
+-- The items of the Dialogs card, shared by the module's page and a dungeon's page:
+-- the dialog list (zone = one dungeon, nil = all) and a Blacklist tab that holds the
+-- NPCs hidden in every dungeon.
+local function DialogItems(m, zone)
+	local function onBlacklist(c) return (c.gossipFilter or "all") == "blacklist" end
+	return {
+		{ type = "description",
+			text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically. An NPC that shows up everywhere and never matters (a vendor, a bank) can be blacklisted once for all dungeons." },
+		{ type = "tabs",
+			values = { { value = "all", text = "Dialogs" }, { value = "blacklist", text = "Blacklist" } },
+			get = function(c) return c.gossipFilter or "all" end,
+			set = function(c, v) c.gossipFilter = v end },
+		{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, zone) end },
+		{ type = "button", text = "Forget unpicked",
+			tip = zone and "Removes every dialog of this dungeon that is not switched on." or "Removes every listed dialog that is not switched on.",
+			hidden = onBlacklist,
+			onClick = function(c) m:ForgetUnpicked(zone) c:Changed("options") end },
+		{ type = "input", label = "Blacklist an NPC (name or ID)", hidden = function(c) return not onBlacklist(c) end,
+			tip = "Type an NPC's name or its NPC ID and press Enter. Its dialogs are hidden and no longer recorded, in every dungeon.",
+			commitOnEnterOnly = true, noUndo = true,
+			get = function() return "" end,
+			set = function(c, v)
+				v = (v or ""):match("^%s*(.-)%s*$")
+				if v == "" then return end
+				local id = tonumber(v)
+				m:Blacklist(id, (not id) and v or nil)
+				c:Changed("options")
+			end },
+	}
+end
+
 O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 	return {
 		Card("When", {
@@ -529,17 +623,7 @@ O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 			{ type = "toggle", label = "Only inside instances", path = "instanceOnly" },
 			{ type = "toggle", label = "Say what it picked", path = "announce" },
 		}),
-		Card("Dialogs", {
-			{ type = "description",
-				text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically." },
-			{ type = "tabs",
-				values = { { value = "all", text = "All" }, { value = "picked", text = "Picked" } },
-				get = function(c) return c.gossipFilter or "all" end,
-				set = function(c, v) c.gossipFilter = v end },
-			{ type = "custom", build = function(parent, c) return GossipList(parent, c, m) end },
-			{ type = "button", text = "Forget unpicked", tip = "Removes every listed dialog that is not switched on.",
-				onClick = function() m:ForgetUnpicked() ctx:Changed("options") end },
-		}),
+		Card("Dialogs", DialogItems(m)),
 		Card("Manual IDs", {
 			{ type = "description",
 				text = "Gossip option IDs typed by hand, comma separated. The switches above edit these lists too. Talk to the NPC and press the button to print the IDs on offer." },
@@ -725,17 +809,7 @@ function O.DialogPage(g)
 							O:RefreshPageHead()
 						end },
 				}, { ctx = mctx }),
-				Only("dialogs", O.Card(zone, {
-					{ type = "description",
-						text = "Every NPC dialog you open in this dungeon is listed here. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically." },
-					{ type = "tabs",
-						values = { { value = "all", text = "All" }, { value = "picked", text = "Picked" } },
-						get = function(c) return c.gossipFilter or "all" end,
-						set = function(c, v) c.gossipFilter = v end },
-					{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, zone) end },
-					{ type = "button", text = "Forget unpicked", tip = "Removes every dialog of this dungeon that is not switched on.",
-						onClick = function() m:ForgetUnpicked(zone) mctx:Changed("options") end },
-				})),
+				Only("dialogs", O.Card(zone, DialogItems(m, zone))),
 			}
 			for _, card in ipairs(O.moduleBuilders.AutoGossip(mctx, m, O.Groups)) do
 				if card.title ~= "Dialogs" then cards[#cards + 1] = Only("settings", card) end

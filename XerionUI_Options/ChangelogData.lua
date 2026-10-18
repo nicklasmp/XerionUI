@@ -4,6 +4,14 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.36.0", date = "2026-10-18", notes = {
+		"Auto NPC Dialog: the Picked tab is replaced by a Blacklist tab; blacklisting an NPC hides it and stops recording it in every dungeon",
+		"Auto NPC Dialog: the Other group is now called Uncategorized",
+		"New Misc. category (below EllesmereUI Tweaks) with Meter Reset, Bonus Roll Confirm and World Markers",
+		"Options panel: keyboard navigation (Tab, Space/Enter, arrows) through switches, dropdowns, sliders and boxes",
+		"Options panel: Diagnostics is a single icon instead of a menu; the Running status text is gone; the per-setting reset arrow is removed",
+		"Co-Tank: removed the Always show this player option",
+	} },
 	{ version = "2.35.2", date = "2026-10-18", notes = {
 		"New addon icon: bold Inter X on black, replaces the X/Twitter-style mark",
 	} },
@@ -52,8 +60,5 @@ O.CHANGELOG = {
 	{ version = "2.33.0", date = "2026-10-17", notes = {
 		"Sidebar rows have icons again; the on/off toggle in the sidebar is gone (use the switch in the page header)",
 		"Modules that are off are dimmed with a grey icon and an off tag; amber or red dot marks a problem; hover tooltip explains the state",
-	} },
-	{ version = "2.32.1", date = "2026-10-17", notes = {
-		"Fix typo: \"Damager Meter\" is now \"Damage Meter\"",
 	} },
 }

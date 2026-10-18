@@ -49,7 +49,7 @@ O.S = S
 function O.ModuleContext(m)
 	return O:NewContext(function() return m.db end, function(path)
 		XUI:NotifySettingChanged(m, path)
-	end, { module = m, defaults = function() return XUI.DB.moduleDefaults[m.key] end })
+	end, { module = m })
 end
 
 function O:GetPageIfBuilt(key) return S.pages[key] end
@@ -97,7 +97,7 @@ local function GetPage(key)
 			if s.key == key then
 				spec = {
 					tabbed = s.list, -- a page that is meant to be a list is not split into tabs
-					ctx = O:NewContext(s.root, s.onChange, { system = s, defaults = s.defaults }),
+					ctx = O:NewContext(s.root, s.onChange, { system = s }),
 					build = function(ctx) return s.build(ctx, O.Groups) end,
 				}
 				break
@@ -406,6 +406,19 @@ local function CreateWindow()
 		elseif IsAltKeyDown() and (key == "LEFT" or key == "RIGHT") then
 			self:SetPropagateKeyboardInput(false)
 			O:GoHistory(key == "LEFT" and -1 or 1)
+		elseif key == "TAB" and not IsControlKeyDown() and not IsAltKeyDown() then
+			-- Tab walks the settings of the open page (see O:KeyMove in Page.lua)
+			self:SetPropagateKeyboardInput(false)
+			O:KeyMove(IsShiftKeyDown() and -1 or 1)
+		elseif S.keyFocus and (key == "UP" or key == "DOWN") then
+			self:SetPropagateKeyboardInput(false)
+			O:KeyMove(key == "UP" and -1 or 1)
+		elseif S.keyFocus and (key == "SPACE" or key == "ENTER") then
+			self:SetPropagateKeyboardInput(false)
+			O:KeyUse()
+		elseif S.keyFocus and S.keyFocus.nudge and (key == "LEFT" or key == "RIGHT") then
+			self:SetPropagateKeyboardInput(false)
+			O:KeyUse(key == "LEFT" and -1 or 1)
 		else
 			self:SetPropagateKeyboardInput(true)
 		end
@@ -497,6 +510,7 @@ local function CreateWindow()
 
 	S.frame:SetScript("OnHide", function()
 		O.CloseDropdown()
+		O:KeyClear()
 		for _, m in ipairs(XUI.modules) do m:SetPreview(false) end
 		wipe(S.autoStarted)
 		if S.docked then S.docked = false end
@@ -558,7 +572,7 @@ function O:Unfold(key)
 	if not (e and e.category) then return end
 	panel[e.category .. "Folded"] = nil
 	if e.category == "dungeon" and panel.dungeonsFolded then
-		panel.dungeonsFolded[e.dungeon or "Other"] = nil
+		panel.dungeonsFolded[e.dungeon or O.DIALOG_NO_ZONE] = nil
 	end
 end
 
@@ -603,6 +617,7 @@ function O:Open(key, focus)
 		end
 	end
 	if S.currentKey and S.pages[S.currentKey] and S.currentKey ~= key then S.pages[S.currentKey]:Hide() end
+	if changed then O:KeyClear() end
 	S.currentKey = key
 	if key == "changelog" then
 		O.ChangelogOpened()

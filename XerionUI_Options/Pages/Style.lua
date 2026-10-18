@@ -57,7 +57,6 @@ O:RegisterSystemPage({
 	icon = "drop",
 	desc = "The look every module follows unless you style it on its own.",
 	root = function() return XUI.DB.style end,
-	defaults = function() return XUI.DB.STYLE_DEFAULTS end,
 	onChange = function()
 		XUI.Style:Invalidate()
 		XUI:Fire("StyleChanged")

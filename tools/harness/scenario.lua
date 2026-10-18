@@ -288,45 +288,47 @@ Step("options: filter, jump to a setting, undo, menu, resize", function()
 	O:Open("general")
 end)
 
-Step("options: reset arrow on module and group pages", function()
+Step("options: keyboard cursor walks the settings", function()
 	local O = XUI.Options
-	local checked = 0
-	local keys = {}
-	for key in pairs(O.groupByKey) do keys[#keys + 1] = key end
-	table.sort(keys)
-	table.insert(keys, 1, "general")
-	for _, m in ipairs(XUI.modules) do keys[#keys + 1] = m.key end
-	for _, key in ipairs(keys) do
-		if checked >= 3 then break end
-		O:Open(key)
+	local S = O.S
+	local slider, page
+	for _, m in ipairs(XUI.modules) do
+		O:Open(m.key)
 		MOCK.Advance(0.1)
-		local page = O.S.pages[key]
-		local target
+		page = S.pages[m.key]
 		if page then
 			for _, card in ipairs(page.cards) do
 				for _, c in ipairs(card.items) do
-					if not target and c.resetButton and c.desc.type == "toggle" then target = c end
+					if not slider and c.nudge and c.desc.path and c:IsShown() and not c.disabled then slider = c end
 				end
 			end
 		end
-		if target then
-			local d, ctx = target.desc, target.ctx
-			local default = XUI.GetPath(ctx.defaults(), d.path)
-			assert(type(default) == "boolean", "toggle default is not a boolean: " .. key)
-			assert(not target.resetButton:IsShown(), "reset arrow shown on a default value: " .. key)
-			O.Undo.Clear()
-			O:SetValue(d, ctx, not default)
-			page:Refresh()
-			assert(target.resetButton:IsShown(), "no reset arrow on a changed value: " .. key)
-			target.resetButton:GetScript("OnClick")(target.resetButton)
-			page:Refresh()
-			assert((O:GetValue(d, ctx) and true or false) == default, "reset did not restore the default: " .. key)
-			assert(not target.resetButton:IsShown(), "reset arrow stays after reset: " .. key)
-			checked = checked + 1
-		end
+		if slider then break end
 	end
-	assert(checked > 0, "no page with a resettable toggle")
+	assert(slider, "no slider on any module page")
+	O:KeyClear()
+	local seen = {}
+	for _ = 1, 60 do
+		O:KeyMove(1)
+		assert(S.keyFocus, "Tab did not set a cursor")
+		assert(page.keyRing and page.keyRing:IsShown(), "no ring around the cursor")
+		seen[S.keyFocus] = true
+		if S.keyFocus == slider then break end
+	end
+	assert(S.keyFocus == slider, "Tab never reached the slider")
+	local d, ctx = slider.desc, slider.ctx
+	local before = O:GetValue(d, ctx)
+	O:KeyUse(1)
+	assert(O:GetValue(d, ctx) ~= before or before >= d.max, "Right did not step the slider")
+	O:KeyUse(-1)
+	O:KeyMove(-1)
+	assert(S.keyFocus ~= slider, "Shift+Tab did not move back")
+	-- the window routes the keys
+	local key = S.frame:GetScript("OnKeyDown")
+	key(S.frame, "TAB")
+	assert(S.keyFocus, "OnKeyDown Tab lost the cursor")
 	O:Open("general")
+	assert(not S.keyFocus, "cursor survives a page change")
 end)
 
 Step("diagnostics, self-check and perf", function()
@@ -533,6 +535,25 @@ Step("auto NPC dialog: records dungeon dialogs and picks switched-on ones", func
 	m:SetConfirm(48126, false)
 	assert(not m:IsConfirm(48126), "a built-in confirm can be switched off")
 	m:SetConfirm(48126, true)
+
+	-- a blacklisted NPC is hidden in every dungeon and no longer recorded
+	m:SetPicked(555001, false)
+	m.db.blacklist = {} -- the page exercise above may have added entries
+	m:Blacklist(219123, "Kaelen")
+	assert(m:IsBlacklisted(219123, nil) and m:IsBlacklisted(nil, "kaelen"), "the NPC should be blacklisted by ID and by name")
+	assert(seen[555001] == nil and seen[555002] == nil, "blacklisting drops the NPC's seen dialogs")
+	for _, c in ipairs(m:Catalogue()) do assert(c.npc ~= "Kaelen", "a blacklisted NPC is not listed") end
+	MOCK.Fire("GOSSIP_SHOW")
+	MOCK.Advance(0.1)
+	assert(seen[555001] == nil, "a blacklisted NPC's dialogs are not recorded")
+	XUI.Options:Open("AutoGossip")
+	MOCK.Advance(0.1)
+	m:Unblacklist(1)
+	assert(not m:IsBlacklisted(219123, "Kaelen"), "an NPC can be taken off the blacklist: " .. tostring(#m.db.blacklist) .. " left")
+	MOCK.Fire("GOSSIP_SHOW")
+	MOCK.Advance(0.1)
+	assert(seen[555001], "a dialog is recorded again once the NPC is off the blacklist")
+	XUI.Options:Open("style")
 
 	-- outside instances nothing is recorded
 	inside = false

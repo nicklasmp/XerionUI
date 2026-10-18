@@ -196,7 +196,6 @@ local function BuildCard(page, spec)
 		assert(make, "XerionUI options: unknown control type " .. tostring(desc.type))
 		local control = make(f, desc, ctx)
 		control.page = page
-		O.AttachReset(control, desc, ctx)
 		card.items[#card.items + 1] = control
 	end
 	return card
@@ -425,6 +424,7 @@ function Page:Layout()
 	end
 	self.child:SetHeight(y + PAGE_PAD)
 	self.scroll:UpdateBar()
+	if self.keyRing then O:KeyRefresh(self) end
 end
 
 -- Tab / Shift+Tab inside a number or text box: on to the next (or back to the
@@ -443,18 +443,115 @@ function O.TabFrom(control, dir)
 	end
 	if not at or #boxes < 2 then return end
 	local nextControl = boxes[(at - 1 + dir) % #boxes + 1]
-	-- bring it into view, then focus it
-	local top, childTop = nextControl:GetTop(), page.child:GetTop()
-	if top and childTop then
-		local view = page.scroll:GetHeight()
-		local scroll = page.scroll:GetVerticalScroll()
-		local y = childTop - top
-		if y < scroll or y > scroll + view - 40 then
-			page.scroll:SetVerticalScroll(math.max(0, math.min(page.scroll:GetVerticalScrollRange(), y - 60)))
-			page.scroll:UpdateBar()
+	O.ScrollIntoView(page, nextControl)
+	nextControl.box:SetFocus()
+end
+
+-- Scrolls the page just far enough to bring a control into view.
+function O.ScrollIntoView(page, control)
+	local top, childTop = control:GetTop(), page.child:GetTop()
+	if not (top and childTop) then return end
+	local view = page.scroll:GetHeight()
+	local scroll = page.scroll:GetVerticalScroll()
+	local y = childTop - top
+	if y < scroll or y > scroll + view - 40 then
+		page.scroll:SetVerticalScroll(math.max(0, math.min(page.scroll:GetVerticalScrollRange(), y - 60)))
+		page.scroll:UpdateBar()
+	end
+end
+
+--------------------------------------------------------------------------------
+-- Keyboard cursor: Tab / Shift+Tab (or Up / Down once it is on) walk through the
+-- settings of the open page with an accent frame around the current one; Space or
+-- Enter uses it (flip, open the list, type a number, press), Left / Right step a
+-- slider. Panel.lua routes the keys. Tab inside a number or text box goes to the
+-- next box instead (O.TabFrom).
+--------------------------------------------------------------------------------
+local KEY_TYPES = { toggle = true, slider = true, dropdown = true, color = true, button = true, input = true, keybind = true }
+
+local function KeyList(page)
+	local list = {}
+	for _, card in ipairs(page.cards) do
+		for _, c in ipairs(card.items) do
+			if KEY_TYPES[c.desc.type] and c.activate and c:IsShown() and not c.disabled then list[#list + 1] = c end
 		end
 	end
-	nextControl.box:SetFocus()
+	return list
+end
+
+local function KeyRing(page)
+	if page.keyRing then return page.keyRing end
+	local ring = CreateFrame("Frame", nil, page.child)
+	ring:SetFrameLevel(page.child:GetFrameLevel() + 30)
+	ring.edges = {}
+	for i, def in ipairs({
+		{ "TOPLEFT", "TOPRIGHT", true }, { "BOTTOMLEFT", "BOTTOMRIGHT", true },
+		{ "TOPLEFT", "BOTTOMLEFT", false }, { "TOPRIGHT", "BOTTOMRIGHT", false },
+	}) do
+		local t = O:Rect(ring, nil, "OVERLAY")
+		t:SetPoint(def[1])
+		t:SetPoint(def[2])
+		if def[3] then t:SetHeight(2) else t:SetWidth(2) end
+		ring.edges[i] = t
+	end
+	ring:Hide()
+	page.keyRing = ring
+	return ring
+end
+
+function O:KeyClear()
+	local S = O.S
+	S.keyFocus = nil
+	for _, page in pairs(S.pages) do
+		if page.keyRing then page.keyRing:Hide() end
+	end
+end
+
+-- Puts the ring on the focused control, or hides it when that is gone.
+function O:KeyRefresh(page)
+	local ring = page.keyRing
+	local c = O.S.keyFocus
+	if not ring then return end
+	if not (c and c.page == page and c:IsShown()) then
+		ring:Hide()
+		return
+	end
+	local r, g, b = O:Accent()
+	for _, t in ipairs(ring.edges) do t:SetVertexColor(r, g, b, 1) end
+	ring:ClearAllPoints()
+	ring:SetPoint("TOPLEFT", c, "TOPLEFT", -6, 3)
+	ring:SetPoint("BOTTOMRIGHT", c, "BOTTOMRIGHT", 6, -3)
+	ring:Show()
+end
+
+-- Moves the cursor one setting on (step 1) or back (step -1).
+function O:KeyMove(step)
+	local S = O.S
+	local page = S.pages[S.currentKey]
+	if not (page and page.built) then return end
+	local list = KeyList(page)
+	if #list == 0 then return end
+	local at
+	for i, c in ipairs(list) do if c == S.keyFocus then at = i end end
+	local target
+	if at then target = list[(at - 1 + step) % #list + 1] else target = step > 0 and list[1] or list[#list] end
+	S.keyFocus = target
+	O.ScrollIntoView(page, target)
+	KeyRing(page)
+	O:KeyRefresh(page)
+end
+
+-- Space / Enter on the cursor; Left / Right (dir -1 / 1) on a slider.
+function O:KeyUse(dir)
+	local c = O.S.keyFocus
+	if not (c and c:IsShown()) then return false end
+	if dir then
+		if not c.nudge then return false end
+		c.nudge(dir)
+	else
+		c.activate()
+	end
+	return true
 end
 
 -- Scrolls so the card titled `title` is at the top of the page.
@@ -544,6 +641,7 @@ end
 
 function Page:Hide()
 	self.scroll:Hide()
+	if self.keyRing then self.keyRing:Hide() end
 end
 
 -- Rebuilds the page from its spec (after a profile switch, say).
@@ -554,6 +652,8 @@ function Page:Rebuild()
 		if card.head then card.head:Hide() card.head:SetParent(nil) end
 	end
 	wipe(self.cards)
+	if O.S.keyFocus and O.S.keyFocus.page == self then O.S.keyFocus = nil end
+	if self.keyRing then self.keyRing:Hide() end
 	self.nav = nil
 	self.built = false
 	if self.scroll:IsShown() then self:Show() end
