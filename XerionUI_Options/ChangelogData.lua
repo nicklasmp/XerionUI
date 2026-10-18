@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.37.2", date = "2026-10-18", notes = {
+		"Who Has the Key moved to the Misc category",
+	} },
 	{ version = "2.37.1", date = "2026-10-18", notes = {
 		"Sidebar: Misc (renamed from Misc.) sits above EllesmereUI Tweaks and Dungeons sits right before Classes",
 		"Options panel: the Position card is removed from every module (move frames with the unlock icon in the header)",
@@ -58,8 +61,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.0", date = "2026-10-17", notes = {
 		"Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)",
-	} },
-	{ version = "2.33.2", date = "2026-10-17", notes = {
-		"Give XerionUI Options the addon list icon",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.37.2 - 2026-10-18
+- Who Has the Key moved to the Misc category
+
 ## 2.37.1 - 2026-10-18
 - Sidebar: Misc (renamed from Misc.) sits above EllesmereUI Tweaks and Dungeons sits right before Classes
 - Options panel: the Position card is removed from every module (move frames with the unlock icon in the header)
