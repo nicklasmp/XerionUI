@@ -149,6 +149,24 @@ function O:DialogEntry(zone)
 	return entry
 end
 
+-- The NPC blacklist is one entry of its own under Dungeons ("All dungeons"): it
+-- holds the NPCs that turn up in every dungeon and never matter, so it is not
+-- tied to one dungeon's page (its page is O.BlacklistPage, Modules/Group.lua).
+O.BLACKLIST_KEY = "dlg-blacklist"
+O.BLACKLIST_ZONE = "All dungeons"
+
+function O:BlacklistEntry()
+	local entry = O.groupByKey[O.BLACKLIST_KEY]
+	if entry then return entry end
+	entry = Register({
+		key = O.BLACKLIST_KEY, name = "NPC blacklist", category = "dungeon", dungeon = O.BLACKLIST_ZONE,
+		desc = "NPCs that turn up in every dungeon and never matter. Their dialogs are hidden everywhere.",
+		members = { { "AutoGossip", "Auto NPC dialog" } },
+	}, false)
+	if entry then O.groupPages[O.BLACKLIST_KEY] = function(g) return O.BlacklistPage(g) end end
+	return entry
+end
+
 -- The texture shown for a group: its first member's.
 function O.GroupIcon(g)
 	return g.texture or XUI.ModuleIcon(g.members[1])

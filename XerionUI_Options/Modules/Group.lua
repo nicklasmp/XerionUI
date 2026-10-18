@@ -339,7 +339,9 @@ end)
 -- switch to pick it and one to answer its "are you sure?" box.
 local GOSSIP_HEAD_H, GOSSIP_ROW_H = 30, 44
 
-local function GossipList(parent, ctx, m, zoneOnly)
+-- mode: nil = the dialogs (of one dungeon with zoneOnly, else all), "blacklist" = the
+-- blacklisted NPCs, "several" = NPCs seen in more than one dungeon (candidates)
+local function GossipList(parent, ctx, m, zoneOnly, mode)
 	local f = CreateFrame("Frame", nil, parent)
 	f.height = 40
 	f.heads, f.rows = {}, {}
@@ -492,8 +494,60 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		r.sub:SetPoint("RIGHT", r.confirm, "LEFT", -8, 0)
 	end
 
-	-- the blacklist tab: the NPCs hidden in every dungeon
+	-- NPCs seen in several dungeons, each with a button that blacklists it
+	f.srows = {}
+	local function SeveralRow(i)
+		local r = f.srows[i]
+		if r then return r end
+		r = CreateFrame("Frame", nil, f)
+		r:SetHeight(GOSSIP_ROW_H - 2)
+		r.bg = O:Rect(r, "control", "BACKGROUND")
+		r.bg:SetAllPoints()
+		r.bg:SetAlpha(0.45)
+		r.ban = O:IconButton(r, "ban", 22, "Blacklist this NPC", function()
+			m:Blacklist(r.npc.id, r.npc.name)
+			Changed()
+		end)
+		r.ban:SetPoint("RIGHT", -6, 0)
+		r.name = O:Text(r, O.SIZE.text, "text")
+		r.name:SetPoint("LEFT", 12, 5)
+		r.name:SetPoint("RIGHT", r.ban, "LEFT", -8, 0)
+		r.sub = O:Text(r, O.SIZE.small, "muted")
+		r.sub:SetPoint("LEFT", 12, -9)
+		r.sub:SetPoint("RIGHT", r.ban, "LEFT", -8, 0)
+		f.srows[i] = r
+		return r
+	end
+
+	local function RefreshSeveral(self)
+		for k = 1, #self.heads do self.heads[k]:Hide() end
+		for k = 1, #self.rows do self.rows[k]:Hide() end
+		for k = 1, #self.brows do self.brows[k]:Hide() end
+		local list = m:CrossDungeonNPCs()
+		for i, npc in ipairs(list) do
+			local r = SeveralRow(i)
+			r.npc = npc
+			r.name:SetText(npc.name or ("NPC " .. npc.id))
+			r.sub:SetText(("Seen in %d dungeons: %s"):format(#npc.zones, table.concat(npc.zones, ", ")))
+			r:ClearAllPoints()
+			r:SetPoint("TOPLEFT", 0, -(i - 1) * GOSSIP_ROW_H)
+			r:SetPoint("TOPRIGHT", 0, -(i - 1) * GOSSIP_ROW_H)
+			r:Show()
+		end
+		for k = #list + 1, #self.srows do self.srows[k]:Hide() end
+		if #list == 0 then
+			self.empty:SetText("No NPC has shown up in more than one dungeon yet. When one does, it is listed here so you can hide it.")
+			self.empty:Show()
+			self.height = 40
+		else
+			self.empty:Hide()
+			self.height = #list * GOSSIP_ROW_H
+		end
+	end
+
+	-- the blacklist: the NPCs hidden in every dungeon
 	local function RefreshBlacklist(self)
+		for k = 1, #self.srows do self.srows[k]:Hide() end
 		for k = 1, #self.heads do self.heads[k]:Hide() end
 		for k = 1, #self.rows do self.rows[k]:Hide() end
 		local list = m.db.blacklist or {}
@@ -509,7 +563,7 @@ local function GossipList(parent, ctx, m, zoneOnly)
 		end
 		for k = #list + 1, #self.brows do self.brows[k]:Hide() end
 		if #list == 0 then
-			self.empty:SetText("No NPC is blacklisted. Use the blocked-circle button on a dialog to hide its NPC in every dungeon, or add one below.")
+			self.empty:SetText("No NPC is blacklisted. Add one below, or use the blocked-circle button on a dialog.")
 			self.empty:Show()
 			self.height = 40
 		else
@@ -519,9 +573,10 @@ local function GossipList(parent, ctx, m, zoneOnly)
 	end
 
 	function f:Refresh()
-		local filter = ctx.gossipFilter or "all"
-		if filter == "blacklist" then return RefreshBlacklist(self) end
+		if mode == "blacklist" then return RefreshBlacklist(self) end
+		if mode == "several" then return RefreshSeveral(self) end
 		for k = 1, #self.brows do self.brows[k]:Hide() end
+		for k = 1, #self.srows do self.srows[k]:Hide() end
 		local list = {}
 		for _, e in ipairs(m:Catalogue()) do
 			if (not zoneOnly or (e.zone or O.DIALOG_NO_ZONE) == zoneOnly) then list[#list + 1] = e end
@@ -584,34 +639,17 @@ local function GossipList(parent, ctx, m, zoneOnly)
 	return f
 end
 
--- The items of the Dialogs card, shared by the module's page and a dungeon's page:
--- the dialog list (zone = one dungeon, nil = all) and a Blacklist tab that holds the
--- NPCs hidden in every dungeon.
+-- The items of the Dialogs card, shared by the module's page and a dungeon's page.
+-- zone = one dungeon, nil = all. NPCs that show up everywhere are hidden on the
+-- blacklist page (Dungeons > All dungeons), not here.
 local function DialogItems(m, zone)
-	local function onBlacklist(c) return (c.gossipFilter or "all") == "blacklist" end
 	return {
 		{ type = "description",
-			text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically. An NPC that shows up everywhere and never matters (a vendor, a bank) can be blacklisted once for all dungeons." },
-		{ type = "tabs",
-			values = { { value = "all", text = "Dialogs" }, { value = "blacklist", text = "Blacklist" } },
-			get = function(c) return c.gossipFilter or "all" end,
-			set = function(c, v) c.gossipFilter = v end },
+			text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically. The blocked-circle button hides the NPC in every dungeon (see Dungeons > All dungeons > NPC blacklist)." },
 		{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, zone) end },
 		{ type = "button", text = "Forget unpicked",
 			tip = zone and "Removes every dialog of this dungeon that is not switched on." or "Removes every listed dialog that is not switched on.",
-			hidden = onBlacklist,
 			onClick = function(c) m:ForgetUnpicked(zone) c:Changed("options") end },
-		{ type = "input", label = "Blacklist an NPC (name or ID)", hidden = function(c) return not onBlacklist(c) end,
-			tip = "Type an NPC's name or its NPC ID and press Enter. Its dialogs are hidden and no longer recorded, in every dungeon.",
-			commitOnEnterOnly = true, noUndo = true,
-			get = function() return "" end,
-			set = function(c, v)
-				v = (v or ""):match("^%s*(.-)%s*$")
-				if v == "" then return end
-				local id = tonumber(v)
-				m:Blacklist(id, (not id) and v or nil)
-				c:Changed("options")
-			end },
 	}
 end
 
@@ -779,6 +817,41 @@ O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+-- The blacklist page (Dungeons > All dungeons): the NPCs hidden in every dungeon,
+-- a box to add one, and the NPCs already seen in more than one dungeon.
+function O.BlacklistPage(g)
+	local m = XUI:GetModule("AutoGossip")
+	local mctx = O.ModuleContext(m)
+	return {
+		ctx = O:NewContext(function() return {} end, nil, { group = g }),
+		build = function()
+			return {
+				O.Card("Blacklisted NPCs", {
+					{ type = "description",
+						text = "NPCs that turn up in many dungeons and never matter - a vendor, a bank, a quartermaster. A blacklisted NPC is hidden in every dungeon and its dialogs are no longer recorded. A dialog you have switched on keeps working and stays listed." },
+					{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, nil, "blacklist") end },
+					{ type = "input", label = "Add an NPC (name or ID)",
+						tip = "Type an NPC's name or its NPC ID and press Enter.",
+						commitOnEnterOnly = true, noUndo = true,
+						get = function() return "" end,
+						set = function(c, v)
+							v = (v or ""):match("^%s*(.-)%s*$")
+							if v == "" then return end
+							local id = tonumber(v)
+							m:Blacklist(id, (not id) and v or nil)
+							c:Changed("options")
+						end },
+				}, { ctx = mctx }),
+				O.Card("Seen in several dungeons", {
+					{ type = "description",
+						text = "NPCs whose dialogs were recorded in two or more dungeons. Blacklist the ones that do not matter." },
+					{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, nil, "several") end },
+				}, { ctx = mctx }),
+			}
+		end,
+	}
+end
+
 -- The "NPC dialogs" page under a dungeon: that dungeon's dialogs, and the
 -- module's own settings on a second tab.
 function O.DialogPage(g)

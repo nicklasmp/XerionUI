@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.37.0", date = "2026-10-18", notes = {
+		"NPC blacklist is a page of its own under Dungeons > All dungeons, shared by every dungeon (the Blacklist tab inside the dialog lists is gone)",
+		"NPC blacklist: NPCs seen in two or more dungeons are listed as candidates, with a button to blacklist them",
+	} },
 	{ version = "2.36.0", date = "2026-10-18", notes = {
 		"Auto NPC Dialog: the Picked tab is replaced by a Blacklist tab; blacklisting an NPC hides it and stops recording it in every dungeon",
 		"Auto NPC Dialog: the Other group is now called Uncategorized",
@@ -56,9 +60,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.33.1", date = "2026-10-17", notes = {
 		"Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag",
-	} },
-	{ version = "2.33.0", date = "2026-10-17", notes = {
-		"Sidebar rows have icons again; the on/off toggle in the sidebar is gone (use the switch in the page header)",
-		"Modules that are off are dimmed with a grey icon and an off tag; amber or red dot marks a problem; hover tooltip explains the state",
 	} },
 }

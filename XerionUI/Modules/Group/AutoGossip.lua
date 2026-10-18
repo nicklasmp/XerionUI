@@ -216,6 +216,37 @@ function M:Blacklist(npcID, name)
 	XUI:Fire("GossipSeen", true)
 end
 
+-- NPCs whose dialogs were seen in two or more dungeons and that are not blacklisted
+-- yet: the candidates for the blacklist (a vendor or a bank follows you around).
+--   { id, name, zones = { sorted dungeon names } }
+function M:CrossDungeonNPCs()
+	local byNPC, order = {}, {}
+	for _, e in pairs(Seen()) do
+		if (e.npc or e.npcID) and e.zone then
+			local key = e.npcID and ("id" .. e.npcID) or ("name" .. e.npc:lower())
+			local n = byNPC[key]
+			if not n then
+				n = { id = e.npcID, name = e.npc, zoneSet = {} }
+				byNPC[key] = n
+				order[#order + 1] = n
+			end
+			n.id, n.name = n.id or e.npcID, n.name or e.npc
+			n.zoneSet[e.zone] = true
+		end
+	end
+	local out = {}
+	for _, n in ipairs(order) do
+		local zones = {}
+		for z in pairs(n.zoneSet) do zones[#zones + 1] = z end
+		if #zones >= 2 and not self:IsBlacklisted(n.id, n.name) then
+			table.sort(zones)
+			out[#out + 1] = { id = n.id, name = n.name, zones = zones }
+		end
+	end
+	table.sort(out, function(a, b) return (a.name or "") < (b.name or "") end)
+	return out
+end
+
 function M:Unblacklist(index)
 	local list = self.db.blacklist
 	if list and list[index] then table.remove(list, index) end

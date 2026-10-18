@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.37.0 - 2026-10-18
+- NPC blacklist is a page of its own under Dungeons > All dungeons, shared by every dungeon (the Blacklist tab inside the dialog lists is gone)
+- NPC blacklist: NPCs seen in two or more dungeons are listed as candidates, with a button to blacklist them
+
 ## 2.36.0 - 2026-10-18
 - Auto NPC Dialog: the Picked tab is replaced by a Blacklist tab; blacklisting an NPC hides it and stops recording it in every dungeon
 - Auto NPC Dialog: the Other group is now called Uncategorized

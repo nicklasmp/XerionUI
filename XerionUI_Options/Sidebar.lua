@@ -524,6 +524,12 @@ function O:RefreshSidebar()
 				-- Auto NPC Dialog: one entry under every dungeon with a seen dialog
 				local gm = XUI:GetModule("AutoGossip")
 				if gm and gm:IsAvailable() then
+					-- and the blacklist, which belongs to no dungeon
+					local be = O:BlacklistEntry()
+					if be and ModuleMatches(be, cat.name:lower() .. " npc blacklist hide dialog gossip") then
+						all[#all + 1] = gm
+						if Keep(be) then list[#list + 1] = be end
+					end
 					for _, zone in ipairs(O.DialogZones()) do
 						local e = O:DialogEntry(zone)
 						if e and ModuleMatches(e, cat.name:lower() .. " " .. zone:lower() .. " dialog gossip") then
