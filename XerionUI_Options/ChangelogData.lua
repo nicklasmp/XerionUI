@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.38.1", date = "2026-10-18", notes = {
+		"Center the dark action row on the Auto Mark Tank button",
+	} },
 	{ version = "2.38.0", date = "2026-10-18", notes = {
 		"Preview and Test are accent-filled primary buttons with a label, in the page header and wherever a Test button sits in a page",
 		"Options panel: the Filter this page box is removed",
@@ -60,8 +63,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.2", date = "2026-10-17", notes = {
 		"Sidebar: remove the Active filter tab (it hid disabled modules); a saved Active filter resets to All",
-	} },
-	{ version = "2.34.1", date = "2026-10-17", notes = {
-		"Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)",
 	} },
 }

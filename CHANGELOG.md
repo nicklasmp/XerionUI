@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.38.1 - 2026-10-18
+- Center the dark action row on the Auto Mark Tank button
+
 ## 2.38.0 - 2026-10-18
 - Preview and Test are accent-filled primary buttons with a label, in the page header and wherever a Test button sits in a page
 - Options panel: the Filter this page box is removed

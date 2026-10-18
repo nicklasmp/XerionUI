@@ -138,8 +138,9 @@ local function Button()
 	title:SetPoint("LEFT", head, "LEFT", 10, 0)
 	-- inset action row: marker icon + hint, the part that reads as the button
 	local row = button:CreateTexture(nil, "BORDER")
-	row:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 10, 10)
-	row:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -10, 10)
+	-- centred in the space under the header: ~5px above and below, 6px each side
+	row:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 6, 5)
+	row:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -6, 5)
 	row:SetHeight(40)
 	row:SetColorTexture(0, 0, 0, 0.4)
 	-- hover: a soft white wash over the action row, drawn by the client
