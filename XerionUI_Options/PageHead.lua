@@ -75,24 +75,48 @@ function O.CreatePageHead(parent)
 		end
 	end)
 
-	-- Preview and Test are icon-only: the row stays short and the title keeps its room
-	f.preview = CreateFrame("Button", nil, f)
-	f.preview:SetSize(28, 28)
-	f.preview:SetPoint("RIGHT", -24, 0)
-	O:Skin(f.preview, "control")
-	f.preview.icon = O:Icon(f.preview, "eye", 16, "muted")
-	f.preview.icon:SetPoint("CENTER")
-	f.preview.text = O:Text(f.preview, O.SIZE.small, "label") -- recoloured with the icon; never filled
-	f.preview:SetScript("OnClick", function()
+	-- Preview and Test are the page's main actions: filled in the accent, with a word.
+	-- A quiet one (the preview is running) turns into an accent outline.
+	local function CTA(icon, text, width, tip, onClick)
+		local b = CreateFrame("Button", nil, f)
+		b:SetSize(width, 28)
+		O:Skin(b, "control", "controlLine")
+		b.icon = O:Icon(b, icon, 14, nil)
+		b.icon:SetPoint("LEFT", 12, 0)
+		b.text = O:Text(b, O.SIZE.text, "text")
+		b.text:SetPoint("LEFT", b.icon, "RIGHT", 8, 0)
+		b.text:SetText(text)
+		function b:Paint(hover)
+			local r, g, bl = O:Accent()
+			if self.quiet then
+				O:SetSkinColor(self, hover and "controlHover" or "control")
+				O:SetBorderColor(self, r, g, bl, 0.9)
+				self.icon:SetVertexColor(r, g, bl)
+				self.text:SetTextColor(r, g, bl)
+			else
+				local k = hover and 1 or 0.85
+				self.__skinBg:SetVertexColor(r * k, g * k, bl * k, 1)
+				O:SetBorderColor(self, r * k, g * k, bl * k, 1)
+				self.icon:SetVertexColor(1, 1, 1)
+				self.text:SetTextColor(1, 1, 1)
+			end
+		end
+		b:SetScript("OnClick", onClick)
+		b:SetScript("OnEnter", function(self) self:Paint(true) end)
+		b:SetScript("OnLeave", function(self) self:Paint(false) end)
+		O:Tooltip(b, text, tip)
+		b:Paint(false)
+		return b
+	end
+
+	f.preview = CTA("eye", "Preview", 124, "Shows the module with sample content so you can see your changes. Ends when the window closes.", function()
 		local m = f.module
 		if m then
 			m:SetPreview(not m.preview)
 			O:RefreshPageHead()
 		end
 	end)
-	f.preview:SetScript("OnEnter", function(self) O:SetSkinColor(self, "controlHover") end)
-	f.preview:SetScript("OnLeave", function(self) O:SetSkinColor(self, "control") end)
-	O:Tooltip(f.preview, "Preview", "Shows the module with sample content so you can see your changes. Ends when the window closes.")
+	f.preview:SetPoint("RIGHT", -24, 0)
 
 	-- text == false makes an icon-only button; `title` then names it in the tooltip
 	local function HeadButton(icon, text, width, tip, onClick, title)
@@ -116,7 +140,7 @@ function O.CreatePageHead(parent)
 	end
 
 	-- plays a short sample through the module's real code
-	f.test = HeadButton("play", false, 28, "Runs a short sample through the real code, as if it had been triggered in the game.", function()
+	f.test = CTA("play", "Test", 80, "Runs a short sample through the real code, as if it had been triggered in the game.", function()
 		local m = f.module
 		if m and m.Test then
 			-- a test goes through the real code, not the sample
@@ -124,7 +148,7 @@ function O.CreatePageHead(parent)
 			XUI.SafeCallFor(m, m.Test, m)
 			O:RefreshPageHead()
 		end
-	end, "Test")
+	end)
 	f.test:SetPoint("RIGHT", f.preview, "LEFT", -8, 0)
 
 	-- cycles the looks the preview can take
@@ -330,14 +354,10 @@ function O:RefreshPageHead()
 			f.status:SetText(m:HasPreview() and ("Off - switch it on, or use Preview to see it." .. note)
 				or ("Off - switch it on to use it." .. note))
 		end
-		local ar, ag, ab = O:Accent()
-		if m.preview then
-			f.preview.icon:SetVertexColor(ar, ag, ab)
-			f.preview.text:SetTextColor(ar, ag, ab)
-		else
-			f.preview.icon:SetVertexColor(O:Color("muted"))
-			f.preview.text:SetTextColor(O:Color("label"))
-		end
+		f.preview.quiet = m.preview and true or false
+		f.preview.text:SetText(m.preview and "Stop preview" or "Preview")
+		f.preview:Paint(false)
+		f.test:Paint(false)
 	elseif O.groupByKey[S.currentKey] then
 		local g = O.groupByKey[S.currentKey]
 		f.icon:SetTexture(O.GroupIcon(g))

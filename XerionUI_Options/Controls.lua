@@ -571,7 +571,10 @@ function Controls.button(parent, desc, ctx)
 	f.activate = function() f.button:Click() end
 	function f:Refresh()
 		self.disabled = IsDisabled(desc, ctx)
-		self.button.text:SetText(Resolve(desc.text or desc.label, ctx) or "")
+		local label = Resolve(desc.text or desc.label, ctx) or ""
+		self.button.text:SetText(label)
+		-- a Test button is a main action, like Preview in the page header
+		self.button.primary = desc.primary or (label:lower():find("test", 1, true) ~= nil)
 		FitWidth()
 		self.button:SetDisabled(self.disabled)
 	end

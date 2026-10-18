@@ -2,8 +2,7 @@
 -- XerionUI_Options - NavBar.lua
 -- The strip between the page header and the cards: chips that jump between the
 -- page's cards (they switch the card on a long page, scroll to it on a short
--- one) and a filter box that narrows the page to the settings matching what is
--- typed. The chips come from page.nav (Page.lua), the filter is page.filter.
+-- one). The chips come from page.nav (Page.lua).
 --------------------------------------------------------------------------------
 local XUI = _G.XerionUI
 local O = XUI and XUI.Options
@@ -11,7 +10,6 @@ if not O then return end
 
 local S = O.S
 local NAV_H = O.LAYOUT.NAV_H
-local FILTER_W = 190
 local CHIP_GAP = 4
 local MORE_W = 34
 
@@ -25,33 +23,6 @@ function O.CreateNavBar(parent)
 	f.line:SetPoint("BOTTOMLEFT")
 	f.line:SetPoint("BOTTOMRIGHT")
 
-	local box = CreateFrame("EditBox", nil, f)
-	box:SetSize(FILTER_W, 24)
-	box:SetPoint("RIGHT", -16, 0)
-	box:SetAutoFocus(false)
-	box:SetFont(O:FontPath(), O.SIZE.small, "")
-	box:SetTextColor(O:Color("text"))
-	box:SetTextInsets(26, 8, 0, 0)
-	O:Skin(box, "field", "fieldLine")
-	local icon = O:Icon(box, "sliders", 12, "muted")
-	icon:SetPoint("LEFT", 8, 0)
-	local hint = O:Text(box, O.SIZE.small, "faint")
-	hint:SetPoint("LEFT", 26, 0)
-	hint:SetText("Filter this page")
-	box:SetScript("OnTextChanged", function(self)
-		local text = self:GetText() or ""
-		hint:SetShown(text == "")
-		if f.syncing then return end
-		local page = S.pages[S.currentKey]
-		if page and page.built then page:SetFilter(text) end
-	end)
-	box:SetScript("OnEscapePressed", function(self)
-		if (self:GetText() or "") ~= "" then self:SetText("") else self:ClearFocus() end
-	end)
-	box:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
-	box:SetScript("OnEditFocusGained", function(self) O:SetBorderColor(self, O:Accent()) end)
-	box:SetScript("OnEditFocusLost", function(self) O:SetBorderColor(self, O:Color("fieldLine")) end)
-	f.box, f.hint = box, hint
 	return f
 end
 
@@ -82,17 +53,10 @@ function O:RefreshNavBar(page)
 	local f = S.navbar
 	if not f then return end
 	page = page or S.pages[S.currentKey]
-	local text = page and page.filter or ""
-	if (f.box:GetText() or "") ~= text and not f.box:HasFocus() then
-		f.syncing = true
-		f.box:SetText(text)
-		f.syncing = false
-	end
-	f.hint:SetShown(text == "" and (f.box:GetText() or "") == "")
 	local nav = page and page.nav
 	local values = nav and (nav.list and nav.list() or nav.values) or {}
 	local current = nav and nav.get and nav.get()
-	local room = (f:GetWidth() > 1 and f:GetWidth() or 700) - FILTER_W - 48
+	local room = (f:GetWidth() > 1 and f:GetWidth() or 700) - 32
 	local ar, ag, ab = O:Accent()
 
 	-- measure every chip, then decide which fit; the rest go behind a "..." chip

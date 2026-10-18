@@ -4,6 +4,11 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.38.0", date = "2026-10-18", notes = {
+		"Preview and Test are accent-filled primary buttons with a label, in the page header and wherever a Test button sits in a page",
+		"Options panel: the Filter this page box is removed",
+		"Bloodlust Ready and Aggro Check moved to the Combat category",
+	} },
 	{ version = "2.37.2", date = "2026-10-18", notes = {
 		"Who Has the Key moved to the Misc category",
 	} },
@@ -58,8 +63,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.1", date = "2026-10-17", notes = {
 		"Sidebar: every module row shows a status dot (green on, grey off, amber/red problem)",
-	} },
-	{ version = "2.34.0", date = "2026-10-17", notes = {
-		"Ungroup modules: every module is listed on its own in the sidebar again (Reminders, Party Tracking, Cooldown Manager, Cast Bars, Externals, Damage Meter)",
 	} },
 }
