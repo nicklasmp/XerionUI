@@ -288,6 +288,47 @@ Step("options: filter, jump to a setting, undo, menu, resize", function()
 	O:Open("general")
 end)
 
+Step("options: reset arrow on module and group pages", function()
+	local O = XUI.Options
+	local checked = 0
+	local keys = {}
+	for key in pairs(O.groupByKey) do keys[#keys + 1] = key end
+	table.sort(keys)
+	table.insert(keys, 1, "general")
+	for _, m in ipairs(XUI.modules) do keys[#keys + 1] = m.key end
+	for _, key in ipairs(keys) do
+		if checked >= 3 then break end
+		O:Open(key)
+		MOCK.Advance(0.1)
+		local page = O.S.pages[key]
+		local target
+		if page then
+			for _, card in ipairs(page.cards) do
+				for _, c in ipairs(card.items) do
+					if not target and c.resetButton and c.desc.type == "toggle" then target = c end
+				end
+			end
+		end
+		if target then
+			local d, ctx = target.desc, target.ctx
+			local default = XUI.GetPath(ctx.defaults(), d.path)
+			assert(type(default) == "boolean", "toggle default is not a boolean: " .. key)
+			assert(not target.resetButton:IsShown(), "reset arrow shown on a default value: " .. key)
+			O.Undo.Clear()
+			O:SetValue(d, ctx, not default)
+			page:Refresh()
+			assert(target.resetButton:IsShown(), "no reset arrow on a changed value: " .. key)
+			target.resetButton:GetScript("OnClick")(target.resetButton)
+			page:Refresh()
+			assert((O:GetValue(d, ctx) and true or false) == default, "reset did not restore the default: " .. key)
+			assert(not target.resetButton:IsShown(), "reset arrow stays after reset: " .. key)
+			checked = checked + 1
+		end
+	end
+	assert(checked > 0, "no page with a resettable toggle")
+	O:Open("general")
+end)
+
 Step("diagnostics, self-check and perf", function()
 	XUI.perfOn = true
 	local text = XUI.Health.Report()

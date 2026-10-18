@@ -98,6 +98,7 @@ function O.AttachReset(control, desc, ctx)
 	btn.icon = O:Icon(btn, "reset", size, "faint")
 	btn.icon:SetPoint("CENTER")
 	btn:Hide()
+	control.resetButton = btn
 	btn:SetScript("OnEnter", function(self)
 		self.icon:SetVertexColor(O:Accent())
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")

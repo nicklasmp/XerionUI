@@ -388,7 +388,7 @@ local function CreateWindow()
 	S.banner:SetPoint("TOPLEFT", S.navbar, "BOTTOMLEFT")
 	S.banner:SetPoint("TOPRIGHT", S.navbar, "BOTTOMRIGHT")
 	S.content = CreateFrame("Frame", nil, S.frame)
-	S.content:SetPoint("TOPLEFT", S.banner, "BOTTOMLEFT")
+	S.content:SetPoint("TOPLEFT", S.navbar, "BOTTOMLEFT", 0, 0) -- moved down by the banner when it shows
 	S.content:SetPoint("BOTTOMRIGHT", 0, 1)
 
 	-- Ctrl+F jumps to the sidebar search, Alt+Left / Alt+Right go back / forward;

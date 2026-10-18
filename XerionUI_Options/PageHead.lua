@@ -52,28 +52,19 @@ function O.CreatePageHead(parent)
 	f.status = O:Text(f, O.SIZE.small, "danger")
 	f.status:SetPoint("TOPLEFT", f.desc, "BOTTOMLEFT", 0, -4)
 
-	-- "OFF" tag after the title of a module that is switched off
-	f.offBadge = CreateFrame("Frame", nil, f)
-	f.offBadge:SetSize(34, 18)
-	O:Skin(f.offBadge, "control", "controlLine")
-	f.offBadge.text = O:Text(f.offBadge, O.SIZE.small, "muted")
-	f.offBadge.text:SetPoint("CENTER", 0, 1)
-	f.offBadge.text:SetText("OFF")
-	f.offBadge:Hide()
-	function f.PlaceBadge()
-		local w = math.min(f.title:GetStringWidth() or 0, math.max(0, (f.title:GetWidth() or 0) - 40))
-		f.offBadge:ClearAllPoints()
-		f.offBadge:SetPoint("LEFT", f.title, "LEFT", w + 10, 0)
-	end
-
-	-- module controls, right to left
+	-- the on/off switch sits right after the title, so what a module is doing and its
+	-- state read together; the page's actions stay on the right
 	f.enable = CreateFrame("Button", nil, f)
-	f.enable:SetSize(112, 28) -- wide enough for the switch plus "Disabled"
-	f.enable:SetPoint("RIGHT", -24, 0)
+	f.enable:SetSize(100, 28) -- wide enough for the switch plus "Disabled"
 	f.enable.switch = O.Switch(f.enable, 34, 18)
-	f.enable.switch:SetPoint("RIGHT")
+	f.enable.switch:SetPoint("LEFT")
 	f.enable.label = O:Text(f.enable, O.SIZE.small, "muted")
-	f.enable.label:SetPoint("RIGHT", f.enable.switch, "LEFT", -8, 0)
+	f.enable.label:SetPoint("LEFT", f.enable.switch, "RIGHT", 8, 0)
+	function f.PlaceEnable()
+		local w = math.min(f.title:GetStringWidth() or 0, math.max(0, (f.title:GetWidth() or 0) - 110))
+		f.enable:ClearAllPoints()
+		f.enable:SetPoint("LEFT", f.title, "LEFT", w + 14, 0)
+	end
 	f.enable:SetScript("OnClick", function()
 		local m = f.module
 		if m then
@@ -84,15 +75,10 @@ function O.CreatePageHead(parent)
 		end
 	end)
 
-	-- a hairline between the page's actions and the on/off switch
-	f.divider = O:Rect(f, "line", "ARTWORK")
-	f.divider:SetSize(1, 24)
-	f.divider:SetPoint("RIGHT", f.enable, "LEFT", -10, 0)
-
 	-- Preview and Test are icon-only: the row stays short and the title keeps its room
 	f.preview = CreateFrame("Button", nil, f)
 	f.preview:SetSize(28, 28)
-	f.preview:SetPoint("RIGHT", f.divider, "LEFT", -10, 0)
+	f.preview:SetPoint("RIGHT", -24, 0)
 	O:Skin(f.preview, "control")
 	f.preview.icon = O:Icon(f.preview, "eye", 16, "muted")
 	f.preview.icon:SetPoint("CENTER")
@@ -176,7 +162,7 @@ function O.CreatePageHead(parent)
 			fs:SetWordWrap(false)
 			fs:SetWidth(w)
 		end
-		f.PlaceBadge()
+		f.PlaceEnable()
 	end
 	f:SetScript("OnSizeChanged", function() f.FitTexts() end)
 
@@ -214,7 +200,10 @@ local BANNER_H = 34
 
 function O.CreateBanner(parent)
 	local f = CreateFrame("Frame", nil, parent)
-	f:SetHeight(0)
+	-- never SetHeight(0): in the game that means "no fixed height", and anything
+	-- anchored to the strip would lose its position. The strip keeps its height and
+	-- is hidden; the page content is moved down by it instead (see f:Set).
+	f:SetHeight(BANNER_H)
 	f:Hide()
 	f.bg = O:Rect(f, nil, "BACKGROUND")
 	f.bg:SetAllPoints()
@@ -234,11 +223,15 @@ function O.CreateBanner(parent)
 	f.line:SetPoint("BOTTOMLEFT")
 	f.line:SetPoint("BOTTOMRIGHT")
 	function f:Set(kind, text)
+		local content = S.content
 		if not kind then
 			self:Hide()
-			self:SetHeight(0)
+			if content then
+				content:SetPoint("TOPLEFT", S.navbar, "BOTTOMLEFT", 0, 0)
+			end
 			return
 		end
+		if content then content:SetPoint("TOPLEFT", S.navbar, "BOTTOMLEFT", 0, -BANNER_H) end
 		local r, g, b = O:Color("danger")
 		if kind == "warn" then r, g, b = 1, 0.8, 0.2 end
 		self.bg:SetVertexColor(r, g, b, 0.10)
@@ -246,7 +239,6 @@ function O.CreateBanner(parent)
 		self.icon:SetTexture(O.MEDIA .. (kind == "warn" and "warn" or "close"))
 		self.icon:SetVertexColor(r, g, b, 1)
 		self.text:SetText(text or "")
-		self:SetHeight(BANNER_H)
 		self:Show()
 	end
 	return f
@@ -299,7 +291,6 @@ function O:RefreshPageHead()
 	f.FitTexts()
 	C_Timer.After(0, f.FitTexts) -- anchors above resolve a frame later
 	f.status:SetText("")
-	f.offBadge:Hide()
 	if S.banner then S.banner:Set(nil) end
 	local crumb = S.currentKey and CrumbFor(S.currentKey)
 	f.crumb:SetShown(crumb ~= nil)
@@ -314,12 +305,10 @@ function O:RefreshPageHead()
 		f.iconBorder:Apply({ useGlobal = false, style = "SOLID", size = 1, color = { 0, 0, 0, 1 } })
 		f.title:SetText(m.name)
 		f.desc:SetText(m.desc or "")
-		f.PlaceBadge()
+		f.PlaceEnable()
 		f.enable.switch:SetState(m.db.enabled)
 		f.enable.label:SetText(m.db.enabled and "Enabled" or "Disabled")
 		f.enable.label:SetTextColor(O:Color(m.db.enabled and "text" or "muted"))
-		-- a module that is off says so next to its name, not only in the small print
-		f.offBadge:SetShown(not m.db.enabled)
 		local ok, why = m:CanRun()
 		local note = m.untested and "  |cff888888Untested in game.|r" or ""
 		-- problems go to the banner under the nav bar; the header keeps the calm states

@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.35.1", date = "2026-10-18", notes = {
+		"Fix the options panel showing no settings on module pages (the hidden problem banner had height 0, which the game treats as no height)",
+		"Options panel: Enable switch moved next to the page title; pages with few settings no longer split into tabs",
+	} },
 	{ version = "2.35.0", date = "2026-10-17", notes = {
 		"Options panel: per-setting reset-to-default arrow next to changed values",
 		"Options panel: module problems shown in a banner under the tab bar; OFF badge next to the title of a disabled module",
@@ -54,10 +58,5 @@ O.CHANGELOG = {
 		"Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search",
 		"All/Active/Inactive show counts; fold-all button; back/forward (header buttons, Alt+Left/Right)",
 		"Page filter box looks different from the sidebar search; header text shows in full on hover when cut; Undo button keeps its place; untested modules marked with * and a tooltip",
-	} },
-	{ version = "2.31.4", date = "2026-10-17", notes = {
-		"Opening a page from a link or search hit unfolds its group and scrolls it into view",
-		"Sidebar keeps its order while you switch modules; it settles when the pointer leaves",
-		"Tab chips that do not fit move into a ... menu; the open tab stays visible",
 	} },
 }

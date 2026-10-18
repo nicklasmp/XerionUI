@@ -210,6 +210,7 @@ end
 -- without a title (notices, switches) stay on every tab. While a filter is typed,
 -- every card is searched, whatever tab is open.
 local AUTO_TABS_FROM = 4
+local SHORT_PAGE_ROWS = 12 -- at or below this many settings a page is never split into tabs
 
 local function BuildNav(page, specs)
 	local order, seen = {}, {}
@@ -220,6 +221,15 @@ local function BuildNav(page, specs)
 		end
 	end
 	if #order < AUTO_TABS_FROM then return end
+	-- many titled cards that hold only a few settings in all fit one screen: tabs
+	-- would just hide them, so such a page has no tabs and simply scrolls
+	local rows = 0
+	for _, s in ipairs(specs) do
+		for _, d in ipairs(s.items or {}) do
+			if ROW_TYPES[d.type] or d.type == "keybind" then rows = rows + 1 end
+		end
+	end
+	if rows <= SHORT_PAGE_ROWS then return end
 	local state = { tab = order[1].value }
 	-- a card that hides itself (its own condition) takes its chip with it, so a
 	-- tab is never empty; the open tab falls back to the first one left
