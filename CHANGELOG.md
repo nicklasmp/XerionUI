@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.35.2 - 2026-10-18
+- New addon icon: bold Inter X on black, replaces the X/Twitter-style mark
+
 ## 2.35.1 - 2026-10-18
 - Fix the options panel showing no settings on module pages (the hidden problem banner had height 0, which the game treats as no height)
 - Options panel: Enable switch moved next to the page title; pages with few settings no longer split into tabs

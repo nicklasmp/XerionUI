@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.35.2", date = "2026-10-18", notes = {
+		"New addon icon: bold Inter X on black, replaces the X/Twitter-style mark",
+	} },
 	{ version = "2.35.1", date = "2026-10-18", notes = {
 		"Fix the options panel showing no settings on module pages (the hidden problem banner had height 0, which the game treats as no height)",
 		"Options panel: Enable switch moved next to the page title; pages with few settings no longer split into tabs",
@@ -52,11 +55,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.32.1", date = "2026-10-17", notes = {
 		"Fix typo: \"Damager Meter\" is now \"Damage Meter\"",
-	} },
-	{ version = "2.32.0", date = "2026-10-17", notes = {
-		"Breadcrumb above the page title shows where a page sits and reveals it in the sidebar",
-		"Sidebar search: Up/Down moves the Enter target, matching words are highlighted, empty results are explained, +N more on this page, Ctrl+F focuses the search",
-		"All/Active/Inactive show counts; fold-all button; back/forward (header buttons, Alt+Left/Right)",
-		"Page filter box looks different from the sidebar search; header text shows in full on hover when cut; Undo button keeps its place; untested modules marked with * and a tooltip",
 	} },
 }
