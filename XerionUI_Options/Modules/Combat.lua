@@ -19,6 +19,5 @@ O:RegisterModuleOptions("MeleeIndicator", function(ctx, m, G)
 				disabled = function() return not m.db.pulse end },
 		}),
 		Card("Text", G.Font("font")),
-		Card("Position", G.Position("position")),
 	}
 end)

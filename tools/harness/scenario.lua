@@ -620,6 +620,14 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 end)
 
 Step("logout strips defaults", function()
+	-- logout strips the live tables, so nothing may keep ticking on them afterwards
+	-- (the game is gone by then; the mock keeps running frames)
+	XUI.Options:Close()
+	for _, m in ipairs(XUI.modules) do
+		m:SetPreview(false)
+		m:SetEnabled(false)
+	end
+	MOCK.Advance(0.2)
 	MOCK.Fire("PLAYER_LOGOUT")
 	local sv = _G.XerionUIDB
 	assert(sv and sv.profiles and sv.profiles.Default)

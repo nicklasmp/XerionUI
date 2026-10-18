@@ -48,7 +48,6 @@ O:RegisterModuleOptions("BoilingPoint", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
 		Card("Glow while Blood Boil is lit", G.Glow("procGlow")),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -65,7 +64,6 @@ local function TimedIconCards(G, extra, glow)
 	cards[#cards + 1] = Card("Border", G.Border("border"))
 	if glow then cards[#cards + 1] = Card("Glow", G.Glow("glow")) end
 	cards[#cards + 1] = Card("Timer text", G.Font("timerText", { toggle = "Show timer", color = true }))
-	cards[#cards + 1] = Card("Position", G.Position("position"))
 	return cards
 end
 
@@ -79,7 +77,6 @@ O:RegisterModuleOptions("BloodBeast", function(ctx, m, G)
 			{ type = "color", label = "Label color", path = "labelColor", tip = "The color of the label text." },
 			{ type = "color", label = "Value color", path = "valueColor", tip = "The color of the number." },
 		})),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -105,7 +102,6 @@ O:RegisterModuleOptions("BearForm", function(ctx, m, G)
 			{ type = "slider", label = "Pulse speed (seconds per fade)", path = "pulseSpeed", min = 0.15, max = 1.5, step = 0.05,
 				disabled = function() return not m.db.pulse end },
 		}, G.Font("font"))),
-		Card("Position", G.Position("position")),
 		Card("Alert", G.Alert("alert", { fallbackText = "Bear form" })),
 	}
 end)
@@ -128,6 +124,5 @@ O:RegisterModuleOptions("Ironfur", function(ctx, m, G)
 		}, G.Icon("icon", { square = true }))),
 		Card("Border", G.Border("border")),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
-		Card("Position", G.Position("position")),
 	}
 end)

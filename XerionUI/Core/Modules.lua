@@ -37,9 +37,9 @@ XUI.CATEGORIES = {
 	{ key = "general", name = "General" },
 	{ key = "combat", name = "Combat" },
 	{ key = "group", name = "Group" },
-	{ key = "dungeon", name = "Dungeons" },
+	{ key = "misc", name = "Misc" },
 	{ key = "tweaks", name = "EllesmereUI Tweaks" },
-	{ key = "misc", name = "Misc." },
+	{ key = "dungeon", name = "Dungeons" }, -- right before Classes
 	{ key = "class", name = "Classes" }, -- last: it is the long one
 }
 

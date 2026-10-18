@@ -34,7 +34,6 @@ O:RegisterModuleOptions("Externals", function(ctx, m, G)
 		Card("Sound for these spells", {
 			{ type = "spellList", path = "soundSpells" },
 		}, { hidden = function() return not IS121() end }),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -82,7 +81,6 @@ O:RegisterModuleOptions("Interrupts", function(ctx, m, G)
 			{ type = "slider", label = "Unknown interrupt cooldown", path = "partyCd", min = 5, max = 60, step = 1 },
 			{ type = "button", text = "Print status", onClick = function() m:PrintStatus() end },
 		}),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -255,7 +253,6 @@ O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
 				set = function(_, v) state.spec = v end },
 			{ type = "custom", build = function(parent, c) return PartyCDRows(parent, c, m, state) end },
 		}),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -293,7 +290,6 @@ O:RegisterModuleOptions("CoTank", function(ctx, m, G)
 		Card("Debuff icons", G.Icon("debuffIcon", { square = true }), { hidden = noDebuffs }),
 		Card("Debuff timer", G.Font("durText", { toggle = "Show timer", anchor = true }), { hidden = noDebuffs }),
 		Card("Debuff stacks", G.Font("stackText", { toggle = "Show stacks", anchor = true }), { hidden = noDebuffs }),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -315,7 +311,6 @@ O:RegisterModuleOptions("Shroud", function(ctx, m, G)
 		Card("Border", G.Border("border")),
 		Card("Name text", G.Font("nameText", { toggle = "Show name" })),
 		Card("Timer text", G.Font("timerText", { toggle = "Show timer" })),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -330,7 +325,6 @@ O:RegisterModuleOptions("AggroCheck", function(ctx, m, G)
 		}),
 		Card("Text", G.Font("font")),
 		Card("Alert", G.Alert("alert")),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -739,7 +733,6 @@ O:RegisterModuleOptions("DamageAmp", function(ctx, m, G)
 		Card("Timer", G.Font("timer", { color = true })),
 		Card("Percent", G.Font("percent", { color = true })),
 		Card("Alert", G.Alert("alert")),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -765,7 +758,6 @@ O:RegisterModuleOptions("ChaosBarrage", function(ctx, m, G)
 		}),
 		Card("Border", G.Border("border")),
 		Card("Timer", G.Font("castTimer", { color = true })),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -785,7 +777,6 @@ O:RegisterModuleOptions("InstanceKeys", function(ctx, m, G)
 				disabled = function() return not m.db.showAll end },
 		}),
 		Card("Text", G.Font("text", { color = true })),
-		Card("Position", G.Position("position")),
 	}
 end)
 
@@ -812,7 +803,6 @@ O:RegisterModuleOptions("AutoMarkTank", function(ctx, m, G)
 		}),
 		Card("Text", G.Font("text", { color = true })),
 		Card("Border", G.Border("border")),
-		Card("Position", G.Position("position")),
 	}
 end)
 

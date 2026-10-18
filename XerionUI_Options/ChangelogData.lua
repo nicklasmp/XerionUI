@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.37.1", date = "2026-10-18", notes = {
+		"Sidebar: Misc (renamed from Misc.) sits above EllesmereUI Tweaks and Dungeons sits right before Classes",
+		"Options panel: the Position card is removed from every module (move frames with the unlock icon in the header)",
+	} },
 	{ version = "2.37.0", date = "2026-10-18", notes = {
 		"NPC blacklist is a page of its own under Dungeons > All dungeons, shared by every dungeon (the Blacklist tab inside the dialog lists is gone)",
 		"NPC blacklist: NPCs seen in two or more dungeons are listed as candidates, with a button to blacklist them",
@@ -57,8 +61,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.33.2", date = "2026-10-17", notes = {
 		"Give XerionUI Options the addon list icon",
-	} },
-	{ version = "2.33.1", date = "2026-10-17", notes = {
-		"Sidebar icons removed again (too busy); off modules keep the dimmed text and off tag",
 	} },
 }

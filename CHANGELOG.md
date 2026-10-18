@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.37.1 - 2026-10-18
+- Sidebar: Misc (renamed from Misc.) sits above EllesmereUI Tweaks and Dungeons sits right before Classes
+- Options panel: the Position card is removed from every module (move frames with the unlock icon in the header)
+
 ## 2.37.0 - 2026-10-18
 - NPC blacklist is a page of its own under Dungeons > All dungeons, shared by every dungeon (the Blacklist tab inside the dialog lists is gone)
 - NPC blacklist: NPCs seen in two or more dungeons are listed as candidates, with a button to blacklist them
