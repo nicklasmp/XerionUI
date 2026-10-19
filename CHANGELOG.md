@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.40.1 - 2026-10-19
+- Fix Mail Contacts font error when the panel is built
+
 ## 2.40.0 - 2026-10-19
 - New modules added by an update are now enabled automatically (once per profile; turn them off in the options)
 

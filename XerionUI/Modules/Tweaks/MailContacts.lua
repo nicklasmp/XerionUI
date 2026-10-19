@@ -253,6 +253,13 @@ function M:SetTab(key)
 	self:Show()
 end
 
+-- A string must have a font before it gets any text (else SetText errors).
+local function Text(parent)
+	local fs = parent:CreateFontString(nil, "OVERLAY")
+	Style:ApplyFont(fs, M.db and M.db.font, 12)
+	return fs
+end
+
 local function Build()
 	if panel or not _G.SendMailFrame or not _G.MailFrame then return end
 	panel = CreateFrame("Frame", "XUI_MailContacts", SendMailFrame)
@@ -269,7 +276,7 @@ local function Build()
 		b:SetSize(step, 22)
 		b:SetPoint("TOPLEFT", panel, "TOPLEFT", 6 + (i - 1) * step, -6)
 		b.key = t.key
-		b.text = b:CreateFontString(nil, "OVERLAY")
+		b.text = Text(b)
 		b.text:SetPoint("CENTER")
 		b.text:SetText(t.label)
 		b.line = b:CreateTexture(nil, "ARTWORK")
@@ -291,7 +298,7 @@ local function Build()
 		row.hl = row:CreateTexture(nil, "HIGHLIGHT")
 		row.hl:SetAllPoints()
 		row.hl:SetColorTexture(1, 1, 1, 0.12)
-		row.text = row:CreateFontString(nil, "OVERLAY")
+		row.text = Text(row)
 		row.text:SetPoint("LEFT", 4, 0)
 		row.text:SetPoint("RIGHT", -4, 0)
 		row.text:SetJustifyH("LEFT")
@@ -314,7 +321,7 @@ local function Build()
 		panel.rows[i] = row
 	end
 
-	panel.empty = panel:CreateFontString(nil, "OVERLAY")
+	panel.empty = Text(panel)
 	panel.empty:SetPoint("TOPLEFT", 12, -44)
 	panel.empty:SetPoint("RIGHT", -12, 0)
 	panel.empty:SetJustifyH("LEFT")
@@ -322,7 +329,7 @@ local function Build()
 	panel.empty:SetTextColor(0.6, 0.6, 0.6)
 	panel.fonts[#panel.fonts + 1] = panel.empty
 
-	panel.count = panel:CreateFontString(nil, "OVERLAY")
+	panel.count = Text(panel)
 	panel.count:SetPoint("BOTTOM", 0, 8)
 	panel.count:SetTextColor(0.6, 0.6, 0.6)
 	panel.fonts[#panel.fonts + 1] = panel.count
@@ -358,8 +365,8 @@ function M:OnRefresh()
 	end
 	Build()
 	if not panel then return end
-	panel:Show()
 	if not tab then tab = self.db.defaultTab or "ALTS" end
+	panel:Show()
 	if panel:IsVisible() then self:Show() end
 end
 

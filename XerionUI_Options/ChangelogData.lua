@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.40.1", date = "2026-10-19", notes = {
+		"Fix Mail Contacts font error when the panel is built",
+	} },
 	{ version = "2.40.0", date = "2026-10-19", notes = {
 		"New modules added by an update are now enabled automatically (once per profile; turn them off in the options)",
 	} },
@@ -61,8 +64,5 @@ O.CHANGELOG = {
 		"Options panel: sidebar status uses shapes (dot, ring, triangle, cross) as well as colour; empty Inactive tab dimmed",
 		"Options panel: higher contrast for muted and faint text, larger section headings, softer corner glow",
 		"Options panel: Tab / Shift+Tab move between number and text boxes; missing SharedMedia entries are marked in red",
-	} },
-	{ version = "2.34.7", date = "2026-10-17", notes = {
-		"Options: pixel-exact toggle switch textures",
 	} },
 }
