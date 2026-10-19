@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.38.2 - 2026-10-19
+- Fit the Stop preview button to its label
+- Drop the Group breadcrumb above group module titles
+
 ## 2.38.1 - 2026-10-18
 - Center the dark action row on the Auto Mark Tank button
 

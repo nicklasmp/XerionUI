@@ -276,7 +276,7 @@ local function CrumbFor(key)
 		return "Classes"
 	end
 	local e = XUI:GetModule(key) or O.groupByKey[key]
-	if not (e and e.category) then return nil end
+	if not (e and e.category) or e.category == "group" then return nil end
 	local name = e.category
 	for _, c in ipairs(XUI.CATEGORIES) do if c.key == e.category then name = c.name end end
 	if e.category == "dungeon" and e.dungeon then name = name .. " / " .. e.dungeon end
@@ -356,6 +356,7 @@ function O:RefreshPageHead()
 		end
 		f.preview.quiet = m.preview and true or false
 		f.preview.text:SetText(m.preview and "Stop preview" or "Preview")
+		f.preview:SetWidth(math.max(124, f.preview.text:GetStringWidth() + 12 + 14 + 8 + 14))
 		f.preview:Paint(false)
 		f.test:Paint(false)
 	elseif O.groupByKey[S.currentKey] then
