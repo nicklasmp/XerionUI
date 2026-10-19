@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.38.3", date = "2026-10-19", notes = {
+		"Remove the breadcrumb above the page icon",
+	} },
 	{ version = "2.38.2", date = "2026-10-19", notes = {
 		"Fit the Stop preview button to its label",
 		"Drop the Group breadcrumb above group module titles",
@@ -61,8 +64,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.4", date = "2026-10-17", notes = {
 		"Nameplates: dispel border color works again with EllesmereUI 9.6 (the border texture moved to host._euiPanTex); it only applies while EllesmereUI's Dispel Glow style is Blizzard Pandemic Border",
-	} },
-	{ version = "2.34.3", date = "2026-10-17", notes = {
-		"Fix ADDON_ACTION_BLOCKED from the options window's keyboard shortcuts in combat",
 	} },
 }

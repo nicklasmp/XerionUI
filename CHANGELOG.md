@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.38.3 - 2026-10-19
+- Remove the breadcrumb above the page icon
+
 ## 2.38.2 - 2026-10-19
 - Fit the Stop preview button to its label
 - Drop the Group breadcrumb above group module titles
