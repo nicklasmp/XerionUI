@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.40.2", date = "2026-10-19", notes = {
+		"Mail Contacts: show only your own characters (Friends, Guild and Favorites lists removed)",
+	} },
 	{ version = "2.40.1", date = "2026-10-19", notes = {
 		"Fix Mail Contacts font error when the panel is built",
 	} },
@@ -56,13 +59,5 @@ O.CHANGELOG = {
 	{ version = "2.35.1", date = "2026-10-18", notes = {
 		"Fix the options panel showing no settings on module pages (the hidden problem banner had height 0, which the game treats as no height)",
 		"Options panel: Enable switch moved next to the page title; pages with few settings no longer split into tabs",
-	} },
-	{ version = "2.35.0", date = "2026-10-17", notes = {
-		"Options panel: per-setting reset-to-default arrow next to changed values",
-		"Options panel: module problems shown in a banner under the tab bar; OFF badge next to the title of a disabled module",
-		"Options panel: Preview, Test and More are icon buttons; separate undo icon and wider header gaps",
-		"Options panel: sidebar status uses shapes (dot, ring, triangle, cross) as well as colour; empty Inactive tab dimmed",
-		"Options panel: higher contrast for muted and faint text, larger section headings, softer corner glow",
-		"Options panel: Tab / Shift+Tab move between number and text boxes; missing SharedMedia entries are marked in red",
 	} },
 }
