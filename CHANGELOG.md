@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.39.0 - 2026-10-19
+- Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail
+
 ## 2.38.3 - 2026-10-19
 - Remove the breadcrumb above the page icon
 

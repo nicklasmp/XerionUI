@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.39.0", date = "2026-10-19", notes = {
+		"Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail",
+	} },
 	{ version = "2.38.3", date = "2026-10-19", notes = {
 		"Remove the breadcrumb above the page icon",
 	} },
@@ -61,8 +64,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.5", date = "2026-10-17", notes = {
 		"Nameplates: fix the secret-boolean error in the dispel border tint (the style is read from EllesmereUI's setting instead of the texture's shown state)",
-	} },
-	{ version = "2.34.4", date = "2026-10-17", notes = {
-		"Nameplates: dispel border color works again with EllesmereUI 9.6 (the border texture moved to host._euiPanTex); it only applies while EllesmereUI's Dispel Glow style is Blizzard Pandemic Border",
 	} },
 }
