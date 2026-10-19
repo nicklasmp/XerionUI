@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.40.0 - 2026-10-19
+- New modules added by an update are now enabled automatically (once per profile; turn them off in the options)
+
+## 2.39.1 - 2026-10-19
+- Mail Contacts moved to the Misc category
+
 ## 2.39.0 - 2026-10-19
 - Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail
 

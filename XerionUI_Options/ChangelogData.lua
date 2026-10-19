@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.40.0", date = "2026-10-19", notes = {
+		"New modules added by an update are now enabled automatically (once per profile; turn them off in the options)",
+	} },
+	{ version = "2.39.1", date = "2026-10-19", notes = {
+		"Mail Contacts moved to the Misc category",
+	} },
 	{ version = "2.39.0", date = "2026-10-19", notes = {
 		"Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail",
 	} },
@@ -58,11 +64,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.34.7", date = "2026-10-17", notes = {
 		"Options: pixel-exact toggle switch textures",
-	} },
-	{ version = "2.34.6", date = "2026-10-17", notes = {
-		"Nameplates: dispel border gets one more additive layer so the corners fill in",
-	} },
-	{ version = "2.34.5", date = "2026-10-17", notes = {
-		"Nameplates: fix the secret-boolean error in the dispel border tint (the style is read from EllesmereUI's setting instead of the texture's shown state)",
 	} },
 }
