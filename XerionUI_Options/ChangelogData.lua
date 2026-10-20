@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.40.3", date = "2026-10-20", notes = {
+		"Rename Mail Contacts to Mail Alts",
+	} },
 	{ version = "2.40.2", date = "2026-10-19", notes = {
 		"Mail Contacts: show only your own characters (Friends, Guild and Favorites lists removed)",
 	} },
@@ -55,9 +58,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.35.2", date = "2026-10-18", notes = {
 		"New addon icon: bold Inter X on black, replaces the X/Twitter-style mark",
-	} },
-	{ version = "2.35.1", date = "2026-10-18", notes = {
-		"Fix the options panel showing no settings on module pages (the hidden problem banner had height 0, which the game treats as no height)",
-		"Options panel: Enable switch moved next to the page title; pages with few settings no longer split into tabs",
 	} },
 }

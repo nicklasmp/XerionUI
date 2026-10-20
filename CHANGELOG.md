@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.40.3 - 2026-10-20
+- Rename Mail Contacts to Mail Alts
+
 ## 2.40.2 - 2026-10-19
 - Mail Contacts: show only your own characters (Friends, Guild and Favorites lists removed)
 

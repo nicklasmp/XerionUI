@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Mail contacts
+-- Mail alts
 -- A panel beside the Send Mail tab listing your other characters; one click
 -- fills in the recipient.
 --
@@ -12,7 +12,7 @@ local T = XUI.Templates
 local Style = XUI.Style
 
 local M = XUI:NewModule("MailContacts", {
-	name = "Mail Contacts",
+	name = "Mail Alts",
 	desc = "A list of your other characters beside the Send Mail tab. Click a name to address the mail.",
 	category = "misc",
 	icon = [[Interface\Icons\INV_Letter_15]],
