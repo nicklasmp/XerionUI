@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.40.3
+## Version: 2.41.0
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -45,6 +45,12 @@ Modules\Group\Externals.lua
 Modules\Group\Interrupts.lua
 Modules\Group\PartyCDsData.lua
 Modules\Group\PartyCDs.lua
+Modules\Group\TimerKit.lua
+Modules\Group\PartyStopsData.lua
+Modules\Group\PartyStops.lua
+Modules\Group\MDTLink.lua
+Modules\Group\SmartCount.lua
+Modules\Group\MDTCompact.lua
 Modules\Group\AutoGossip.lua
 Modules\Group\BonusRollConfirm.lua
 Modules\Group\MeterReset.lua

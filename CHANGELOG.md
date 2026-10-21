@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.41.0 - 2026-10-21
+- Add Party Stops: cooldowns of the group's stuns and AoE crowd control, read from enemy debuffs, with talent-adjusted lengths
+- Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill
+- Add MDT Compact: fold Mythic Dungeon Tools' window into a small map with the pull list
+- Add shared Timer kit, enemy sensor chains and talent reader for the group modules
+
 ## 2.40.3 - 2026-10-20
 - Rename Mail Contacts to Mail Alts
 

@@ -60,7 +60,10 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Auto NPC Dialog (Auto Gossip) | K | ✅ | Port 14. okt 2026: vælger valgte gossip-IDs i instanser; knap der printer de åbne valg. 16. okt: registrerer dialoger i instanser (dungeon, NPC, tekst) og viser dem pr. dungeon med switch til auto-valg og bekræft. Utestet i spillet |
 | Kira Reminders: Damage Amp + Chaos Barrage (Murder Row, Kystia Manaheart) | K | ✅ | Port 14. okt 2026 som to moduler (DamageAmp, ChaosBarrage). Droppet: nameplate-fastgørelse på EllesmereUI (brug position.attach), chat-debug/log, manuel target-bar. Utestet i spillet |
 | Kira Reminders: resten (BigWigs-lister pr. dungeon, boss-HP-kald, wrong target, trash aura-lyde) | K | ❌ | Fravalgt af Nicklas 14. okt 2026; kan tages op senere (5.400 linjer, kun to dungeons har indbyggede regler) |
-| MDT Compact / MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |
+| Party Stops (CC-cooldowns) | K | ✅ | Port 21. okt 2026: stuns og AoE-CC pr. gruppemedlem i to barer. Egne casts læses direkte, andres via debuffen på fjendernes nameplates (`Engine.NewChain`), cooldown efter talents (`XUI.Talents`), timer-ikon i `TimerKit`. Utestet i spillet. Droppet: delt cell-kit med PartyCDs (PartyCDs har stadig sin egen kopi), radial swipe |
+| Smart Count Tracker | K | ✅ | Port 21. okt 2026: enemy forces-bar mod MDT-ruten (næste pull eller før næste boss), pull-stakning bag fyldet. Ruten læses fra MDT (`MDTLink.lua`) og gemmes i modulets indstillinger. Forenklet: pull-position udledes af tallet i stedet for Kiras fight-log, og "+N"-teksten skrives kun når alle værdier kan læses (ellers tegnes kun striberne). Utestet i spillet |
+| MDT Compact | K | ✅ | Port 21. okt 2026: knap på MDT-vinduet der folder det til et lille kort med pull-listen ved siden af. Flytter MDT's egne frames rundt, så den stopper hvis vinduet ikke ligner det forventede. Utestet i spillet |
+| MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |
 | Key Vendor | K | ⏳ | |
 | Macro Factory | I | ❓ | |
 
@@ -121,3 +124,20 @@ Alle får `requires = "EllesmereUI…"`, så de kun kører med det relevante Ell
 4. Tilføj modulet til `XerionUI.toc` og options-filen til `XerionUI_Options.toc`.
 5. `npm test` og `npm run shots` i `tools/` — derefter test i spillet med BugSack.
 6. Commit pr. modul.
+
+## Backlog (fra gennemgangen af KiraUI 21. okt 2026)
+
+Ikke besluttet endnu; tages op når der er lyst. Idéer, ikke kopier — vi skriver dem selv.
+
+| Idé | Kilde i Kira | Note |
+|---|---|---|
+| Soft CC Icons (CC på fjender uden hård CC: polymorph, hex, sap, fear) | SoftCC | Samme sensor-teknik som Party Stops; kan genbruge `Engine.NewChain`. CC Tracker (bars) blev fjernet, så afklar først om det er ønsket |
+| Party Potions / Healer External | PartyPotions, HealerExternal | Samme motor som PartyCDs/Party Stops |
+| Trix (Tricks of the Trade / Misdirection) | Trix | |
+| DoT Coverage (antal fjender med dine DoTs) | DotCoverage | |
+| Trinkets (proc-ikoner) | Trinkets | |
+| Cooldown Pulse / Spell History | CDPulse, History | Blink når cooldown er klar; cast-log |
+| Vendor Search, Great Vault, Spell Queue, Secondary Stats, Crosshair, Combat Text, Ready Check-bar, Recuperate | diverse | Små QoL-moduler |
+| PartyCDs på TimerKit | – | PartyCDs har sin egen kopi af timer-motoren; flyt den over på `Modules/Group/TimerKit.lua` så der kun er én |
+| Smart Count: tal under skjulte værdier | ForcesPlan | Kiras "enough/short"-tekst bruger en cursor-probe til at skrive summen selv når værdierne er hemmelige |
+| Options-UX: nøgleordskort pr. modul til søgning, "Hvorfor er den utilgængelig"-tekst på tomme sider, liste over flytbare elementer med link til siden | Options | Xerion har søgning, movers og Diagnostics; det er finpudsning |

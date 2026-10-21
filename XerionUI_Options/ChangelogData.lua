@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.41.0", date = "2026-10-21", notes = {
+		"Add Party Stops: cooldowns of the group's stuns and AoE crowd control, read from enemy debuffs, with talent-adjusted lengths",
+		"Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill",
+		"Add MDT Compact: fold Mythic Dungeon Tools' window into a small map with the pull list",
+		"Add shared Timer kit, enemy sensor chains and talent reader for the group modules",
+	} },
 	{ version = "2.40.3", date = "2026-10-20", notes = {
 		"Rename Mail Contacts to Mail Alts",
 	} },
@@ -55,8 +61,5 @@ O.CHANGELOG = {
 		"Options panel: keyboard navigation (Tab, Space/Enter, arrows) through switches, dropdowns, sliders and boxes",
 		"Options panel: Diagnostics is a single icon instead of a menu; the Running status text is gone; the per-setting reset arrow is removed",
 		"Co-Tank: removed the Always show this player option",
-	} },
-	{ version = "2.35.2", date = "2026-10-18", notes = {
-		"New addon icon: bold Inter X on black, replaces the X/Twitter-style mark",
 	} },
 }

@@ -257,6 +257,197 @@ O:RegisterModuleOptions("PartyCDs", function(ctx, m, G)
 end)
 
 --------------------------------------------------------------------------------
+-- Party Stops: one list of spells per bar
+--------------------------------------------------------------------------------
+local function StopRows(parent, ctx, m, g)
+	local f = CreateFrame("Frame", nil, parent)
+	f.rows = {}
+	f.height = PCD_ROW_H
+	f:SetHeight(PCD_ROW_H)
+
+	local function Row(i)
+		local r = f.rows[i]
+		if r then return r end
+		r = CreateFrame("Frame", nil, f)
+		r:SetHeight(PCD_ROW_H - 2)
+		r.bg = O:Rect(r, "control", "BACKGROUND")
+		r.bg:SetAllPoints()
+		r.bg:SetAlpha(i % 2 == 0 and 0.35 or 0.6)
+		r.icon = r:CreateTexture(nil, "ARTWORK")
+		r.icon:SetSize(18, 18)
+		r.icon:SetPoint("LEFT", 8, 0)
+		r.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+		r.name = O:Text(r, O.SIZE.text, "text")
+		r.name:SetPoint("LEFT", r.icon, "RIGHT", 8, 0)
+		r.remove = O:IconButton(r, "close", 22, "Remove from this bar", function()
+			m:RemoveSpell(g, r.spell)
+			ctx:Changed()
+		end)
+		r.remove:SetPoint("RIGHT", -2, 0)
+		r.down = O:IconButton(r, "chevron", 22, "Move down", function()
+			if m:MoveSpell(g, r.spell, 1) then ctx:Changed() end
+		end)
+		r.down:SetPoint("RIGHT", r.remove, "LEFT", -2, 0)
+		r.up = O:IconButton(r, "chevron", 22, "Move up", function()
+			if m:MoveSpell(g, r.spell, -1) then ctx:Changed() end
+		end)
+		r.up.icon:SetTexCoord(0, 1, 1, 0)
+		r.up:SetPoint("RIGHT", r.down, "LEFT", -2, 0)
+		r.name:SetPoint("RIGHT", r.up, "LEFT", -8, 0)
+		f.rows[i] = r
+		return r
+	end
+
+	function f:Measure()
+		local n = #m:BarSpells(g)
+		self.height = math.max(1, n) * PCD_ROW_H
+		self:SetHeight(self.height)
+		return self.height
+	end
+
+	function f:Refresh()
+		local list = m:BarSpells(g)
+		for i, e in ipairs(list) do
+			local r = Row(i)
+			r.spell = e.id
+			r:ClearAllPoints()
+			r:SetPoint("TOPLEFT", 0, -(i - 1) * PCD_ROW_H)
+			r:SetPoint("TOPRIGHT", 0, -(i - 1) * PCD_ROW_H)
+			r.icon:SetTexture(XUI.GetSpellIcon(e.id))
+			local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[e.class]
+			local label = (LOCALIZED_CLASS_NAMES_MALE and LOCALIZED_CLASS_NAMES_MALE[e.class]) or e.class
+			r.name:SetText(XUI.GetSpellName(e.id) .. "  |c" .. (c and c.colorStr or "ffffffff") .. label .. "|r")
+			r.up:SetEnabled(i > 1)
+			r.down:SetEnabled(i < #list)
+			r:Show()
+		end
+		for i = #list + 1, #self.rows do self.rows[i]:Hide() end
+		self:Measure()
+	end
+	return f
+end
+
+local function StopBarCards(m, G, g)
+	local k = "bar" .. g
+	local function P(field) return k .. "." .. field end
+	local function namesOff() return not m.db[k].showNames end
+	return {
+		Card("Bar " .. g, Join({
+			{ type = "toggle", label = "Show this bar", path = P("show") },
+			{ type = "dropdown", label = "Grow", path = P("grow"), values = m.GROW },
+			{ type = "slider", label = "Space between icons", path = P("spacing"), min = -1, max = 30, step = 1 },
+		}, G.Icon(P("icon"), { square = true }))),
+		Card("Bar " .. g .. " border", G.Border(P("border"))),
+		Card("Bar " .. g .. " timer text", G.Font(P("timerText"), { color = true })),
+		Card("Bar " .. g .. " names", Join({
+			{ type = "toggle", label = "Member name in class color", path = P("showNames") },
+			{ type = "dropdown", label = "Name place", path = P("namePos"), values = m.NAMEPOS, disabled = namesOff },
+			{ type = "slider", label = "Name letters (0 = whole name)", path = P("nameLen"), min = 0, max = 12, step = 1, disabled = namesOff },
+		}, G.Font(P("nameText")))),
+		Card("Bar " .. g .. " position", G.Position(P("position"))),
+		Card("Bar " .. g .. " spells", {
+			{ type = "custom", build = function(parent, c) return StopRows(parent, c, m, g) end },
+			{ type = "dropdown", label = "Add a spell",
+				values = function()
+					local out, have = { { value = 0, text = "Choose a spell" } }, {}
+					for _, e in ipairs(m:BarSpells(g)) do have[e.id] = true end
+					for _, e in ipairs(m:Catalogue()) do
+						if not have[e.id] then
+							local cls = (LOCALIZED_CLASS_NAMES_MALE and LOCALIZED_CLASS_NAMES_MALE[e.class]) or e.class
+							out[#out + 1] = { value = e.id, text = XUI.GetSpellName(e.id) .. " (" .. cls .. ")" }
+						end
+					end
+					return out
+				end,
+				get = function() return 0 end,
+				set = function(c, v)
+					if type(v) == "number" and v ~= 0 then
+						m:AddSpell(g, v)
+						c:Changed()
+					end
+				end },
+		}),
+	}
+end
+
+O:RegisterModuleOptions("PartyStops", function(ctx, m, G)
+	local cards = {
+		Card("Who", {
+			{ type = "toggle", label = "Include your own stops", path = "showSelf" },
+			{ type = "toggle", label = "Only while in a group", path = "groupOnly" },
+			{ type = "toggle", label = "Only in dungeons", path = "dungeonOnly" },
+			{ type = "toggle", label = "Read party talents for cooldown lengths", path = "talents",
+				tip = "Inspects party members in a dungeon so a talent that shortens a stop is counted, and a stop they did not take is left out." },
+			{ type = "slider", label = "Enemies watched", path = "maxUnits", min = 4, max = 20, step = 1,
+				tip = "How many enemy nameplates in combat are watched for a stop landing. Fewer is lighter." },
+			{ type = "description",
+				text = "Five-player groups only. Your own stops follow your casts; the others are noticed by the debuff a stop leaves on an enemy, which the game still lets this read inside a key. The bars are placed separately in the cards below." },
+		}),
+	}
+	for g = 1, 2 do
+		for _, c in ipairs(StopBarCards(m, G, g)) do cards[#cards + 1] = c end
+	end
+	return cards
+end)
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+O:RegisterModuleOptions("SmartCount", function(ctx, m, G)
+	return {
+		Card("Target", {
+			{ type = "dropdown", label = "The bar aims at", path = "target", values = m.TARGETS,
+				tip = "The next pull is worked out from your count against the route; the boss option only watches the count needed before the next boss." },
+			{ type = "dropdown", label = "Numbers", path = "numbers", values = m.NUMBERS },
+			{ type = "toggle", label = "Stack the enemies in the fight on the bar", path = "showPull",
+				tip = "While you are in combat in a key, what the enemies fighting you are worth is drawn behind the fill, so the end of the bar shows where the pull leaves you." },
+			{ type = "toggle", label = "Load MDT's window by itself to read the route", path = "autoLoad",
+				tip = "MDT keeps its routes in the part of it that loads with its window. When no route is known in a key dungeon, that part is loaded once." },
+		}),
+		Card("MDT route", {
+			{ type = "description", text = function()
+				return table.concat(m:Status(), "\n")
+			end },
+			{ type = "button", text = "Read routes from MDT", onClick = function(c)
+				m:ReadRoutes(true)
+				c:Changed()
+			end },
+		}),
+		Card("Bar", Join(G.Bar("bar"), {
+			{ type = "color", label = "Normal", path = "color" },
+			{ type = "color", label = "Target reached", path = "reachedColor" },
+			{ type = "color", label = "Pull ends short", path = "shortColor" },
+			{ type = "color", label = "Enemies in the fight", path = "pullColor", hasAlpha = true },
+		})),
+		Card("Border", G.Border("border")),
+		Card("Label text", G.Font("nameText", { toggle = "Show the label", color = true })),
+		Card("Numbers text", G.Font("valueText", { toggle = "Show the numbers", color = true })),
+		Card("Alert", Join({
+			{ type = "description", text = "Plays once when the count reaches what the bar aims at." },
+		}, G.Alert("alert"))),
+		Card("Position", G.Position("position")),
+	}
+end)
+
+--------------------------------------------------------------------------------
+O:RegisterModuleOptions("MDTCompact", function(ctx, m)
+	return {
+		Card("Compact window", {
+			{ type = "description", text = function()
+				return m:Why() or "A button next to the title of Mythic Dungeon Tools' window folds it. Right-click the button to come back here."
+			end },
+			{ type = "slider", label = "Map width", path = "width", min = 300, max = 800, step = 10 },
+			{ type = "toggle", label = "Keep the pull list beside the map", path = "showPulls" },
+			{ type = "slider", label = "Pull list size", path = "pullScale", min = 0.5, max = 1, step = 0.05 },
+			{ type = "slider", label = "Window opacity", path = "alpha", min = 0.2, max = 1, step = 0.05 },
+			{ type = "button", text = "Fold or unfold MDT now", onClick = function(c)
+				m:Toggle()
+				c:Changed()
+			end },
+			{ type = "button", text = "Reset the compact position", onClick = function() m:ResetPosition() end },
+		}),
+	}
+end)
+
 O:RegisterModuleOptions("CoTank", function(ctx, m, G)
 	local function noDebuffs() return not m.db.debuffs.enabled end
 	return {
