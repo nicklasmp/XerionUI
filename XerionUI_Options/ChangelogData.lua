@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.43.0", date = "2026-10-21", notes = {
+		"Add MDT Font: use another font for the text in Mythic Dungeon Tools' window",
+	} },
 	{ version = "2.42.3", date = "2026-10-21", notes = {
 		"Remove Smart Count Tracker and MDT Compact again",
 	} },
@@ -49,8 +52,5 @@ O.CHANGELOG = {
 	{ version = "2.38.2", date = "2026-10-19", notes = {
 		"Fit the Stop preview button to its label",
 		"Drop the Group breadcrumb above group module titles",
-	} },
-	{ version = "2.38.1", date = "2026-10-18", notes = {
-		"Center the dark action row on the Auto Mark Tank button",
 	} },
 }

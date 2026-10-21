@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.43.0 - 2026-10-21
+- Add MDT Font: use another font for the text in Mythic Dungeon Tools' window
+
 ## 2.42.3 - 2026-10-21
 - Remove Smart Count Tracker and MDT Compact again
 

@@ -55,6 +55,15 @@ O:RegisterModuleOptions("EUICDMStackFont", function(ctx, m, G)
 	}
 end)
 
+O:RegisterModuleOptions("MDTFont", function(ctx, m, G)
+	return {
+		Card("Font", {
+			{ type = "dropdown", label = "Font", path = "face", media = "font",
+				tip = "Used for the text in Mythic Dungeon Tools' window. Sizes and outlines stay as MDT sets them; enemy names on the map keep MDT's font." },
+		}),
+	}
+end)
+
 O:RegisterModuleOptions("ZoneText", function(ctx, m, G)
 	return {
 		Card("Font", Join({
