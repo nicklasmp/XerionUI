@@ -2,6 +2,12 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.42.3 - 2026-10-21
+- Remove Smart Count Tracker and MDT Compact again
+
+## 2.42.2 - 2026-10-21
+- Fix the page header on/off switch being covered by the title hover area
+
 ## 2.42.1 - 2026-10-21
 - Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on
 

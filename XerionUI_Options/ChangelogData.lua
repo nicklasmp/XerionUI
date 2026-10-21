@@ -4,6 +4,12 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.42.3", date = "2026-10-21", notes = {
+		"Remove Smart Count Tracker and MDT Compact again",
+	} },
+	{ version = "2.42.2", date = "2026-10-21", notes = {
+		"Fix the page header on/off switch being covered by the title hover area",
+	} },
 	{ version = "2.42.1", date = "2026-10-21", notes = {
 		"Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on",
 	} },
@@ -46,13 +52,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.38.1", date = "2026-10-18", notes = {
 		"Center the dark action row on the Auto Mark Tank button",
-	} },
-	{ version = "2.38.0", date = "2026-10-18", notes = {
-		"Preview and Test are accent-filled primary buttons with a label, in the page header and wherever a Test button sits in a page",
-		"Options panel: the Filter this page box is removed",
-		"Bloodlust Ready and Aggro Check moved to the Combat category",
-	} },
-	{ version = "2.37.2", date = "2026-10-18", notes = {
-		"Who Has the Key moved to the Misc category",
 	} },
 }

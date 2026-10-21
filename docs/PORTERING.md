@@ -61,8 +61,8 @@ Melee Indicator, Externals, Party Interrupts, Co-Tank, Shroud/Mass Invis, Aggro 
 | Kira Reminders: Damage Amp + Chaos Barrage (Murder Row, Kystia Manaheart) | K | ✅ | Port 14. okt 2026 som to moduler (DamageAmp, ChaosBarrage). Droppet: nameplate-fastgørelse på EllesmereUI (brug position.attach), chat-debug/log, manuel target-bar. Utestet i spillet |
 | Kira Reminders: resten (BigWigs-lister pr. dungeon, boss-HP-kald, wrong target, trash aura-lyde) | K | ❌ | Fravalgt af Nicklas 14. okt 2026; kan tages op senere (5.400 linjer, kun to dungeons har indbyggede regler) |
 | Party Stops (CC-cooldowns) | K | ✅ | Port 21. okt 2026: stuns og AoE-CC pr. gruppemedlem i to barer. Egne casts læses direkte, andres via debuffen på fjendernes nameplates (`Engine.NewChain`), cooldown efter talents (`XUI.Talents`), timer-ikon i `TimerKit`. Utestet i spillet. Droppet: delt cell-kit med PartyCDs (PartyCDs har stadig sin egen kopi), radial swipe |
-| Smart Count Tracker | K | ✅ | Port 21. okt 2026: enemy forces-bar mod MDT-ruten (næste pull eller før næste boss), pull-stakning bag fyldet. Ruten læses fra MDT (`MDTLink.lua`) og gemmes i modulets indstillinger. Forenklet: pull-position udledes af tallet i stedet for Kiras fight-log, og "+N"-teksten skrives kun når alle værdier kan læses (ellers tegnes kun striberne). Utestet i spillet |
-| MDT Compact | K | ✅ | Port 21. okt 2026: knap på MDT-vinduet der folder det til et lille kort med pull-listen ved siden af. Flytter MDT's egne frames rundt, så den stopper hvis vinduet ikke ligner det forventede. Utestet i spillet |
+| Smart Count Tracker | K | ✖ | Porteret 21. okt 2026 og fjernet igen efter ønske samme dag. Kan tages op igen (se git-historikken, v2.41.0) |
+| MDT Compact | K | ✖ | Porteret 21. okt 2026 og fjernet igen efter ønske samme dag. Kan tages op igen (se git-historikken, v2.41.0) |
 | MDI Teleports / Raid Markers / Instance Reset | K | ❓ | Ikke vurderet endnu |
 | Key Vendor | K | ⏳ | |
 | Macro Factory | I | ❓ | |

@@ -181,6 +181,13 @@ function O.CreatePageHead(parent)
 		GameTooltip:Show()
 	end)
 	f.textHit:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	-- the switch sits inside the texts' width, so it must stay above their hover area
+	f.enable:SetFrameLevel(f.textHit:GetFrameLevel() + 2)
+	f.enable:SetScript("OnEnter", function(self) self.label:SetTextColor(O:Color("text")) end)
+	f.enable:SetScript("OnLeave", function(self)
+		local m = f.module
+		self.label:SetTextColor(O:Color(m and m.db.enabled and "text" or "muted"))
+	end)
 
 	f.line = O:Rect(f, "line", "ARTWORK")
 	f.line:SetHeight(1)
