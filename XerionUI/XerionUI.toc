@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.43.0
+## Version: 2.44.0
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -77,6 +77,7 @@ Modules\Tweaks\FlyingBar.lua
 Modules\Tweaks\ActionBarFont.lua
 Modules\Tweaks\CDMStackFont.lua
 Modules\Tweaks\CDMBarFonts.lua
+Modules\Tweaks\CDMCombatRes.lua
 Modules\Tweaks\MDTFont.lua
 Modules\Tweaks\ZoneText.lua
 Modules\Tweaks\EUIChat.lua

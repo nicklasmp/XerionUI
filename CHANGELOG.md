@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.44.0 - 2026-10-21
+- Add Cooldown Manager Combat Res: track the group's battle resurrections on an EllesmereUI Cooldown Manager bar with any class
+
 ## 2.43.0 - 2026-10-21
 - Add MDT Font: use another font for the text in Mythic Dungeon Tools' window
 

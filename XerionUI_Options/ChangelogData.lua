@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.0", date = "2026-10-21", notes = {
+		"Add Cooldown Manager Combat Res: track the group's battle resurrections on an EllesmereUI Cooldown Manager bar with any class",
+	} },
 	{ version = "2.43.0", date = "2026-10-21", notes = {
 		"Add MDT Font: use another font for the text in Mythic Dungeon Tools' window",
 	} },
@@ -48,9 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.38.3", date = "2026-10-19", notes = {
 		"Remove the breadcrumb above the page icon",
-	} },
-	{ version = "2.38.2", date = "2026-10-19", notes = {
-		"Fit the Stop preview button to its label",
-		"Drop the Group breadcrumb above group module titles",
 	} },
 }
