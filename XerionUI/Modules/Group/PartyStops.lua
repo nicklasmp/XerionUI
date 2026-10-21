@@ -3,7 +3,7 @@
 -- When the group's crowd control is ready again: stuns, knocks, fears and AoE
 -- disorients (Leg Sweep, Chaos Nova, Shadowfury, Capacitor Totem, Shockwave,
 -- Hammer of Justice, ...), one icon per member and spell with a countdown.
--- Two bars, so the big AoE stops and the rest can sit in different places.
+-- One block you lay out yourself: rows or columns, direction and fill order.
 --
 -- HOW ANOTHER MEMBER'S CAST IS NOTICED
 -- Their casts are secret in a key, but the debuff a stop leaves on an enemy is
@@ -32,7 +32,7 @@ local floor, mmax, mmin = math.floor, math.max, math.min
 local tremove, wipe = table.remove, wipe
 local format = string.format
 
-local GROUPS = 2
+local GROUPS = 1
 local TOKENS = { "player", "party1", "party2", "party3", "party4" }
 local MAX_PLATES = 40
 local READ_EVERY, TICK, LINGER_PLATE, SETTLE = 0.2, 0.25, 1, 0.4
@@ -41,14 +41,15 @@ local PREVIEW_AT = { 0.35, 1, 0.7 }
 local EDIT_ICONS = 7
 local EMPTY = {}
 
-local function BarDefaults(group, x, y)
+local function BarDefaults(x, y)
 	local spells = {}
-	for _, id in ipairs(ORDER) do
-		if SPELLS[id].bar == group then spells[#spells + 1] = id end
-	end
+	for _, id in ipairs(ORDER) do spells[#spells + 1] = id end
 	return {
-		show = true,
-		grow = "RIGHT",
+		orientation = "HORIZONTAL",
+		lines = 1,
+		reverse = false,
+		stackReverse = false,
+		center = false,
 		spacing = 2,
 		showNames = true,
 		namePos = "IN",
@@ -77,17 +78,13 @@ local M = XUI:NewModule("PartyStops", {
 		talents = true,
 		maxUnits = 10,
 		seen = {},
-		bar1 = BarDefaults(1, -160, -150),
-		bar2 = BarDefaults(2, -160, -200),
+		bar = BarDefaults(-160, -150),
 	},
 })
 
-M.GROW = {
-	{ value = "RIGHT", text = "Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "UP", text = "Up" },
-	{ value = "DOWN", text = "Down" },
-	{ value = "CENTER", text = "Centered" },
+M.ORIENTATION = {
+	{ value = "HORIZONTAL", text = "Horizontal (icons side by side)" },
+	{ value = "VERTICAL", text = "Vertical (icons on top of each other)" },
 }
 M.NAMEPOS = {
 	{ value = "IN", text = "On the icon" },
@@ -154,29 +151,47 @@ local function Cap() return mmax(1, mmin(MAX_PLATES, floor(tonumber(M.db.maxUnit
 --------------------------------------------------------------------------------
 -- Spell lists (what the options edit)
 --------------------------------------------------------------------------------
-local function BarDb(g) return M.db["bar" .. g] end
+local function BarDb() return M.db.bar end
 
 -- Spells that were added to the addon after the lists were first saved join
 -- the bar they belong to, once; a spell the user removed stays removed.
 local function Migrate()
 	local db = M.db
 	if type(db.seen) ~= "table" then db.seen = {} end
-	for g = 1, GROUPS do
-		if type(BarDb(g).spells) ~= "table" then BarDb(g).spells = {} end
+	-- the two bars of the first version became one: bar 1's look, both lists
+	if db.bar1 or db.bar2 then
+		local old1, old2 = db.bar1, db.bar2
+		local list, have = {}, {}
+		for _, b in ipairs({ old1 or {}, old2 or {} }) do
+			for _, id in ipairs(b.spells or {}) do
+				if SPELLS[id] and not have[id] then
+					have[id] = true
+					list[#list + 1] = id
+				end
+			end
+		end
+		local keep = old1 or old2
+		if keep then
+			for _, k in ipairs({ "spacing", "showNames", "namePos", "nameLen", "icon", "border", "timerText", "nameText", "position" }) do
+				if keep[k] ~= nil then db.bar[k] = keep[k] end
+			end
+			if keep.grow == "DOWN" or keep.grow == "UP" then db.bar.orientation = "VERTICAL" end
+			db.bar.reverse = (keep.grow == "LEFT" or keep.grow == "UP") and true or false
+			db.bar.center = keep.grow == "CENTER"
+		end
+		db.bar.spells = list
+		db.bar1, db.bar2 = nil, nil
 	end
+	local bar = db.bar
+	if type(bar.spells) ~= "table" then bar.spells = {} end
 	for _, id in ipairs(ORDER) do
 		if not db.seen[id] then
 			db.seen[id] = true
 			local there = false
-			for g = 1, GROUPS do
-				for _, v in ipairs(BarDb(g).spells) do
-					if v == id then there = true end
-				end
+			for _, v in ipairs(bar.spells) do
+				if v == id then there = true end
 			end
-			if not there then
-				local list = BarDb(SPELLS[id].bar or 1).spells
-				list[#list + 1] = id
-			end
+			if not there then bar.spells[#bar.spells + 1] = id end
 		end
 	end
 end
@@ -198,13 +213,10 @@ end
 
 function M:AddSpell(g, id)
 	if not SPELLS[id] then return end
-	for k = 1, GROUPS do
-		local list = BarDb(k).spells
-		for i = #list, 1, -1 do
-			if list[i] == id then tremove(list, i) end
-		end
-	end
 	local list = BarDb(g).spells
+	for i = #list, 1, -1 do
+		if list[i] == id then tremove(list, i) end
+	end
 	list[#list + 1] = id
 	self:RefreshSoon()
 end
@@ -470,32 +482,37 @@ end
 local function Layout(g)
 	local bar, bdb = bars[g], BarDb(g)
 	local size, gap = bdb.icon.width or 36, bdb.spacing or 2
-	local grow = bdb.grow
+	local vertical = bdb.orientation == "VERTICAL"
 	local names = bdb.showNames ~= false
 	local below = names and bdb.namePos == "BELOW"
 	local nameSize = bdb.nameText.size or 10
 	local letters = floor(tonumber(bdb.nameLen) or 0)
-	local step = size + gap
-	local tall = step + (below and nameSize + 2 or 0)
+	local stepX = size + gap
+	local stepY = size + gap + (below and nameSize + 2 or 0)
 	local n = bar.n or 0
+	-- icons fill a line, then the next line starts; n is split evenly over the lines
+	local lines = mmax(1, mmin(8, floor(tonumber(bdb.lines) or 1)))
+	lines = mmin(lines, mmax(1, n))
+	local per = math.ceil(n / lines)
 	bar.frame:SetSize(size, size)
 	for i, c in ipairs(bar.cells) do
 		local on = i <= n
 		if on then
-			local k, x, y = i - 1, 0, 0
-			if grow == "LEFT" then
-				x = -k * step
-			elseif grow == "UP" then
-				y = k * tall
-			elseif grow == "DOWN" then
-				y = -k * tall
-			elseif grow == "CENTER" then
-				x = floor((k - (n - 1) / 2) * step + 0.5)
+			local k = i - 1
+			local line, idx = floor(k / per), k % per
+			local count = mmin(per, n - line * per)
+			local along = bdb.center and (idx - (count - 1) / 2) or idx
+			local across = line
+			if bdb.reverse then along = -along end
+			if bdb.stackReverse then across = -across end
+			local x, y
+			if vertical then
+				x, y = across * stepX, -along * stepY
 			else
-				x = k * step
+				x, y = along * stepX, -across * stepY
 			end
 			c:ClearAllPoints()
-			c:SetPoint("CENTER", bar.frame, "CENTER", x, y)
+			c:SetPoint("CENTER", bar.frame, "CENTER", floor(x + 0.5), floor(y + 0.5))
 			kit.Seat(c)
 			local who, m = c.who, c.m
 			if names and m and m.name ~= nil then
@@ -507,7 +524,7 @@ local function Layout(g)
 				else
 					who:SetPoint("BOTTOM", c, "BOTTOM", 0, 2)
 				end
-				who:SetWidth(step)
+				who:SetWidth(stepX)
 				if not pcall(who.SetText, who, Short(m.name, letters)) then who:SetText("") end
 				who:Show()
 			else
@@ -532,7 +549,7 @@ local function EnsureFrames()
 		f:SetFrameStrata("MEDIUM")
 		f:SetSize(36, 36)
 		f:Hide()
-		XUI.Movers:Register(f, M, "bar" .. g .. ".position", { key = tostring(g), label = "Party Stops - bar " .. g })
+		XUI.Movers:Register(f, M, "bar.position", { key = tostring(g) })
 		bars[g] = { frame = f, cells = {}, n = 0 }
 	end
 end
@@ -809,7 +826,7 @@ local function Share()
 	local have, take, used = {}, {}, {}
 	for g = 1, GROUPS do
 		local count = 0
-		if BarDb(g).show ~= false then
+		if true then
 			for _, id in ipairs(BarDb(g).spells) do
 				if SPELLS[id] and not used[id] then
 					used[id] = true
@@ -851,7 +868,7 @@ local function Rebuild()
 	for g = 1, GROUPS do
 		local list = {}
 		local bdb = BarDb(g)
-		if (preview or on) and bdb.show ~= false then
+		if preview or on then
 			for _, id in ipairs(bdb.spells) do
 				local sp = SPELLS[id]
 				if sp and not used[id] then

@@ -208,6 +208,13 @@ function M:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", Disarm)
 end
 
+-- The framework has cancelled the ticker and dropped the events; forget the
+-- running bar so it does not stay on screen and the next enable starts clean.
+function M:OnDisable()
+	armed, live, ticker = nil, nil, nil
+	if display and not self:IsPreview() then display:Hide() end
+end
+
 -- plays the bar with a made-up health curve for eight seconds
 function M:Test()
 	if not self:RequireRunning() then return end

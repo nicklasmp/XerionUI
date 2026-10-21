@@ -328,24 +328,30 @@ local function StopRows(parent, ctx, m, g)
 end
 
 local function StopBarCards(m, G, g)
-	local k = "bar" .. g
+	local k = "bar"
 	local function P(field) return k .. "." .. field end
 	local function namesOff() return not m.db[k].showNames end
 	return {
-		Card("Bar " .. g, Join({
-			{ type = "toggle", label = "Show this bar", path = P("show") },
-			{ type = "dropdown", label = "Grow", path = P("grow"), values = m.GROW },
+		Card("Layout", Join({
+			{ type = "dropdown", label = "Direction", path = P("orientation"), values = m.ORIENTATION },
+			{ type = "slider", label = "Lines", path = P("lines"), min = 1, max = 8, step = 1,
+				tip = "Rows when horizontal, columns when vertical. The icons are spread evenly over them." },
+			{ type = "toggle", label = "Fill from the other end", path = P("reverse"),
+				tip = "Horizontal: icons run to the left instead of the right. Vertical: upwards instead of downwards." },
+			{ type = "toggle", label = "Stack the lines the other way", path = P("stackReverse"),
+				tip = "Horizontal: new rows go up instead of down. Vertical: new columns go left instead of right." },
+			{ type = "toggle", label = "Center each line", path = P("center") },
 			{ type = "slider", label = "Space between icons", path = P("spacing"), min = -1, max = 30, step = 1 },
 		}, G.Icon(P("icon"), { square = true }))),
-		Card("Bar " .. g .. " border", G.Border(P("border"))),
-		Card("Bar " .. g .. " timer text", G.Font(P("timerText"), { color = true })),
-		Card("Bar " .. g .. " names", Join({
+		Card("Border", G.Border(P("border"))),
+		Card("Timer text", G.Font(P("timerText"), { color = true })),
+		Card("Names", Join({
 			{ type = "toggle", label = "Member name in class color", path = P("showNames") },
 			{ type = "dropdown", label = "Name place", path = P("namePos"), values = m.NAMEPOS, disabled = namesOff },
 			{ type = "slider", label = "Name letters (0 = whole name)", path = P("nameLen"), min = 0, max = 12, step = 1, disabled = namesOff },
 		}, G.Font(P("nameText")))),
-		Card("Bar " .. g .. " position", G.Position(P("position"))),
-		Card("Bar " .. g .. " spells", {
+		Card("Position", G.Position(P("position"))),
+		Card("Spells", {
 			{ type = "custom", build = function(parent, c) return StopRows(parent, c, m, g) end },
 			{ type = "dropdown", label = "Add a spell",
 				values = function()
@@ -381,12 +387,10 @@ O:RegisterModuleOptions("PartyStops", function(ctx, m, G)
 			{ type = "slider", label = "Enemies watched", path = "maxUnits", min = 4, max = 20, step = 1,
 				tip = "How many enemy nameplates in combat are watched for a stop landing. Fewer is lighter." },
 			{ type = "description",
-				text = "Five-player groups only. Your own stops follow your casts; the others are noticed by the debuff a stop leaves on an enemy, which the game still lets this read inside a key. The bars are placed separately in the cards below." },
+				text = "Five-player groups only. Your own stops follow your casts; the others are noticed by the debuff a stop leaves on an enemy, which the game still lets this read inside a key. All stops share one block; set its layout below." },
 		}),
 	}
-	for g = 1, 2 do
-		for _, c in ipairs(StopBarCards(m, G, g)) do cards[#cards + 1] = c end
-	end
+	for _, c in ipairs(StopBarCards(m, G, 1)) do cards[#cards + 1] = c end
 	return cards
 end)
 

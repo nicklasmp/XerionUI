@@ -362,6 +362,16 @@ function M:OnEnable()
 	self:RegisterEvent("ENCOUNTER_END", Stop)
 end
 
+-- The framework has cancelled the ticker and dropped the events; forget the
+-- counting state so nothing stays on screen and the next enable starts clean.
+function M:OnDisable()
+	rule, unit, away, wait, sim, simStep = nil, nil, nil, nil, nil, nil
+	total, left = 0, 0
+	ticker = nil
+	CastBar()
+	if display and not self:IsPreview() then display:Hide() end
+end
+
 -- plays the boxes: four bolts, then three, twice
 function M:Test()
 	if not self:RequireRunning() then return end
