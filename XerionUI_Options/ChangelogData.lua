@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.42.1", date = "2026-10-21", notes = {
+		"Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on",
+	} },
 	{ version = "2.42.0", date = "2026-10-21", notes = {
 		"Party Stops is now one block: choose horizontal or vertical, how many rows or columns, fill order and centering (the two old bars are merged on update)",
 	} },
@@ -51,9 +54,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.37.2", date = "2026-10-18", notes = {
 		"Who Has the Key moved to the Misc category",
-	} },
-	{ version = "2.37.1", date = "2026-10-18", notes = {
-		"Sidebar: Misc (renamed from Misc.) sits above EllesmereUI Tweaks and Dungeons sits right before Classes",
-		"Options panel: the Position card is removed from every module (move frames with the unlock icon in the header)",
 	} },
 }

@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.42.1 - 2026-10-21
+- Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on
+
 ## 2.42.0 - 2026-10-21
 - Party Stops is now one block: choose horizontal or vertical, how many rows or columns, fill order and centering (the two old bars are merged on update)
 
