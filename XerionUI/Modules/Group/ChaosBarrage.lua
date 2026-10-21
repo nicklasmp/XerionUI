@@ -154,6 +154,12 @@ local function CastTick()
 	bar.time:SetFormattedText("%.1f", rest)
 end
 
+-- 20 per second only while something animates (cast bar, demo); otherwise the
+-- ticker just watches for silence
+local FAST, SLOW = 0.05, 0.2
+local rate
+local SetRate
+
 local function CastBar(len, t0)
 	local bar = display and display.castBar
 	if not bar then return end
@@ -166,6 +172,7 @@ local function CastBar(len, t0)
 	bar.bar:SetMinMaxValues(0, len)
 	bar:Show()
 	CastTick()
+	if ticker then SetRate(FAST) end
 end
 
 local function Set(t, l)
@@ -174,10 +181,20 @@ local function Set(t, l)
 	Paint()
 end
 
-local function Idle()
+local Idle
+
+SetRate = function(want)
+	if rate == want and ticker then return end
+	rate = want
+	if ticker then M:CancelTicker(ticker) end
+	ticker = M:NewTicker(want, Idle)
+end
+
+Idle = function()
 	-- the box is shown while counting (or simulating); the ticker lives with it
 	local now = GetTime()
 	CastTick()
+	SetRate((sim or castT0) and FAST or SLOW)
 	if sim then
 		local i = math.max(1, math.ceil((now - sim) / DEMO.pace))
 		local step = DEMO.steps[i]
@@ -203,11 +220,11 @@ end
 
 local function Show()
 	display:Show()
-	if not ticker then ticker = M:NewTicker(0.05, Idle) end
+	if not ticker then SetRate(FAST) end
 end
 
 local function HideAll()
-	if ticker then M:CancelTicker(ticker) ticker = nil end
+	if ticker then M:CancelTicker(ticker) ticker, rate = nil, nil end
 	CastBar()
 	if display and not M:IsPreview() then display:Hide() end
 end
@@ -218,7 +235,7 @@ function M:Away(now)
 	local s = unit and state[unit]
 	if s then s.start, s.expect = nil, nil end
 	CastBar()
-	if ticker then M:CancelTicker(ticker) ticker = nil end
+	if ticker then M:CancelTicker(ticker) ticker, rate = nil, nil end
 	display:Hide()
 end
 
@@ -367,7 +384,7 @@ end
 function M:OnDisable()
 	rule, unit, away, wait, sim, simStep = nil, nil, nil, nil, nil, nil
 	total, left = 0, 0
-	ticker = nil
+	ticker, rate = nil, nil
 	CastBar()
 	if display and not self:IsPreview() then display:Hide() end
 end

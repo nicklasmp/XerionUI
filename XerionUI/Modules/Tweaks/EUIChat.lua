@@ -104,10 +104,22 @@ local function WantTabs()
 	return menus and menus:IsAnyMenuOpen() and true or false
 end
 
+-- fast while the tabs fade, slow while they rest: the resting poll only has to notice the mouse
+local IDLE_STEP = 0.15
+local tabRate
+
+local function SetTabRate(self, rate)
+	if tabRate == rate and self._tabTicker then return end
+	tabRate = rate
+	if self._tabTicker then self:CancelTicker(self._tabTicker) end
+	self._tabTicker = self:NewTicker(rate, self.Poll)
+end
+
 function M:Poll()
 	if not wrappedStrip then WrapStrip() end
 	target = WantTabs() and 1 or 0
-	if factor == target then return end
+	if factor == target then return SetTabRate(self, IDLE_STEP) end
+	SetTabRate(self, STEP)
 	if target > factor then
 		factor = math.min(1, factor + STEP * 5)
 	else
@@ -119,14 +131,15 @@ end
 function M:StartTabs()
 	if self._tabTicker then return end
 	WrapStrip()
-	self._tabTicker = self:NewTicker(STEP, self.Poll)
+	SetTabRate(self, IDLE_STEP)
 end
 
 function M:StopTabs()
 	if self._tabTicker then
-		self._tabTicker:Cancel()
+		self:CancelTicker(self._tabTicker)
 		self._tabTicker = nil
 	end
+	tabRate = nil
 	factor, target = 1, 1
 	PushAlpha()
 end

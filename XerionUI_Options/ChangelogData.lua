@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.1", date = "2026-10-21", notes = {
+		"Lower idle polling in EUIChat tabs and Chaos Barrage (fast ticks only while animating)",
+	} },
 	{ version = "2.44.0", date = "2026-10-21", notes = {
 		"Add Cooldown Manager Combat Res: track the group's battle resurrections on an EllesmereUI Cooldown Manager bar with any class",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.39.0", date = "2026-10-19", notes = {
 		"Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail",
-	} },
-	{ version = "2.38.3", date = "2026-10-19", notes = {
-		"Remove the breadcrumb above the page icon",
 	} },
 }
