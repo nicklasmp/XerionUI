@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.41.1 - 2026-10-21
+- Chat Tweaks: show the chat tabs while a whisper is unread
+
 ## 2.41.0 - 2026-10-21
 - Add Party Stops: cooldowns of the group's stuns and AoE crowd control, read from enemy debuffs, with talent-adjusted lengths
 - Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.41.1", date = "2026-10-21", notes = {
+		"Chat Tweaks: show the chat tabs while a whisper is unread",
+	} },
 	{ version = "2.41.0", date = "2026-10-21", notes = {
 		"Add Party Stops: cooldowns of the group's stuns and AoE crowd control, read from enemy debuffs, with talent-adjusted lengths",
 		"Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill",
@@ -53,13 +56,5 @@ O.CHANGELOG = {
 	{ version = "2.37.0", date = "2026-10-18", notes = {
 		"NPC blacklist is a page of its own under Dungeons > All dungeons, shared by every dungeon (the Blacklist tab inside the dialog lists is gone)",
 		"NPC blacklist: NPCs seen in two or more dungeons are listed as candidates, with a button to blacklist them",
-	} },
-	{ version = "2.36.0", date = "2026-10-18", notes = {
-		"Auto NPC Dialog: the Picked tab is replaced by a Blacklist tab; blacklisting an NPC hides it and stops recording it in every dungeon",
-		"Auto NPC Dialog: the Other group is now called Uncategorized",
-		"New Misc. category (below EllesmereUI Tweaks) with Meter Reset, Bonus Roll Confirm and World Markers",
-		"Options panel: keyboard navigation (Tab, Space/Enter, arrows) through switches, dropdowns, sliders and boxes",
-		"Options panel: Diagnostics is a single icon instead of a menu; the Running status text is gone; the per-setting reset arrow is removed",
-		"Co-Tank: removed the Always show this player option",
 	} },
 }

@@ -73,7 +73,22 @@ local function PushAlpha()
 	if strip and baseAlpha then strip:SetAlpha(baseAlpha) end
 end
 
+-- Blizzard raises tab.alerting on a window that got a message while another tab
+-- is selected and clears it once the tab is opened, so it doubles as "unread"
+local function UnreadWhisper()
+	for i = 1, 20 do
+		local cf = _G[FRAME_NAMES[i]]
+		local ct = cf and cf.chatType
+		if ct == "WHISPER" or ct == "BN_WHISPER" then
+			local tab = _G[FRAME_NAMES[i] .. "Tab"]
+			if tab and tab.alerting then return true end
+		end
+	end
+	return false
+end
+
 local function WantTabs()
+	if UnreadWhisper() then return true end
 	local ns = Chat()
 	local strip = wrappedStrip
 	if strip and strip:IsShown() and strip:IsMouseOver() then return true end
