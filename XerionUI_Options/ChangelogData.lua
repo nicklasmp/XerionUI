@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.2", date = "2026-10-22", notes = {
+		"Remove Cooldown Manager Combat Res tweak",
+	} },
 	{ version = "2.44.1", date = "2026-10-21", notes = {
 		"Lower idle polling in EUIChat tabs and Chaos Barrage (fast ticks only while animating)",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.39.1", date = "2026-10-19", notes = {
 		"Mail Contacts moved to the Misc category",
-	} },
-	{ version = "2.39.0", date = "2026-10-19", notes = {
-		"Add Mail Contacts: a list of your other characters, online friends, guild members and favorites beside Send Mail",
 	} },
 }

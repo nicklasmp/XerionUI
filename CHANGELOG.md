@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.44.2 - 2026-10-22
+- Remove Cooldown Manager Combat Res tweak
+
 ## 2.44.1 - 2026-10-21
 - Lower idle polling in EUIChat tabs and Chaos Barrage (fast ticks only while animating)
 

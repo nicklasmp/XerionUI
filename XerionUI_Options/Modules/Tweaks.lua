@@ -55,14 +55,6 @@ O:RegisterModuleOptions("EUICDMStackFont", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("EUICombatRes", function(ctx, m, G)
-	return {
-		Card("How to use", {
-			{ type = "description", text = "In EllesmereUI's Cooldown Manager, add a Custom Spell ID to the bar you want and enter 20484 (Rebirth). Tick Show Charges for the number of battle resurrections left. This module makes EllesmereUI draw it for every class and shows the pool's recharge on the icon." },
-		}),
-	}
-end)
-
 O:RegisterModuleOptions("MDTFont", function(ctx, m, G)
 	return {
 		Card("Font", {
