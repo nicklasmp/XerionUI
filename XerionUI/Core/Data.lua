@@ -13,20 +13,20 @@ XUI.Data = Data
 -- [spellID] = cooldown (seconds), class, and for a healer-length kick its
 -- healer cooldown; `icon` points a pet's spell at the icon players know.
 Data.KICKS = {
-	[47528]   = { cd = 12, class = "DEATHKNIGHT", name = "Mind Freeze" },
+	[47528]   = { cd = 15, class = "DEATHKNIGHT", name = "Mind Freeze" },
 	[183752]  = { cd = 15, class = "DEMONHUNTER", name = "Disrupt" },
 	[106839]  = { cd = 15, class = "DRUID", name = "Skull Bash" },
 	[78675]   = { cd = 60, class = "DRUID", name = "Solar Beam" },
-	[351338]  = { cd = 40, class = "EVOKER", name = "Quell" },
+	[351338]  = { cd = 20, class = "EVOKER", name = "Quell" },
 	[147362]  = { cd = 24, class = "HUNTER", name = "Counter Shot" },
 	[187707]  = { cd = 15, class = "HUNTER", name = "Muzzle" },
-	[2139]    = { cd = 21, class = "MAGE", name = "Counterspell" },
+	[2139]    = { cd = 25, class = "MAGE", name = "Counterspell" },
 	[116705]  = { cd = 15, class = "MONK", name = "Spear Hand Strike" },
 	[96231]   = { cd = 15, class = "PALADIN", name = "Rebuke" },
-	[15487]   = { cd = 45, class = "PRIEST", name = "Silence" },
+	[15487]   = { cd = 30, class = "PRIEST", name = "Silence" },
 	[1766]    = { cd = 15, class = "ROGUE", name = "Kick" },
 	[57994]   = { cd = 12, healerCd = 30, class = "SHAMAN", name = "Wind Shear" },
-	[6552]    = { cd = 13.5, class = "WARRIOR", name = "Pummel" },
+	[6552]    = { cd = 15, class = "WARRIOR", name = "Pummel" },
 	[386071]  = { cd = 90, class = "WARRIOR", name = "Disrupting Shout" },
 	[19647]   = { cd = 24, class = "WARLOCK", name = "Spell Lock" },
 	[89766]   = { cd = 30, class = "WARLOCK", name = "Axe Toss" },
@@ -34,6 +34,16 @@ Data.KICKS = {
 	[132409]  = { cd = 24, class = "WARLOCK", icon = 19647 },
 	[1276467] = { cd = 24, class = "WARLOCK", icon = 19647 },
 	[119914]  = { cd = 30, class = "WARLOCK", icon = 89766 },
+}
+
+-- Talents that change a kick's length, by kick. `add` seconds and `pct`
+-- percent apply to a kick that landed, which is every kick seen on someone
+-- else (Coldthirst and Light of the Sun only shorten a successful interrupt).
+Data.KICK_MODS = {
+	[2139]  = { { talent = 382297, add = -5 } },  -- Quick Witted
+	[6552]  = { { talent = 391271, pct = -10 } }, -- Honed Reflexes
+	[47528] = { { talent = 378848, add = -3 } },  -- Coldthirst
+	[78675] = { { talent = 202918, add = -15 } }, -- Light of the Sun
 }
 
 -- A party member's kick by class, before their spec is known.

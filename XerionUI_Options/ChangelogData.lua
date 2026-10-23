@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.5", date = "2026-10-23", notes = {
+		"Remove the Forget unpicked button from Auto NPC Dialog",
+	} },
 	{ version = "2.46.4", date = "2026-10-23", notes = {
 		"Skip Cinematic: moved under Kings' Rest in the Dungeons tab (was Misc), one switch for the module",
 	} },
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.44.0", date = "2026-10-21", notes = {
 		"Add Cooldown Manager Combat Res: track the group's battle resurrections on an EllesmereUI Cooldown Manager bar with any class",
-	} },
-	{ version = "2.43.0", date = "2026-10-21", notes = {
-		"Add MDT Font: use another font for the text in Mythic Dungeon Tools' window",
 	} },
 }

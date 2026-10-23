@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.5 - 2026-10-23
+- Remove the Forget unpicked button from Auto NPC Dialog
+
 ## 2.46.4 - 2026-10-23
 - Skip Cinematic: moved under Kings' Rest in the Dungeons tab (was Misc), one switch for the module
 

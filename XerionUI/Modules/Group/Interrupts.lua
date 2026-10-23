@@ -99,7 +99,7 @@ local function Read(fn, ...)
 	return v
 end
 
-local obs = { total = 0, readable = 0, secret = 0, mine = 0, guessed = 0, unmatched = 0, meter = 0, confirmed = 0, named = 0, unconfirmed = 0 }
+local obs = { total = 0, readable = 0, secret = 0, mine = 0, guessed = 0, unmatched = 0, meter = 0, confirmed = 0, named = 0, unconfirmed = 0, ignored = 0 }
 
 --------------------------------------------------------------------------------
 -- Members and lengths
@@ -113,10 +113,40 @@ local function Heals(spec, role)
 	return role == "HEALER"
 end
 
-local function KickCd(spell, heals)
+-- Every kick seen on someone else landed, so the cooldown talents that
+-- shorten a successful interrupt count; `ranks` is the member's read talents
+-- (nil while unread: the table's plain length).
+local function KickCd(spell, heals, ranks)
 	local kick = spell and KICKS[spell]
 	if not kick then return nil end
-	return heals and kick.healerCd or kick.cd
+	local len = heals and kick.healerCd or kick.cd
+	local mods = D.KICK_MODS[spell]
+	if mods and ranks then
+		local add, pct = 0, 0
+		for _, mod in ipairs(mods) do
+			if (ranks[mod.talent] or 0) > 0 then
+				add = add + (mod.add or 0)
+				pct = pct + (mod.pct or 0)
+			end
+		end
+		len = len * (1 + pct / 100) + add
+	end
+	return max(len, 1)
+end
+
+-- Talent and spec reads wait for the inspect queue; a class with no cooldown
+-- talent needs only the spec.
+local talents = XUI.Talents.New()
+local WANTS_RANKS = {}
+for spell, mods in pairs(D.KICK_MODS) do
+	local class = KICKS[spell].class
+	WANTS_RANKS[class] = true
+	for _, mod in ipairs(mods) do talents:Want(class, mod.talent) end
+end
+local ranksByGUID = {}
+
+local function Settled(m)
+	return m.spec and (m.ranks or not WANTS_RANKS[m.class]) and true or false
 end
 
 local function MemberSpell(m)
@@ -167,8 +197,7 @@ local function OwnCd(spell)
 	if healer then return healer end
 	local v = spell and LearnedStore()[spell]
 	if type(v) == "number" and v > 0 then return v end
-	local cap = spell and KICKS[spell] and KICKS[spell].cd
-	return cap or M.db.partyCd
+	return KickCd(spell, false, members.player and members.player.ranks) or M.db.partyCd
 end
 
 local function SelfSpecId()
@@ -670,9 +699,9 @@ end
 -- true keeps the unit waiting for its inspect answer
 local function TryInspect(unit, q)
 	local m = members[unit]
-	if not m or m.spec then return false end
-	if m.guid and specByGUID[m.guid] then
-		m.spec = specByGUID[m.guid]
+	if not m or Settled(m) then return false end
+	if m.guid and specByGUID[m.guid] and (ranksByGUID[m.guid] or not WANTS_RANKS[m.class]) then
+		m.spec, m.ranks = specByGUID[m.guid], ranksByGUID[m.guid]
 		ScheduleRebuild()
 		return false
 	end
@@ -680,7 +709,7 @@ local function TryInspect(unit, q)
 	if m.tries > 12 then
 		M:After(30, function()
 			local cur = members[unit]
-			if cur and cur.guid == m.guid and not cur.spec then
+			if cur and cur.guid == m.guid and not Settled(cur) then
 				cur.tries = 0
 				QueueInspect(unit)
 			end
@@ -704,14 +733,25 @@ local function OnInspectReady(guid)
 	if IsSecret(guid) then return end
 	local unit = UnitForGUID(guid)
 	if not unit then return end
+	local m = members[unit]
 	local spec = ReadSpec(unit)
+	local changed = false
 	if spec then
 		specByGUID[guid] = spec
-		if members[unit].spec ~= spec then
-			members[unit].spec = spec
-			ScheduleRebuild()
+		if m.spec ~= spec then
+			m.spec = spec
+			changed = true
 		end
 	end
+	-- the cooldown talents come out of the same inspect
+	if WANTS_RANKS[m.class] then
+		local ok, ranks = pcall(talents.Ranks, talents, m.class)
+		if ok and ranks then
+			ranksByGUID[guid] = ranks
+			changed = true
+		end
+	end
+	if changed then ScheduleRebuild() end
 end
 
 --------------------------------------------------------------------------------
@@ -737,8 +777,15 @@ local function Rebuild()
 					class = class,
 					role = Read(UnitGroupRolesAssigned, unit),
 					spec = guid and specByGUID[guid] or nil,
+					ranks = guid and ranksByGUID[guid] or nil,
 					tries = old[unit] and old[unit].guid == guid and old[unit].tries or nil,
 				}
+				if isSelf then
+					local cfg = WANTS_RANKS[class] and XUI.Talents.Config()
+					local ok, ranks = false, nil
+					if cfg then ok, ranks = pcall(talents.Ranks, talents, class, cfg) end
+					m.ranks = ok and ranks or nil
+				end
 				m.heals = Heals(isSelf and SelfSpecId() or m.spec, m.role)
 				members[unit] = m
 				if guid then unitByGUID[guid] = unit end
@@ -747,7 +794,7 @@ local function Rebuild()
 					spell, poll = D.PlayerKick()
 				else
 					spell = MemberSpell(m)
-					if not m.spec then QueueInspect(unit) end
+					if not Settled(m) then QueueInspect(unit) end
 				end
 				m.spell = spell
 				if spell then
@@ -764,7 +811,7 @@ local function Rebuild()
 					row.unit, row.guid, row.class, row.order = unit, guid, class, idx
 					row.label = m.name or unit
 					row.spell, row.poll = spell, poll
-					row.cd = KickCd(spell, m.heals) or 15
+					row.cd = KickCd(spell, m.heals, m.ranks) or 15
 					StyleRow(row)
 					if not row.cdStart then
 						row.bar:SetMinMaxValues(0, 1)
@@ -892,7 +939,8 @@ local function OnCast(unit, spellID)
 	local iconSpell = kick.icon or spellID
 	if row.spell ~= iconSpell then
 		row.spell = iconSpell
-		row.cd = KickCd(spellID, members[owner] and members[owner].heals)
+		local mem = members[owner]
+		row.cd = KickCd(spellID, mem and mem.heals, mem and mem.ranks)
 		if members[owner] then members[owner].spell = iconSpell end
 		StyleRow(row)
 	end
@@ -1082,8 +1130,12 @@ end
 
 local lastEventAt = -10
 
+-- A kick's cast stop and the meter's update land in the same frame; a little
+-- slack for a late one. Anything further apart is two unrelated things.
+local PAIR_WINDOW = 0.3
+
 local function Expire(list, now, onDrop)
-	while list[1] and now - list[1].at > 1.5 do
+	while list[1] and now - list[1].at > PAIR_WINDOW do
 		local e = table.remove(list, 1)
 		if onDrop then onDrop(e) end
 	end
@@ -1097,9 +1149,9 @@ local function Pair(now)
 	while pendings[1] and meterHits[1] do
 		local p, h = pendings[1], meterHits[1]
 		local gap = p.at - h.at
-		if gap > 1 then
+		if gap > PAIR_WINDOW then
 			table.remove(meterHits, 1)
-		elseif gap < -1 then
+		elseif gap < -PAIR_WINDOW then
 			table.remove(pendings, 1)
 			DropUnconfirmed()
 		else
@@ -1121,6 +1173,12 @@ local function OnEnemyInterrupted(unit, spellID, interruptedBy)
 	-- the event fires for every token a unit is seen through, friends
 	-- included; only a unit we can attack can have been kicked
 	if Ask(UnitCanAttack, "player", unit) == false then return end
+	-- a cast stopped by a stun, a death or its own end names no interrupter
+	-- (nil or ""); a kick names one, plain outside a key and secret inside
+	if interruptedBy == nil or (not IsSecret(interruptedBy) and interruptedBy == "") then
+		obs.ignored = obs.ignored + 1
+		return
+	end
 	obs.total = obs.total + 1
 	local db = M.db
 	if not db.observe or M:IsPreview() then return end
@@ -1207,7 +1265,7 @@ function M:OnEnable()
 	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", function(_, _, unit)
 		if type(unit) == "string" and not IsSecret(unit) and unit ~= "player" then
 			local m = members[unit]
-			if m and m.guid then specByGUID[m.guid] = nil end
+			if m and m.guid then specByGUID[m.guid], ranksByGUID[m.guid] = nil, nil end
 		end
 		ScheduleRebuild()
 	end)
@@ -1297,6 +1355,6 @@ function M:PrintStatus()
 				tostring(m.spell), m.spell and state or "no interrupt"))
 		end
 	end
-	print(format("  interrupted casts %d (%d named the kicker, %d secret, %d unconfirmed); meter %d, confirmed %d: %d named, %d guessed, %d yours, %d unmatched",
-		obs.total, obs.readable, obs.secret, obs.unconfirmed, obs.meter, obs.confirmed, obs.named, obs.guessed, obs.mine, obs.unmatched))
+	print(format("  interrupted casts %d (%d named the kicker, %d secret, %d unconfirmed, %d ignored as no kick); meter %d, confirmed %d: %d named, %d guessed, %d yours, %d unmatched",
+		obs.total, obs.readable, obs.secret, obs.unconfirmed, obs.ignored, obs.meter, obs.confirmed, obs.named, obs.guessed, obs.mine, obs.unmatched))
 end
