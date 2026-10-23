@@ -48,6 +48,7 @@ DB.GLOBAL_DEFAULTS = {
 		classFolded = false,
 		groupFolded = false,
 		dungeonFolded = false,
+		delveFolded = false,
 		tweaksFolded = false,
 		miscFolded = false,
 	},

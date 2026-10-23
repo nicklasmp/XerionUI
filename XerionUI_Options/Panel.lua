@@ -571,7 +571,7 @@ function O:Unfold(key)
 	local e = XUI:GetModule(key) or O.groupByKey[key]
 	if not (e and e.category) then return end
 	panel[e.category .. "Folded"] = nil
-	if e.category == "dungeon" and panel.dungeonsFolded then
+	if (e.category == "dungeon" or e.category == "delve") and panel.dungeonsFolded then
 		panel.dungeonsFolded[e.dungeon or O.DIALOG_NO_ZONE] = nil
 	end
 end

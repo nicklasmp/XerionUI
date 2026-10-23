@@ -778,7 +778,7 @@ end
 local function DialogItems(m, zone)
 	return {
 		{ type = "description",
-			text = "Every NPC dialog you open inside a dungeon is listed here under its dungeon and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically. The blocked-circle button hides the NPC in every dungeon (see Dungeons > All dungeons > NPC blacklist)." },
+			text = "Every NPC dialog you open inside a dungeon or delve is listed here under its dungeon (Dungeons) or delve (Delves) and NPC. The quoted line is the option clicked for you - the step you skip. Switch it on to have it picked automatically. The blocked-circle button hides the NPC in every dungeon (see Dungeons > All dungeons > NPC blacklist)." },
 		{ type = "custom", build = function(parent, c) return GossipList(parent, c, m, zone) end },
 		{ type = "button", text = "Forget unpicked",
 			tip = zone and "Removes every dialog of this dungeon that is not switched on." or "Removes every listed dialog that is not switched on.",

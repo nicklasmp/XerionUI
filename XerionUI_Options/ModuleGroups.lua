@@ -119,14 +119,22 @@ end
 -- dungeon's dialogs.
 O.DIALOG_NO_ZONE = "Uncategorized"
 
-function O.DialogZones()
+-- Delves get their own category; everything else (dungeons, raids, unseen
+-- dialogs) stays under Dungeons.
+local function ZoneCategory(e)
+	return XUI.IsDelveKind(e.kind) and "delve" or "dungeon"
+end
+
+-- The zones that have dialogs, for one sidebar category ("dungeon" by default).
+function O.DialogZones(category)
+	category = category or "dungeon"
 	local m = XUI:GetModule("AutoGossip")
 	local out, have = {}, {}
 	if not m then return out end
 	for _, e in ipairs(m:Catalogue()) do
 		-- dialogs not seen in game yet (built-ins, typed IDs) have no dungeon: "Uncategorized"
 		local zone = e.zone or O.DIALOG_NO_ZONE
-		if not have[zone] then
+		if not have[zone] and ZoneCategory(e) == category then
 			have[zone] = true
 			out[#out + 1] = zone
 		end
@@ -134,12 +142,16 @@ function O.DialogZones()
 	return out
 end
 
-function O:DialogEntry(zone)
+function O:DialogEntry(zone, category)
+	category = category or "dungeon"
 	local key = "dlg:" .. zone
 	local entry = O.groupByKey[key]
-	if entry then return entry end
+	if entry then
+		entry.category = category
+		return entry
+	end
 	entry = Register({
-		key = key, name = "NPC dialogs", category = "dungeon", dungeon = zone,
+		key = key, name = "NPC dialogs", category = category, dungeon = zone,
 		desc = "Dialogs to skip in " .. zone .. ".", members = { { "AutoGossip", "Auto NPC dialog" } },
 	}, false)
 	if entry then

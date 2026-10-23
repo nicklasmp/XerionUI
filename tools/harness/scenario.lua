@@ -516,6 +516,18 @@ Step("auto NPC dialog: records dungeon dialogs and picks switched-on ones", func
 	assert(hasZone, "the seen dungeon should be listed for the sidebar")
 	local entry = XUI.Options:DialogEntry("Ara-Kara")
 	assert(entry and entry.dungeon == "Ara-Kara", "a dungeon entry should exist")
+	assert(entry.category == "dungeon", "a dungeon's dialogs sit under Dungeons")
+
+	-- a delve's dialogs sit under Delves, not Dungeons
+	seen[555009] = { text = "Begin the delve", npc = "Valeera", npcID = 1, zone = "Fungal Folly", kind = "Delve" }
+	local delveZone, dungeonZone
+	for _, z in ipairs(XUI.Options.DialogZones("delve")) do if z == "Fungal Folly" then delveZone = true end end
+	for _, z in ipairs(XUI.Options.DialogZones("dungeon")) do if z == "Fungal Folly" then dungeonZone = true end end
+	assert(delveZone and not dungeonZone, "a delve should be listed under Delves only")
+	local dEntry = XUI.Options:DialogEntry("Fungal Folly", "delve")
+	assert(dEntry and dEntry.category == "delve", "a delve entry should be in the delve category")
+	XUI.Options:RefreshSidebar()
+	seen[555009] = nil
 	XUI.Options:Open(entry.key)
 	MOCK.Advance(0.1)
 	XUI.Options:RefreshSidebar()

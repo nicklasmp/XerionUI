@@ -520,18 +520,18 @@ function O:RefreshSidebar()
 					if Keep(m) then list[#list + 1] = m end
 				end
 			end
-			if cat.key == "dungeon" then
-				-- Auto NPC Dialog: one entry under every dungeon with a seen dialog
+			if cat.key == "dungeon" or cat.key == "delve" then
+				-- Auto NPC Dialog: one entry under every dungeon / delve with a seen dialog
 				local gm = XUI:GetModule("AutoGossip")
 				if gm and gm:IsAvailable() then
 					-- and the blacklist, which belongs to no dungeon
-					local be = O:BlacklistEntry()
+					local be = cat.key == "dungeon" and O:BlacklistEntry()
 					if be and ModuleMatches(be, cat.name:lower() .. " npc blacklist hide dialog gossip") then
 						all[#all + 1] = gm
 						if Keep(be) then list[#list + 1] = be end
 					end
-					for _, zone in ipairs(O.DialogZones()) do
-						local e = O:DialogEntry(zone)
+					for _, zone in ipairs(O.DialogZones(cat.key)) do
+						local e = O:DialogEntry(zone, cat.key)
 						if e and ModuleMatches(e, cat.name:lower() .. " " .. zone:lower() .. " dialog gossip") then
 							all[#all + 1] = gm
 							if Keep(e) then list[#list + 1] = e end
@@ -546,7 +546,7 @@ function O:RefreshSidebar()
 					O:RefreshSidebar()
 				end }, all)
 				if not folded then
-					if cat.key == "dungeon" then
+					if cat.key == "dungeon" or cat.key == "delve" then
 						-- one sub-heading per dungeon (alphabetical), its modules below it
 						local byDungeon, names = {}, {}
 						for _, m in ipairs(list) do

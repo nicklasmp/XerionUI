@@ -30,6 +30,11 @@ local BUILTIN_BY_ID = {}
 for _, d in ipairs(BUILTIN) do BUILTIN_BY_ID[d.id] = d end
 
 local KINDS = { party = "Dungeon", raid = "Raid", scenario = "Scenario", pvp = "Battleground", arena = "Arena" }
+local DELVE_DIFFICULTY = 208 -- difficulty ID of a delve (they are scenarios)
+
+-- Delves are listed under their own sidebar category. Older records only know
+-- "Scenario", which is what a delve reported before it was told apart.
+function XUI.IsDelveKind(kind) return kind == "Delve" or kind == "Scenario" end
 
 local M = XUI:NewModule("AutoGossip", {
 	name = "Auto NPC Dialog",
@@ -164,11 +169,13 @@ end
 
 -- nil outside instances; else the instance's name, kind and ID
 local function InstanceInfo()
-	local ok, name, kind, _, difficulty, _, _, _, instanceID = pcall(GetInstanceInfo)
+	local ok, name, kind, difficultyID, difficulty, _, _, _, instanceID = pcall(GetInstanceInfo)
 	if not ok or IsSecret(kind) or not kind or kind == "none" then return end
+	local label = KINDS[kind] or "Instance"
+	if kind == "scenario" and difficultyID == DELVE_DIFFICULTY and not IsSecret(difficultyID) then label = "Delve" end
 	return {
 		zone = Clean(name),
-		kind = KINDS[kind] or "Instance",
+		kind = label,
 		difficulty = Clean(difficulty),
 		zoneID = (type(instanceID) == "number" and not IsSecret(instanceID)) and instanceID or nil,
 	}

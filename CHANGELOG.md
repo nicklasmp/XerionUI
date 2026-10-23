@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.45.0 - 2026-10-23
+- Auto NPC Dialog: delves now have their own Delves category in the sidebar, separate from Dungeons
+
 ## 2.44.5 - 2026-10-23
 - Chat Tweaks: show tabs on unread whisper again (read alert state via ChatFrameUtil.IsTabAlerting)
 
