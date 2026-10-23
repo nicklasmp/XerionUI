@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.8", date = "2026-10-23", notes = {
+		"Auto Mark Tank: all settings on one page instead of tabs",
+	} },
 	{ version = "2.46.7", date = "2026-10-23", notes = {
 		"Party Interrupts: ignore cast stops with no interrupter (stuns, deaths), pair cast stop and meter hit within 0.3 s",
 		"Party Interrupts: read party cooldown talents (Quick Witted, Honed Reflexes, Coldthirst, Light of the Sun) and update kick base cooldowns",
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.44.3", date = "2026-10-23", notes = {
 		"Remove MDT Font again",
-	} },
-	{ version = "2.44.2", date = "2026-10-22", notes = {
-		"Remove Cooldown Manager Combat Res tweak",
 	} },
 }
