@@ -2,6 +2,13 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.7 - 2026-10-23
+- Party Interrupts: ignore cast stops with no interrupter (stuns, deaths), pair cast stop and meter hit within 0.3 s
+- Party Interrupts: read party cooldown talents (Quick Witted, Honed Reflexes, Coldthirst, Light of the Sun) and update kick base cooldowns
+
+## 2.46.6 - 2026-10-23
+- Auto NPC Dialog: Blacklist button always shown on a dialog row (dimmed until the NPC is known)
+
 ## 2.46.5 - 2026-10-23
 - Remove the Forget unpicked button from Auto NPC Dialog
 

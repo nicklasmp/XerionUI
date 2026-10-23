@@ -4,6 +4,13 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.7", date = "2026-10-23", notes = {
+		"Party Interrupts: ignore cast stops with no interrupter (stuns, deaths), pair cast stop and meter hit within 0.3 s",
+		"Party Interrupts: read party cooldown talents (Quick Witted, Honed Reflexes, Coldthirst, Light of the Sun) and update kick base cooldowns",
+	} },
+	{ version = "2.46.6", date = "2026-10-23", notes = {
+		"Auto NPC Dialog: Blacklist button always shown on a dialog row (dimmed until the NPC is known)",
+	} },
 	{ version = "2.46.5", date = "2026-10-23", notes = {
 		"Remove the Forget unpicked button from Auto NPC Dialog",
 	} },
@@ -44,11 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.44.2", date = "2026-10-22", notes = {
 		"Remove Cooldown Manager Combat Res tweak",
-	} },
-	{ version = "2.44.1", date = "2026-10-21", notes = {
-		"Lower idle polling in EUIChat tabs and Chaos Barrage (fast ticks only while animating)",
-	} },
-	{ version = "2.44.0", date = "2026-10-21", notes = {
-		"Add Cooldown Manager Combat Res: track the group's battle resurrections on an EllesmereUI Cooldown Manager bar with any class",
 	} },
 }

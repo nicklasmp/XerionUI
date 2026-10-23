@@ -548,6 +548,10 @@ local function GossipList(parent, ctx, m, zoneOnly, mode)
 		-- hides the NPC in every dungeon (Blacklist tab)
 		r.ban = O:Button(r, "Blacklist", 70, function()
 			local e = r.entry
+			if not (e.npc or e.npcID) then
+				m:Print("this dialog has no NPC saved yet - talk to the NPC once, then Blacklist works.")
+				return
+			end
 			ConfirmBlacklist(e.npc or ("NPC " .. tostring(e.npcID)), function()
 				m:Blacklist(e.npcID, e.npc)
 				Changed()
@@ -629,8 +633,8 @@ local function GossipList(parent, ctx, m, zoneOnly, mode)
 		r.confirm.switch:SetState(e.confirm, false)
 		r.confirm:SetAlpha(e.picked and 1 or 0.4) -- only matters once the option is picked
 		r.forget:SetShown(not e.builtin)
-		local canBan = e.npc ~= nil or e.npcID ~= nil
-		r.ban:SetShown(canBan)
+		local canBan = true
+		r.ban:SetAlpha((e.npc ~= nil or e.npcID ~= nil) and 1 or 0.4) -- needs an NPC to match
 		r.ban:ClearAllPoints()
 		if e.builtin then r.ban:SetPoint("RIGHT", -6, 0) else r.ban:SetPoint("RIGHT", r.forget, "LEFT", -4, 0) end
 		r.confirm:ClearAllPoints()
