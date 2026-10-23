@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.5", date = "2026-10-23", notes = {
+		"Chat Tweaks: show tabs on unread whisper again (read alert state via ChatFrameUtil.IsTabAlerting)",
+	} },
 	{ version = "2.44.4", date = "2026-10-23", notes = {
 		"New modules are no longer enabled automatically after an update",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.40.2", date = "2026-10-19", notes = {
 		"Mail Contacts: show only your own characters (Friends, Guild and Favorites lists removed)",
-	} },
-	{ version = "2.40.1", date = "2026-10-19", notes = {
-		"Fix Mail Contacts font error when the panel is built",
 	} },
 }

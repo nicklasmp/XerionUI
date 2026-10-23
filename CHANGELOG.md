@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.44.5 - 2026-10-23
+- Chat Tweaks: show tabs on unread whisper again (read alert state via ChatFrameUtil.IsTabAlerting)
+
 ## 2.44.4 - 2026-10-23
 - New modules are no longer enabled automatically after an update
 

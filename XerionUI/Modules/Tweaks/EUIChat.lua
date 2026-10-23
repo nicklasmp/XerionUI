@@ -73,15 +73,27 @@ local function PushAlpha()
 	if strip and baseAlpha then strip:SetAlpha(baseAlpha) end
 end
 
--- Blizzard raises tab.alerting on a window that got a message while another tab
--- is selected and clears it once the tab is opened, so it doubles as "unread"
+-- Blizzard flags a tab as alerting when its window got a message while another
+-- tab is selected and clears it once the tab is opened, so it doubles as
+-- "unread". Retail since 12.1.5 keeps that state off the tab (read through
+-- ChatFrameUtil.IsTabAlerting); older clients use tab.alerting and LibChatAnims
+-- (DBM and others) keeps its own table. Same lookup order as EllesmereUI.
+local lcaLib
+local function TabAlerting(tab)
+	if tab.alerting then return true end
+	local util = _G.ChatFrameUtil
+	if util and util.IsTabAlerting and util.IsTabAlerting(tab) then return true end
+	lcaLib = lcaLib or (_G.LibStub and _G.LibStub("LibChatAnims", true))
+	return lcaLib and lcaLib:IsAlerting(tab) and true or false
+end
+
 local function UnreadWhisper()
 	for i = 1, 20 do
 		local cf = _G[FRAME_NAMES[i]]
 		local ct = cf and cf.chatType
 		if ct == "WHISPER" or ct == "BN_WHISPER" then
 			local tab = _G[FRAME_NAMES[i] .. "Tab"]
-			if tab and tab.alerting then return true end
+			if tab and TabAlerting(tab) then return true end
 		end
 	end
 	return false
