@@ -619,30 +619,6 @@ Step("nameplate dispel glow wraps EllesmereUI's buff style", function()
 	assert(dbg:find("borders tinted: 1", 1, true), "no glow shown: " .. dbg)
 end)
 
-Step("mdt font swaps MDT's font objects and restores them", function()
-	local ARCHIVO = [[Interface\AddOns\MythicDungeonTools\Fonts\ArchivoNarrow-Bold.ttf]]
-	local function Font(path)
-		local f = { path = path, h = 12, flags = "OUTLINE" }
-		function f:GetFont() return self.path, self.h, self.flags end
-		function f:SetFont(p, h, fl) self.path, self.h, self.flags = p, h, fl end
-		return f
-	end
-	_G.MDTFont_body = Font(ARCHIVO)
-	_G.MDTFont_small_outline = Font(ARCHIVO)
-	_G.MDTFont_title = Font([[Fonts2.TTF]]) -- a client alphabet: left alone
-	MOCK.loaded.MythicDungeonTools = true
-	local m = XUI:GetModule("MDTFont")
-	assert(m, "module missing")
-	m:SetEnabled(true)
-	assert(m.running, "module not running")
-	assert(_G.MDTFont_body.path ~= ARCHIVO, "body font not swapped")
-	assert(_G.MDTFont_body.h == 12 and _G.MDTFont_body.flags == "OUTLINE", "size or flags changed")
-	assert(_G.MDTFont_small_outline.path ~= ARCHIVO, "outline twin not swapped")
-	assert(_G.MDTFont_title.path == [[Fonts2.TTF]], "client alphabet font was touched")
-	m:SetEnabled(false)
-	assert(_G.MDTFont_body.path == ARCHIVO, "body font not restored")
-	_G.MDTFont_body, _G.MDTFont_small_outline, _G.MDTFont_title = nil, nil, nil
-end)
 
 Step("party stops: runs, previews, reports", function()
 	local m = XUI:GetModule("PartyStops")

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.3", date = "2026-10-23", notes = {
+		"Remove MDT Font again",
+	} },
 	{ version = "2.44.2", date = "2026-10-22", notes = {
 		"Remove Cooldown Manager Combat Res tweak",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.40.0", date = "2026-10-19", notes = {
 		"New modules added by an update are now enabled automatically (once per profile; turn them off in the options)",
-	} },
-	{ version = "2.39.1", date = "2026-10-19", notes = {
-		"Mail Contacts moved to the Misc category",
 	} },
 }

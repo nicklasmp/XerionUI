@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.44.3 - 2026-10-23
+- Remove MDT Font again
+
 ## 2.44.2 - 2026-10-22
 - Remove Cooldown Manager Combat Res tweak
 
