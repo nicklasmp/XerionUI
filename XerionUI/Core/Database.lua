@@ -219,27 +219,6 @@ local function MigrateFonts(profile)
 	profile.fontsMigrated = 1
 end
 
--- Modules added by an update start enabled. The profile remembers which modules
--- it has already met (seenModules); one it has not met yet is switched on once,
--- so the user can turn it off again. A profile without the list (a fresh
--- install, a reset, an import from before this existed) only records the
--- current modules, so it never switches a whole set on at once.
-local function EnableNewModules(profile)
-	local seen = profile.seenModules
-	local baseline = type(seen) ~= "table"
-	if baseline then
-		seen = {}
-		profile.seenModules = seen
-	end
-	for key, defaults in pairs(DB.moduleDefaults) do
-		if not seen[key] then
-			seen[key] = true
-			local db = profile.modules[key]
-			if not baseline and db and defaults.enabled == false then db.enabled = true end
-		end
-	end
-end
-
 --------------------------------------------------------------------------------
 -- Lifecycle
 --------------------------------------------------------------------------------
@@ -297,7 +276,6 @@ function DB:Activate(name)
 	MigrateFonts(profile)
 	MigrateGlow(profile)
 	Inflate(profile, profileDefaults)
-	EnableNewModules(profile)
 	self.profile = profile
 	self.profileName = name
 	self.style = profile.style
@@ -363,7 +341,6 @@ function DB:CopyProfile(source)
 	MigrateFonts(self.profile)
 	MigrateGlow(self.profile)
 	Inflate(self.profile, profileDefaults)
-	EnableNewModules(self.profile)
 	self.style, self.general = self.profile.style, self.profile.general
 	Changed()
 	return true
@@ -381,7 +358,6 @@ end
 function DB:ResetProfile()
 	wipe(self.profile)
 	Inflate(self.profile, profileDefaults)
-	EnableNewModules(self.profile)
 	self.style, self.general = self.profile.style, self.profile.general
 	Changed()
 end

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.44.4", date = "2026-10-23", notes = {
+		"New modules are no longer enabled automatically after an update",
+	} },
 	{ version = "2.44.3", date = "2026-10-23", notes = {
 		"Remove MDT Font again",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.40.1", date = "2026-10-19", notes = {
 		"Fix Mail Contacts font error when the panel is built",
-	} },
-	{ version = "2.40.0", date = "2026-10-19", notes = {
-		"New modules added by an update are now enabled automatically (once per profile; turn them off in the options)",
 	} },
 }
