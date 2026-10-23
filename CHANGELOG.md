@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.1 - 2026-10-23
+- Save Auto NPC Dialog NPC name from the gossip window title when the unit name is missing
+- Explain unseen built-in NPC names instead of showing Unknown NPC
+
 ## 2.46.0 - 2026-10-23
 - Add Skip Cinematics: skips the cinematic that plays in Kings' Rest (per-dungeon list, more can be added)
 

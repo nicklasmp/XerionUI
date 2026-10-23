@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.1", date = "2026-10-23", notes = {
+		"Save Auto NPC Dialog NPC name from the gossip window title when the unit name is missing",
+		"Explain unseen built-in NPC names instead of showing Unknown NPC",
+	} },
 	{ version = "2.46.0", date = "2026-10-23", notes = {
 		"Add Skip Cinematics: skips the cinematic that plays in Kings' Rest (per-dungeon list, more can be added)",
 	} },
@@ -45,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.42.1", date = "2026-10-21", notes = {
 		"Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on",
-	} },
-	{ version = "2.42.0", date = "2026-10-21", notes = {
-		"Party Stops is now one block: choose horizontal or vertical, how many rows or columns, fill order and centering (the two old bars are merged on update)",
 	} },
 }
