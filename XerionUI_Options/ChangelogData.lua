@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.2", date = "2026-10-23", notes = {
+		"Auto NPC Dialog: remove manual ID and NPC entry; add a Blacklist button per NPC with an are-you-sure dialog",
+	} },
 	{ version = "2.46.1", date = "2026-10-23", notes = {
 		"Save Auto NPC Dialog NPC name from the gossip window title when the unit name is missing",
 		"Explain unseen built-in NPC names instead of showing Unknown NPC",
@@ -46,8 +49,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.42.2", date = "2026-10-21", notes = {
 		"Fix the page header on/off switch being covered by the title hover area",
-	} },
-	{ version = "2.42.1", date = "2026-10-21", notes = {
-		"Fix Chaos Barrage and Damage Amp staying on screen or not restarting when switched off and on",
 	} },
 }

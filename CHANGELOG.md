@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.2 - 2026-10-23
+- Auto NPC Dialog: remove manual ID and NPC entry; add a Blacklist button per NPC with an are-you-sure dialog
+
 ## 2.46.1 - 2026-10-23
 - Save Auto NPC Dialog NPC name from the gossip window title when the unit name is missing
 - Explain unseen built-in NPC names instead of showing Unknown NPC
