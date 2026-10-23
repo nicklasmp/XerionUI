@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.45.2 - 2026-10-23
+- Auto NPC Dialog: built-in list, instance-only and chat announcements are now always on (options removed)
+
 ## 2.45.1 - 2026-10-23
 - Auto NPC Dialog: ship the Den of Nalorakk and Altar of Fangs dialogs in the built-in list
 

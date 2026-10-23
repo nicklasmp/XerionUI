@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.45.2", date = "2026-10-23", notes = {
+		"Auto NPC Dialog: built-in list, instance-only and chat announcements are now always on (options removed)",
+	} },
 	{ version = "2.45.1", date = "2026-10-23", notes = {
 		"Auto NPC Dialog: ship the Den of Nalorakk and Altar of Fangs dialogs in the built-in list",
 	} },
@@ -45,11 +48,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.41.1", date = "2026-10-21", notes = {
 		"Chat Tweaks: show the chat tabs while a whisper is unread",
-	} },
-	{ version = "2.41.0", date = "2026-10-21", notes = {
-		"Add Party Stops: cooldowns of the group's stuns and AoE crowd control, read from enemy debuffs, with talent-adjusted lengths",
-		"Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill",
-		"Add MDT Compact: fold Mythic Dungeon Tools' window into a small map with the pull list",
-		"Add shared Timer kit, enemy sensor chains and talent reader for the group modules",
 	} },
 }
