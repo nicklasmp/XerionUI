@@ -552,7 +552,7 @@ local function GossipList(parent, ctx, m, zoneOnly, mode)
 		r.confirm:SetScript("OnEnter", function(self)
 			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
 			GameTooltip:SetText("Answer \"are you sure?\"")
-			GameTooltip:AddLine("Also accepts the confirmation box this option opens.", 1, 1, 1, true)
+			GameTooltip:AddLine("Also accepts the confirmation box this option opens. Only used when the option is picked automatically.", 1, 1, 1, true)
 			local t = r.entry and r.entry.confirmText
 			if t then GameTooltip:AddLine("\"" .. t .. "\"", 0.7, 0.7, 0.7, true) end
 			GameTooltip:Show()
@@ -610,6 +610,7 @@ local function GossipList(parent, ctx, m, zoneOnly, mode)
 		if e.builtin then sub[#sub + 1] = "built-in" end
 		r.sub:SetText(table.concat(sub, "  -  "))
 		r.confirm.switch:SetState(e.confirm, false)
+		r.confirm:SetAlpha(e.picked and 1 or 0.4) -- only matters once the option is picked
 		r.forget:SetShown(not e.builtin)
 		local canBan = e.npc ~= nil or e.npcID ~= nil
 		r.ban:SetShown(canBan)
@@ -788,12 +789,6 @@ end
 
 O:RegisterModuleOptions("AutoGossip", function(ctx, m, G)
 	return {
-		Card("When", {
-			{ type = "toggle", label = "Use the built-in dungeon list", path = "useBuiltin",
-				tip = "Dialogs shipped with XerionUI, picked automatically. On by default; each can be switched off below." },
-			{ type = "toggle", label = "Only inside instances", path = "instanceOnly" },
-			{ type = "toggle", label = "Say what it picked", path = "announce" },
-		}),
 		Card("Dialogs", DialogItems(m)),
 		Card("Manual IDs", {
 			{ type = "description",

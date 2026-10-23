@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.45.1", date = "2026-10-23", notes = {
+		"Auto NPC Dialog: ship the Den of Nalorakk and Altar of Fangs dialogs in the built-in list",
+	} },
 	{ version = "2.45.0", date = "2026-10-23", notes = {
 		"Auto NPC Dialog: delves now have their own Delves category in the sidebar, separate from Dungeons",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 		"Add Smart Count Tracker: enemy forces bar against your MDT route with the pull stacked behind the fill",
 		"Add MDT Compact: fold Mythic Dungeon Tools' window into a small map with the pull list",
 		"Add shared Timer kit, enemy sensor chains and talent reader for the group modules",
-	} },
-	{ version = "2.40.3", date = "2026-10-20", notes = {
-		"Rename Mail Contacts to Mail Alts",
 	} },
 }

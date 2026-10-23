@@ -18,14 +18,17 @@ local COOLDOWN = 5
 -- Dialogs shipped with the addon: dungeon steps worth skipping every time.
 -- Used while "Use the built-in dungeon list" is on (the default); each can be
 -- switched off on its own. confirm = also answer "are you sure?".
--- Dungeon, NPC and text come from what the game shows once you talk to them.
+-- text/zone/zoneID are only the fallback shown in the list before the dialog
+-- has been seen in game; what the game reports replaces them.
 local BUILTIN = {
-	{ id = 131567 },
-	{ id = 131502 },
-	{ id = 48126, confirm = true }, -- Sethraliss
+	{ id = 131567, text = "I'm ready for my disguise.", zone = "Murder Row", zoneID = 2813 },
+	{ id = 131502, text = "<Clock in.>", zone = "Murder Row", zoneID = 2813 },
+	{ id = 48126, confirm = true, text = "We will restore you!", zone = "Temple of Sethraliss", zoneID = 1877 },
+	{ id = 141730, confirm = true, text = "<Carefully complete the mixture.>", zone = "Altar of Fangs", zoneID = 2993 },
+	{ id = 135009, confirm = true, text = "<Meditate on the sound of the flames.>", zone = "Den of Nalorakk", zoneID = 2825 },
+	{ id = 135010, confirm = true, text = "<Meditate on the sound of the flames.>", zone = "Den of Nalorakk", zoneID = 2825 },
+	{ id = 137694, confirm = true, text = "<You light the incense, its aroma fortifying the resolve of nearby allies.>", zone = "Den of Nalorakk", zoneID = 2825 },
 }
--- (text, NPC and dungeon are not listed here; the list shows them once the
--- dialog has been seen in game)
 local BUILTIN_BY_ID = {}
 for _, d in ipairs(BUILTIN) do BUILTIN_BY_ID[d.id] = d end
 
@@ -43,13 +46,10 @@ local M = XUI:NewModule("AutoGossip", {
 	icon = [[Interface\Icons\INV_Misc_Note_01]],
 	order = 62,
 	defaults = {
-		useBuiltin = true,
 		options = {},
 		confirm = {},
 		builtinOff = {},       -- [id] = true: a built-in dialog switched off
 		builtinNoConfirm = {}, -- [id] = true: a built-in's "are you sure?" left alone
-		instanceOnly = true,
-		announce = true,
 		-- NPCs that turn up everywhere and never matter (a vendor, a bank): { id, name }.
 		-- Their dialogs are not recorded and not listed, in any dungeon.
 		blacklist = {},
@@ -104,7 +104,7 @@ local function Put(list, id, on)
 end
 
 local function BuiltinOn(db, id)
-	return BUILTIN_BY_ID[id] and db.useBuiltin and not (db.builtinOff and db.builtinOff[id])
+	return BUILTIN_BY_ID[id] and not (db.builtinOff and db.builtinOff[id])
 end
 
 function M:IsBuiltin(id) return BUILTIN_BY_ID[id] ~= nil end
@@ -126,8 +126,6 @@ function M:SetPicked(id, on)
 	db.builtinOff = db.builtinOff or {}
 	if BUILTIN_BY_ID[id] then
 		db.builtinOff[id] = (not on) or nil
-		-- with the built-in list off, a built-in switched on rides the own list
-		Put(db.options, id, on and not db.useBuiltin)
 	else
 		Put(db.options, id, on)
 	end
@@ -318,16 +316,17 @@ function M:Catalogue()
 		if not id or have[id] then return end
 		have[id] = true
 		local e = seen[id] or {}
+		local b = BUILTIN_BY_ID[id] or {}
 		-- a blacklisted NPC's dialogs are hidden, unless one is switched on
 		if self:IsBlacklisted(e.npcID, e.npc) and not self:IsPicked(id) then return end
 		out[#out + 1] = {
 			id = id,
-			text = e.text or legacyNames[id],
+			text = e.text or b.text or legacyNames[id],
 			npc = e.npc,
 			npcID = e.npcID,
-			zone = e.zone,
-			zoneID = e.zoneID,
-			kind = e.kind,
+			zone = e.zone or b.zone,
+			zoneID = e.zoneID or b.zoneID,
+			kind = e.kind or (b.zone and "Dungeon" or nil),
 			difficulty = e.difficulty,
 			confirmText = e.confirmText,
 			builtin = BUILTIN_BY_ID[id] ~= nil,
@@ -363,14 +362,13 @@ local function IDSet(list)
 end
 
 local function Inside()
-	if not M.db.instanceOnly then return true end
 	local ok, inside = pcall(IsInInstance)
 	if not ok or IsSecret(inside) then return true end
 	return inside and true or false
 end
 
 local function Say(text)
-	if M.db.announce then M:Print(text) end
+	M:Print(text)
 end
 
 local function Select(id, name, confirmed)
