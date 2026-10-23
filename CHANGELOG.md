@@ -2,6 +2,10 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.3 - 2026-10-23
+- Dim the Confirm switch in Auto NPC Dialog until the option is picked
+- Add more built-in dungeon dialogs and drop the When card in Auto NPC Dialog
+
 ## 2.46.2 - 2026-10-23
 - Auto NPC Dialog: remove manual ID and NPC entry; add a Blacklist button per NPC with an are-you-sure dialog
 

@@ -4,6 +4,10 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.3", date = "2026-10-23", notes = {
+		"Dim the Confirm switch in Auto NPC Dialog until the option is picked",
+		"Add more built-in dungeon dialogs and drop the When card in Auto NPC Dialog",
+	} },
 	{ version = "2.46.2", date = "2026-10-23", notes = {
 		"Auto NPC Dialog: remove manual ID and NPC entry; add a Blacklist button per NPC with an are-you-sure dialog",
 	} },
@@ -46,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.42.3", date = "2026-10-21", notes = {
 		"Remove Smart Count Tracker and MDT Compact again",
-	} },
-	{ version = "2.42.2", date = "2026-10-21", notes = {
-		"Fix the page header on/off switch being covered by the title hover area",
 	} },
 }
