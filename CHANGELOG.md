@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.4 - 2026-10-23
+- Skip Cinematic: moved under Kings' Rest in the Dungeons tab (was Misc), one switch for the module
+
 ## 2.46.3 - 2026-10-23
 - Dim the Confirm switch in Auto NPC Dialog until the option is picked
 - Add more built-in dungeon dialogs and drop the When card in Auto NPC Dialog

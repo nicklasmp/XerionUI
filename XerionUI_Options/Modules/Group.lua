@@ -842,15 +842,10 @@ end)
 
 --------------------------------------------------------------------------------
 O:RegisterModuleOptions("SkipCinematics", function(ctx, m, G)
-	local items = {}
-	for _, d in ipairs(m.DUNGEONS) do
-		items[#items + 1] = { type = "toggle", label = d.name,
-			get = function() return m:IsOn(d.id) end,
-			set = function(_, v) m:SetOn(d.id, v) end }
-	end
-	items[#items + 1] = { type = "toggle", label = "Say what happened", path = "announce" }
 	return {
-		Card("Dungeons", items),
+		Card("Skip", {
+			{ type = "toggle", label = "Say what happened", path = "announce" },
+		}),
 	}
 end)
 
@@ -988,26 +983,18 @@ function O.BlacklistPage(g)
 	}
 end
 
--- The "NPC dialogs" page under a dungeon: that dungeon's dialogs, and the
--- module's own settings on a second tab.
+-- The "NPC dialogs" page under a dungeon: that dungeon's dialogs.
 function O.DialogPage(g)
 	local m = XUI:GetModule("AutoGossip")
 	local zone = g.zone
-	local state = { tab = "dialogs" }
+	local state = {}
 	local mctx = O.ModuleContext(m)
 	return {
 		ctx = O:NewContext(function() return state end, nil, { group = g }),
 		build = function()
-			local function Only(tab, card)
-				card.ctx = mctx
-				card.hidden = function() return state.tab ~= tab end
-				return card
-			end
-			local cards = {
-				O.Card(nil, {
-					{ type = "tabs", values = { { value = "dialogs", text = "Dialogs" }, { value = "settings", text = "Settings" } },
-						get = function() return state.tab end, set = function(_, v) state.tab = v end },
-				}),
+			local dialogs = O.Card(zone, DialogItems(m, zone))
+			dialogs.ctx = mctx
+			return {
 				O.Card("Auto NPC Dialog", {
 					{ type = "description", text = m.desc or "" },
 					{ type = "toggle", label = "Enabled",
@@ -1018,12 +1005,8 @@ function O.DialogPage(g)
 							O:RefreshPageHead()
 						end },
 				}, { ctx = mctx }),
-				Only("dialogs", O.Card(zone, DialogItems(m, zone))),
+				dialogs,
 			}
-			for _, card in ipairs(O.moduleBuilders.AutoGossip(mctx, m, O.Groups)) do
-				if card.title ~= "Dialogs" then cards[#cards + 1] = Only("settings", card) end
-			end
-			return cards
 		end,
 	}
 end

@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.46.4", date = "2026-10-23", notes = {
+		"Skip Cinematic: moved under Kings' Rest in the Dungeons tab (was Misc), one switch for the module",
+	} },
 	{ version = "2.46.3", date = "2026-10-23", notes = {
 		"Dim the Confirm switch in Auto NPC Dialog until the option is picked",
 		"Add more built-in dungeon dialogs and drop the When card in Auto NPC Dialog",
@@ -47,8 +50,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.43.0", date = "2026-10-21", notes = {
 		"Add MDT Font: use another font for the text in Mythic Dungeon Tools' window",
-	} },
-	{ version = "2.42.3", date = "2026-10-21", notes = {
-		"Remove Smart Count Tracker and MDT Compact again",
 	} },
 }
