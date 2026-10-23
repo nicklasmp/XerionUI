@@ -188,6 +188,14 @@ local function NPCInfo()
 			npcID = tonumber(guid:match("^%a+%-%d+%-%d+%-%d+%-%d+%-(%d+)"))
 		end
 	end)
+	-- some NPCs (quest-giver objects, phased helpers) give no unit name; the window title has it
+	if not name then
+		pcall(function()
+			local f = GossipFrame
+			local t = f and ((f.TitleContainer and f.TitleContainer.TitleText) or f.TitleText)
+			name = Clean(t and t:GetText())
+		end)
+	end
 	return name, npcID
 end
 

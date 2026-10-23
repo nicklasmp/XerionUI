@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.46.0 - 2026-10-23
+- Add Skip Cinematics: skips the cinematic that plays in Kings' Rest (per-dungeon list, more can be added)
+
 ## 2.45.2 - 2026-10-23
 - Auto NPC Dialog: built-in list, instance-only and chat announcements are now always on (options removed)
 
