@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.47.0", date = "2026-10-25", notes = {
+		"Remove Mail Alts (now covered by EllesmereUI)",
+	} },
 	{ version = "2.46.8", date = "2026-10-23", notes = {
 		"Auto Mark Tank: all settings on one page instead of tabs",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.44.4", date = "2026-10-23", notes = {
 		"New modules are no longer enabled automatically after an update",
-	} },
-	{ version = "2.44.3", date = "2026-10-23", notes = {
-		"Remove MDT Font again",
 	} },
 }

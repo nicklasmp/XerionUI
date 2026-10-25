@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.47.0 - 2026-10-25
+- Remove Mail Alts (now covered by EllesmereUI)
+
 ## 2.46.8 - 2026-10-23
 - Auto Mark Tank: all settings on one page instead of tabs
 

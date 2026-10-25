@@ -2,7 +2,7 @@
 ## Title: |cffff7d0aXerion|r|cffffffffUI|r
 ## Notes: Personal quality-of-life and tweak suite. Type /xui for options.
 ## Author: Nicklas Pedersen
-## Version: 2.46.8
+## Version: 2.47.0
 ## AllowLoadGameType: mainline
 ## SavedVariables: XerionUIDB
 ## SavedVariablesPerCharacter: XerionUICharDB
@@ -80,7 +80,6 @@ Modules\Tweaks\CDMStackFont.lua
 Modules\Tweaks\CDMBarFonts.lua
 Modules\Tweaks\ZoneText.lua
 Modules\Tweaks\EUIChat.lua
-Modules\Tweaks\MailContacts.lua
 
 # The options window is the load-on-demand addon XerionUI_Options; it is
 # loaded the first time /xui is used, so nothing of it costs anything at login.

@@ -65,18 +65,6 @@ O:RegisterModuleOptions("ZoneText", function(ctx, m, G)
 	}
 end)
 
-O:RegisterModuleOptions("MailContacts", function(ctx, m, G)
-	return {
-		Card("Behaviour", {
-			{ type = "toggle", label = "Show the realm", path = "showRealm", tip = "Writes the realm after names on other realms." },
-			{ type = "description", text = "A character is added to the list when you log in on it with this module on. Right-click an alt to forget it." },
-		}),
-		Card("Font", G.Font("font", { color = false })),
-		Card("Border", G.Border("border")),
-		Card("Background", G.Background("background")),
-	}
-end)
-
 O:RegisterModuleOptions("EUIFocusCastbar", function(ctx, m, G)
 	local function off() return not m.db.kick.enabled end
 	return {
