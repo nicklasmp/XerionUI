@@ -548,11 +548,8 @@ Step("auto NPC dialog: records dungeon dialogs and picks switched-on ones", func
 	assert(not m:IsConfirm(48126), "a built-in confirm can be switched off")
 	m:SetConfirm(48126, true)
 
-	-- an NPC seen in two dungeons is offered for the blacklist, on a page of its own
+	-- the blacklist has a page of its own
 	seen[555003] = { text = "Open the vault", npc = "Kaelen", npcID = 219123, zone = "Murder Row", kind = "Dungeon" }
-	local several
-	for _, n in ipairs(m:CrossDungeonNPCs()) do if n.id == 219123 then several = n end end
-	assert(several and #several.zones == 2, "an NPC seen in two dungeons should be offered")
 	local be = XUI.Options:BlacklistEntry()
 	assert(be and be.dungeon == XUI.Options.BLACKLIST_ZONE, "the blacklist has an entry of its own")
 	XUI.Options:Open(be.key)

@@ -179,22 +179,32 @@ local function InstanceInfo()
 	}
 end
 
+-- The NPC behind the open dialog: name and ID. Tries the "npc" unit, the window
+-- title, then the target (an object-style NPC has no "npc" unit name).
 local function NPCInfo()
 	local name, npcID
-	pcall(function()
-		name = Clean(UnitName("npc"))
-		local guid = UnitGUID("npc")
-		if type(guid) == "string" and not IsSecret(guid) then
-			npcID = tonumber(guid:match("^%a+%-%d+%-%d+%-%d+%-%d+%-(%d+)"))
-		end
-	end)
-	-- some NPCs (quest-giver objects, phased helpers) give no unit name; the window title has it
+	local function fromUnit(unit)
+		local n = Clean(XUI.Probe(UnitName, unit))
+		local guid = XUI.Probe(UnitGUID, unit)
+		local id
+		if type(guid) == "string" then id = tonumber(guid:match("^%a+%-%d+%-%d+%-%d+%-%d+%-(%d+)")) end
+		return n, id
+	end
+	for _, unit in ipairs({ "npc", "questnpc" }) do
+		local n, id = fromUnit(unit)
+		name, npcID = name or n, npcID or id
+	end
 	if not name then
 		pcall(function()
 			local f = GossipFrame
 			local t = f and ((f.TitleContainer and f.TitleContainer.TitleText) or f.TitleText)
 			name = Clean(t and t:GetText())
 		end)
+	end
+	if not name or not npcID then
+		local n, id = fromUnit("target")
+		if not name or (id and not npcID) then name = name or n end
+		npcID = npcID or id
 	end
 	return name, npcID
 end
@@ -227,37 +237,6 @@ function M:Blacklist(npcID, name)
 		if SameNPC({ id = npcID, name = name }, e.npcID, e.npc) and not self:IsPicked(id) then Seen()[id] = nil end
 	end
 	XUI:Fire("GossipSeen", true)
-end
-
--- NPCs whose dialogs were seen in two or more dungeons and that are not blacklisted
--- yet: the candidates for the blacklist (a vendor or a bank follows you around).
---   { id, name, zones = { sorted dungeon names } }
-function M:CrossDungeonNPCs()
-	local byNPC, order = {}, {}
-	for _, e in pairs(Seen()) do
-		if (e.npc or e.npcID) and e.zone then
-			local key = e.npcID and ("id" .. e.npcID) or ("name" .. e.npc:lower())
-			local n = byNPC[key]
-			if not n then
-				n = { id = e.npcID, name = e.npc, zoneSet = {} }
-				byNPC[key] = n
-				order[#order + 1] = n
-			end
-			n.id, n.name = n.id or e.npcID, n.name or e.npc
-			n.zoneSet[e.zone] = true
-		end
-	end
-	local out = {}
-	for _, n in ipairs(order) do
-		local zones = {}
-		for z in pairs(n.zoneSet) do zones[#zones + 1] = z end
-		if #zones >= 2 and not self:IsBlacklisted(n.id, n.name) then
-			table.sort(zones)
-			out[#out + 1] = { id = n.id, name = n.name, zones = zones }
-		end
-	end
-	table.sort(out, function(a, b) return (a.name or "") < (b.name or "") end)
-	return out
 end
 
 function M:Unblacklist(index)
@@ -295,6 +274,11 @@ function M:RecordConfirm(id, text)
 	text = Clean(text)
 	if e and text then
 		e.confirmText = text
+	end
+	if e and not e.npc then
+		local npc, npcID = NPCInfo()
+		e.npc, e.npcID = npc or e.npc, npcID or e.npcID
+		if npc then XUI:Fire("GossipSeen", true) end
 	end
 end
 
@@ -389,6 +373,10 @@ function M:OnGossipShow()
 	if not ok or type(opts) ~= "table" then return end
 	self:Record(opts)
 	self:TrySelect(opts)
+	if not NPCInfo() then
+		-- the unit can be late; look again while the window may still be open
+		self:After(0.3, function() self:Record(opts) end)
+	end
 end
 
 function M:TrySelect(opts)

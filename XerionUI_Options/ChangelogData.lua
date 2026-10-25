@@ -4,6 +4,9 @@ local O = XUI and XUI.Options
 if not O then return end
 
 O.CHANGELOG = {
+	{ version = "2.47.1", date = "2026-10-25", notes = {
+		"Remove the 'Seen in several dungeons' list from the Auto NPC Dialog blacklist page",
+	} },
 	{ version = "2.47.0", date = "2026-10-25", notes = {
 		"Remove Mail Alts (now covered by EllesmereUI)",
 	} },
@@ -48,8 +51,5 @@ O.CHANGELOG = {
 	} },
 	{ version = "2.44.5", date = "2026-10-23", notes = {
 		"Chat Tweaks: show tabs on unread whisper again (read alert state via ChatFrameUtil.IsTabAlerting)",
-	} },
-	{ version = "2.44.4", date = "2026-10-23", notes = {
-		"New modules are no longer enabled automatically after an update",
 	} },
 }

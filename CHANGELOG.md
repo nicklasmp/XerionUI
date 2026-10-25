@@ -2,6 +2,9 @@
 
 Newest first. Add an entry with `node tools/bump.js` before every push.
 
+## 2.47.1 - 2026-10-25
+- Remove the 'Seen in several dungeons' list from the Auto NPC Dialog blacklist page
+
 ## 2.47.0 - 2026-10-25
 - Remove Mail Alts (now covered by EllesmereUI)
 
